@@ -1,0 +1,380 @@
+# HomeForge - Frontend
+
+Aplicación web para HomeForge, un CRM para constructoras, desarrolladores inmobiliarios y equipos comerciales de vivienda.
+
+## 🚀 Tecnologías
+
+- **Framework**: React 18
+- **Lenguaje**: TypeScript
+- **Build**: Vite
+- **Routing**: React Router
+- **HTTP Client**: Axios
+- **Internacionalización**: i18next
+- **Testing**: Vitest
+- **Styling**: CSS Modules
+
+## 📋 Requisitos
+
+- Node.js 20 o superior ([Descargar Node.js](https://nodejs.org/))
+- npm (incluido con Node.js)
+- Backend de HomeForge corriendo en http://localhost:8080
+
+## 🔧 Configuración Inicial
+
+### 1. Clonar el repositorio
+
+```bash
+git clone <tu-repositorio-frontend>
+cd HomeForge-frontend
+```
+
+### 2. Instalar dependencias
+
+```bash
+npm install
+```
+
+### 3. Configurar variables de entorno
+
+Copia el archivo de ejemplo:
+
+```bash
+cp .env.example .env
+```
+
+Edita `.env` según tus necesidades:
+
+```bash
+# URL del backend API
+VITE_API_URL=http://localhost:8080
+```
+
+## 🚀 Iniciar el Proyecto
+
+### Modo Desarrollo
+
+```bash
+npm run dev
+```
+
+La aplicación estará disponible en: **http://localhost:5174**
+
+### Build para Producción
+
+```bash
+npm run build
+```
+
+Los archivos compilados estarán en: `dist/`
+
+### Preview del Build
+
+```bash
+npm run preview
+```
+
+## 📡 Conexión con el Backend
+
+El frontend se conecta al backend mediante Axios.
+
+**URL configurada**: Se lee de la variable de entorno `VITE_API_URL` (default: http://localhost:8080)
+
+### Endpoints utilizados:
+
+- `GET /api/properties` - Listar propiedades
+- `POST /api/properties` - Crear propiedad
+- `GET /api/leads` - Listar prospectos
+- `POST /api/leads` - Crear prospecto
+- `GET /api/users` - Usuarios
+- Ver más en el código fuente
+
+## 🧪 Tests
+
+```bash
+# Ejecutar tests
+npm test
+
+# Tests con UI
+npm run test:ui
+
+# Cobertura
+npm run test:coverage
+```
+
+## 📁 Estructura del Proyecto
+
+```
+HomeForge-frontend/
+├── public/              # Archivos estáticos
+├── src/
+│   ├── components/      # Componentes React
+│   ├── pages/          # Páginas/Vistas
+│   ├── services/       # Servicios API (Axios)
+│   ├── contexts/       # React Contexts
+│   ├── hooks/          # Custom Hooks
+│   ├── types/          # TypeScript Types
+│   ├── i18n/           # Traducciones
+│   ├── utils/          # Utilidades
+│   ├── App.tsx         # Componente principal
+│   └── main.tsx        # Punto de entrada
+├── index.html
+├── package.json
+├── tsconfig.json
+├── vite.config.ts
+└── README.md
+```
+
+## 🌍 Internacionalización
+
+El proyecto soporta múltiples idiomas:
+
+- **Español** (es)
+- **Inglés** (en)
+
+Los archivos de traducción están en: `src/i18n/locales/`
+
+### Cambiar idioma
+
+El idioma se puede cambiar desde la interfaz de usuario o configurando el locale en el navegador.
+
+## 🎨 Estilos
+
+El proyecto usa **CSS Modules** para estilos con scope local.
+
+Cada componente tiene su propio archivo de estilos:
+```
+Component.tsx
+Component.module.css
+```
+
+## 🛠️ Comandos Útiles
+
+```bash
+# Instalar dependencias
+npm install
+
+# Modo desarrollo
+npm run dev
+
+# Build
+npm run build
+
+# Preview
+npm run preview
+
+# Tests
+npm test
+
+# Linter
+npm run lint
+
+# Formatear código
+npm run format
+
+# Limpiar node_modules y reinstalar
+rm -rf node_modules package-lock.json
+npm install
+```
+
+## 🔧 Configuración Avanzada
+
+### Cambiar puerto
+
+Edita `vite.config.ts`:
+
+```typescript
+export default defineConfig({
+  server: {
+    port: 5175  // Cambiar aquí
+  }
+})
+```
+
+### Cambiar URL del backend
+
+Edita `.env`:
+
+```bash
+VITE_API_URL=http://api.midominio.com
+```
+
+### Proxy API (desarrollo)
+
+Si tienes problemas con CORS, puedes configurar un proxy en `vite.config.ts`:
+
+```typescript
+export default defineConfig({
+  server: {
+    proxy: {
+      '/api': {
+        target: 'http://localhost:8080',
+        changeOrigin: true,
+      }
+    }
+  }
+})
+```
+
+## 🔐 Autenticación
+
+El frontend incluye:
+
+- Formulario de registro
+- Formulario de login
+- Gestión de sesión (localStorage)
+- Rutas protegidas
+- Redirección automática
+
+## 📦 Dependencias Principales
+
+```json
+{
+  "react": "^18.x",
+  "react-router-dom": "^6.x",
+  "axios": "^1.x",
+  "i18next": "^23.x",
+  "react-i18next": "^13.x"
+}
+```
+
+## 🚀 Despliegue
+
+### Vercel / Netlify
+
+1. Conecta tu repositorio
+2. Configura la variable de entorno: `VITE_API_URL`
+3. Build command: `npm run build`
+4. Output directory: `dist`
+
+### Manual
+
+```bash
+# Build
+npm run build
+
+# Subir carpeta dist/ a tu servidor
+scp -r dist/* usuario@servidor:/ruta/
+```
+
+### Nginx
+
+Configuración ejemplo:
+
+```nginx
+server {
+    listen 80;
+    server_name midominio.com;
+    root /ruta/a/dist;
+
+    location / {
+        try_files $uri $uri/ /index.html;
+    }
+}
+```
+
+## 📱 Funcionalidades
+
+- ✅ Autenticación (registro/login)
+- ✅ Dashboard principal
+- ✅ Gestión de propiedades
+  - Crear, editar, eliminar
+  - Carga de imágenes
+  - Filtros y búsqueda
+- ✅ CRM de prospectos
+  - Lista de leads
+  - Detalle de prospecto
+  - Actividades y seguimiento
+- ✅ Calendario de citas
+- ✅ Gestión de documentos
+- ✅ Perfil de empresa
+- ✅ Configuración de usuario
+- ✅ Multi-idioma (ES/EN)
+
+## 🤝 Backend
+
+Este frontend está diseñado para trabajar con el backend de HomeForge:
+
+- Repositorio Backend: `HomeForge-backend`
+- URL esperada: http://localhost:8080
+- Debe estar configurado con CORS para permitir: http://localhost:5174
+
+## 🔄 Variables de Entorno
+
+```bash
+# .env
+VITE_API_URL=http://localhost:8080
+
+# .env.production (para producción)
+VITE_API_URL=https://api.midominio.com
+```
+
+Las variables **DEBEN** empezar con `VITE_` para ser expuestas al frontend.
+
+## 📊 Performance
+
+- **Vite** proporciona Hot Module Replacement (HMR) ultra-rápido
+- **Code splitting** automático por rutas
+- **Lazy loading** de componentes pesados
+- **Optimización** de assets en build
+
+## 🐛 Debugging
+
+### React DevTools
+
+Instala la extensión de navegador: [React Developer Tools](https://react.dev/learn/react-developer-tools)
+
+### Network Inspector
+
+Revisa las llamadas HTTP en las DevTools del navegador (tab Network).
+
+### Logs
+
+El proyecto usa `console.log` para debugging. En producción, estos se eliminan automáticamente.
+
+## 🆘 Solución de Problemas
+
+### "Cannot connect to backend"
+
+1. Verifica que el backend esté corriendo: http://localhost:8080/actuator/health
+2. Revisa la variable `VITE_API_URL` en `.env`
+3. Verifica CORS en el backend
+
+### "npm install" falla
+
+```bash
+# Limpiar caché
+npm cache clean --force
+rm -rf node_modules package-lock.json
+npm install
+```
+
+### Puerto ya en uso
+
+Cambia el puerto en `vite.config.ts` o usa:
+
+```bash
+npm run dev -- --port 5175
+```
+
+### TypeScript errors
+
+```bash
+# Verificar tipos
+npx tsc --noEmit
+```
+
+## 📝 Licencia
+
+Proyecto privado - Todos los derechos reservados
+
+## 🆘 Soporte
+
+Para problemas o preguntas:
+
+1. Revisa la documentación
+2. Verifica la consola del navegador
+3. Revisa las DevTools (Network tab)
+
+---
+
+**Desarrollado con ⚛️ y React**

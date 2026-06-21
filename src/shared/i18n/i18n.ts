@@ -1,0 +1,146 @@
+import i18n from 'i18next';
+import { initReactI18next } from 'react-i18next';
+
+export const resources = {
+  en: { translation: {
+    dashboard: 'Dashboard',
+    leads: 'Leads',
+    properties: 'Properties',
+    catalogs: 'Catalogs',
+    plans: 'Plans',
+    language: 'Language',
+    workspace: 'Workspace',
+    welcome: 'Your commercial operation, at a glance',
+    welcomeSubtitle: 'Track prospects, inventory, catalogs and growth from one place.',
+    summary: 'Business summary',
+    activeLeads: 'Active leads',
+    availableProperties: 'Available properties',
+    estimatedSales: 'Estimated sales',
+    thisMonth: 'this month',
+    reserved: 'reserved',
+    recentLeads: 'Recent leads',
+    newLead: 'New lead',
+    crm: 'Sales pipeline',
+    demoMode: 'Showing sample data while the API is offline.',
+    demoData: 'Demo data',
+    noLeads: 'No leads yet.',
+    noEmail: 'No email',
+    inventory: 'Inventory',
+    featuredProperties: 'Featured properties',
+    viewAll: 'View all',
+    subscription: 'Subscription',
+    configuration: 'Configuration',
+    catalogNames: {
+      'lead-sources': 'Lead sources',
+      'property-types': 'Property types',
+      'document-types': 'Documents',
+      'mortgage-types': 'Financing'
+    },
+    status: { NEW: 'New', CONTACTED: 'Contacted', QUALIFIED: 'Qualified' },
+    propertyStatus: { AVAILABLE: 'Available', RESERVED: 'Reserved' },
+    propertyForm: {
+      photos: 'Property photos',
+      photosDescription: 'Up to 12 images JPG, PNG or WebP. Maximum 8 MB each.',
+      photosCounter: '{{count}}/12',
+      dragPhotos: 'Drag photos here or click to select',
+      dragPhotosEdit: 'Drag photos or click to select',
+      dropPhotosHere: 'Drop images here',
+      formatInfo: 'JPG, PNG or WebP • Maximum 8MB per image',
+      savedPhotos: 'Saved photos ({{count}})',
+      newPhotos: 'New photos ({{count}})',
+      coverBadge: 'Cover',
+      newBadge: 'New',
+      setCover: 'Set as cover',
+      remove: 'Remove',
+      uploading: 'Uploading {{count}} photo...',
+      uploading_other: 'Uploading {{count}} photos...',
+      saving: 'Saving property...',
+      saveChanges: 'Save changes',
+      saveProperty: 'Save property',
+      errorFormats: 'Only JPG, PNG or WebP images are allowed.',
+      errorSize: 'Each image must be maximum 8 MB.',
+      errorLimit: 'Each property can have maximum 12 photos.',
+      removePhoto: 'Remove photo'
+    },
+    export: {
+      button: 'Export to Excel',
+      fileName: 'export',
+      exporting: 'Exporting...'
+    }
+  } },
+  es: { translation: {
+    dashboard: 'Panel',
+    leads: 'Prospectos',
+    properties: 'Propiedades',
+    catalogs: 'Catálogos',
+    plans: 'Planes',
+    language: 'Idioma',
+    workspace: 'Espacio de trabajo',
+    welcome: 'Tu operación comercial, de un vistazo',
+    welcomeSubtitle: 'Controla prospectos, inventario, catálogos y crecimiento desde un solo lugar.',
+    summary: 'Resumen del negocio',
+    activeLeads: 'Prospectos activos',
+    availableProperties: 'Propiedades disponibles',
+    estimatedSales: 'Ventas estimadas',
+    thisMonth: 'este mes',
+    reserved: 'reservadas',
+    recentLeads: 'Prospectos recientes',
+    newLead: 'Nuevo prospecto',
+    crm: 'Pipeline comercial',
+    demoMode: 'Mostrando datos de ejemplo mientras la API está apagada.',
+    demoData: 'Datos demo',
+    noLeads: 'Aún no hay prospectos.',
+    noEmail: 'Sin correo',
+    inventory: 'Inventario',
+    featuredProperties: 'Propiedades destacadas',
+    viewAll: 'Ver todas',
+    subscription: 'Suscripción',
+    configuration: 'Configuración',
+    catalogNames: {
+      'lead-sources': 'Origen de prospectos',
+      'property-types': 'Tipos de propiedad',
+      'document-types': 'Documentos',
+      'mortgage-types': 'Financiamiento'
+    },
+    status: { NEW: 'Nuevo', CONTACTED: 'Contactado', QUALIFIED: 'Calificado' },
+    propertyStatus: { AVAILABLE: 'Disponible', RESERVED: 'Reservada' },
+    propertyForm: {
+      photos: 'Fotos de la propiedad',
+      photosDescription: 'Hasta 12 imágenes JPG, PNG o WebP. Máximo 8 MB cada una.',
+      photosCounter: '{{count}}/12',
+      dragPhotos: 'Arrastra fotos aquí o haz clic para seleccionar',
+      dragPhotosEdit: 'Arrastra fotos o haz clic para seleccionar',
+      dropPhotosHere: 'Suelta las imágenes aquí',
+      formatInfo: 'JPG, PNG o WebP • Máximo 8MB por imagen',
+      savedPhotos: 'Fotos guardadas ({{count}})',
+      newPhotos: 'Nuevas fotos ({{count}})',
+      coverBadge: 'Portada',
+      newBadge: 'Nueva',
+      setCover: 'Portada',
+      remove: 'Eliminar',
+      uploading: 'Subiendo {{count}} foto...',
+      uploading_other: 'Subiendo {{count}} fotos...',
+      saving: 'Guardando propiedad...',
+      saveChanges: 'Guardar cambios',
+      saveProperty: 'Guardar propiedad',
+      errorFormats: 'Solo se permiten imágenes JPG, PNG o WebP.',
+      errorSize: 'Cada imagen debe pesar máximo 8 MB.',
+      errorLimit: 'Cada propiedad puede tener máximo 12 fotos.',
+      removePhoto: 'Quitar foto'
+    },
+    export: {
+      button: 'Exportar a Excel',
+      fileName: 'exportacion',
+      exporting: 'Exportando...'
+    }
+  } }
+};
+
+i18n.use(initReactI18next).init({
+  resources,
+  lng: 'es',
+  fallbackLng: 'en',
+  interpolation: { escapeValue: false }
+});
+
+export default i18n;
