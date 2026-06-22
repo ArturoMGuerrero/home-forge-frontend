@@ -80,6 +80,11 @@ export function addLeadActivity(
   return postJson<LeadActivity>(`/leads/${leadId}/activities`, { companyId: getCompanyId(), ...activity });
 }
 
+export function deleteLeadActivity(leadId: string, activityId: string): Promise<void> {
+  const { deleteVoid } = require('./services/api');
+  return deleteVoid(`/leads/${leadId}/activities/${activityId}?companyId=${getCompanyId()}`);
+}
+
 export const leadStatusLabels: Record<LeadStatus, string> = {
   NEW: 'Nuevo',
   CONTACTED: 'Contactado',

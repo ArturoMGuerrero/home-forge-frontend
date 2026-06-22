@@ -3,6 +3,7 @@ import { Link, useNavigate, useParams } from 'react-router-dom';
 import {
   addLeadActivity,
   deleteLead,
+  deleteLeadActivity,
   getLead,
   LeadActivity,
   LeadActivityType,
@@ -149,6 +150,19 @@ export function LeadDetailPage() {
       setShowDeleteModal(false);
     } finally {
       setDeleting(false);
+    }
+  }
+
+  async function handleDeleteActivity(activityId: string) {
+    if (!confirm('¿Eliminar esta actividad de la línea de tiempo? Esta acción no se puede deshacer.')) return;
+    setError('');
+    setSuccess('');
+    try {
+      await deleteLeadActivity(leadId, activityId);
+      setActivities(current => current.filter(item => item.id !== activityId));
+      setSuccess('Actividad eliminada de la línea de tiempo.');
+    } catch (requestError) {
+      setError(requestError instanceof Error ? requestError.message : 'No fue posible eliminar la actividad.');
     }
   }
 
@@ -301,9 +315,24 @@ export function LeadDetailPage() {
             {activities.length === 0 && <p className="py-8 text-center text-sm text-slate-500">Todavía no hay actividades registradas.</p>}
             <div className="space-y-5">
               {activities.map(item => (
-                <article className="relative border-l-2 border-indigo-100 pl-5" key={item.id}>
+                <article className="group relative border-l-2 border-indigo-100 pl-5" key={item.id}>
                   <span className="absolute -left-[7px] top-1 size-3 rounded-full bg-indigo-600" />
-                  <div className="flex flex-wrap items-center justify-between gap-2"><strong className="text-sm">{activityLabels[item.activityType]}</strong><time className="text-xs text-slate-400">{new Date(item.occurredAt).toLocaleString('es-MX')}</time></div>
+                  <div className="flex flex-wrap items-center justify-between gap-2">
+                    <strong className="text-sm">{activityLabels[item.activityType]}</strong>
+                    <div className="flex items-center gap-2">
+                      <time className="text-xs text-slate-400">{new Date(item.occurredAt).toLocaleString('es-MX')}</time>
+                      <button
+                        className="opacity-0 transition group-hover:opacity-100 rounded-lg p-1.5 hover:bg-rose-50 text-slate-400 hover:text-rose-600"
+                        onClick={() => handleDeleteActivity(item.id)}
+                        title="Eliminar actividad"
+                        type="button"
+                      >
+                        <svg className="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                        </svg>
+                      </button>
+                    </div>
+                  </div>
                   <p className="mt-2 whitespace-pre-line text-sm leading-6 text-slate-600">{item.notes}</p>
                   {item.nextFollowUpAt && <p className="mt-2 rounded-lg bg-indigo-50 px-3 py-2 text-xs font-semibold text-indigo-700">Siguiente contacto: {new Date(item.nextFollowUpAt).toLocaleString('es-MX')}</p>}
                 </article>

@@ -50,13 +50,28 @@ export function PublicPropertyDetailPage() {
           <p className="mt-3 text-base text-slate-500">{[property.address, property.city, property.stateCode, countryName(property.countryCode)].filter(Boolean).join(', ')}</p>
         </div>
 
-        <section className="grid gap-4 lg:grid-cols-[1fr_220px]">
-          <img alt={property.title} className="h-[320px] w-full rounded-3xl object-cover sm:h-[520px]" src={currentImage} />
+        <section className="grid gap-4 lg:grid-cols-[1fr_280px]">
+          <div className="relative overflow-hidden rounded-3xl bg-slate-100">
+            <img alt={property.title} className="h-[320px] w-full object-cover sm:h-[520px]" src={currentImage} />
+            {images.length > 1 && (
+              <div className="absolute bottom-4 right-4 rounded-full bg-black/60 px-3 py-1.5 text-xs font-semibold text-white backdrop-blur-sm">
+                {activeImage + 1} / {images.length}
+              </div>
+            )}
+          </div>
           {images.length > 1 && (
-            <div className="grid grid-cols-4 gap-3 lg:max-h-[520px] lg:grid-cols-1 lg:overflow-y-auto">
+            <div className="grid auto-rows-fr grid-cols-4 gap-3 lg:max-h-[520px] lg:grid-cols-2 lg:overflow-y-auto lg:pr-2">
               {images.map((image, index) => (
-                <button className={`overflow-hidden rounded-2xl border-2 ${activeImage === index ? 'border-indigo-600' : 'border-transparent opacity-75 hover:opacity-100'}`} key={image} onClick={() => setActiveImage(index)} type="button">
-                  <img alt={`Vista ${index + 1}`} className="h-20 w-full object-cover lg:h-28" src={image} />
+                <button
+                  className={`group relative aspect-square overflow-hidden rounded-2xl border-2 transition-all ${activeImage === index ? 'border-indigo-600 ring-2 ring-indigo-200' : 'border-slate-200 hover:border-indigo-400'}`}
+                  key={image}
+                  onClick={() => setActiveImage(index)}
+                  type="button"
+                >
+                  <img alt={`Vista ${index + 1}`} className={`size-full object-cover transition-all ${activeImage === index ? 'scale-100' : 'scale-105 opacity-80 group-hover:scale-100 group-hover:opacity-100'}`} src={image} />
+                  {activeImage === index && (
+                    <div className="absolute inset-0 bg-indigo-600/20" />
+                  )}
                 </button>
               ))}
             </div>
