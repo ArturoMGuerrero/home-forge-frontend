@@ -3,6 +3,9 @@ import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import { getSession, logout, updateSessionSubscription } from '../shared/auth';
 import { Icon, IconName } from '../shared/Icon';
 import { getSubscription, Subscription } from '../shared/subscriptionApi';
+import { SubscriptionBadge } from '../shared/SubscriptionBadge';
+import { SubscriptionBanner } from '../shared/SubscriptionBanner';
+import { useSubscriptionRestrictions } from '../shared/useSubscriptionRestrictions';
 
 const navigation: Array<{ label: string; to: string; icon: IconName; end?: boolean }> = [
   { label: 'Panel', to: '/app', icon: 'dashboard', end: true },
@@ -22,6 +25,7 @@ export function PrivateLayout() {
   const session = getSession();
   const [menuOpen, setMenuOpen] = useState(false);
   const [subscription, setSubscription] = useState<Subscription | null>(null);
+  const { restrictions } = useSubscriptionRestrictions();
 
   useEffect(() => {
     getSubscription()
@@ -116,9 +120,63 @@ export function PrivateLayout() {
               </span>
               <div className="min-w-0 flex-1">
                 <strong className="block truncate text-sm text-white">{session?.name}</strong>
-                <small className="block truncate text-xs text-slate-400">{subscription?.planCode ?? session?.planCode ?? 'Starter'}</small>
+                <div className="mt-1">
+                  <SubscriptionBadge />
+                </div>
               </div>
             </div>
+
+            {/* Estado de suscripción */}
+            {subscription && (
+              <div className="mt-3 space-y-1.5">
+                {subscription.status === 'ACTIVE' && (
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="text-slate-400">Estado</span>
+                    <span className="flex items-center gap-1.5 font-semibold text-emerald-400">
+                      <svg className="size-3" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                      </svg>
+                      Activo
+                    </span>
+                  </div>
+                )}
+                {subscription.status === 'TRIAL' && (
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="text-slate-400">Estado</span>
+                    <span className="flex items-center gap-1.5 font-semibold text-amber-400">
+                      <svg className="size-3" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clipRule="evenodd" />
+                      </svg>
+                      Prueba ({subscription.trialDaysRemaining}d)
+                    </span>
+                  </div>
+                )}
+                {(subscription.status === 'SUSPENDED' || subscription.status === 'CANCELLED' || subscription.status === 'EXPIRED') && (
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="text-slate-400">Estado</span>
+                    <span className="flex items-center gap-1.5 font-semibold text-rose-400">
+                      <svg className="size-3" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                      </svg>
+                      {subscription.status === 'SUSPENDED' ? 'Suspendido' : subscription.status === 'EXPIRED' ? 'Expirado' : 'Cancelado'}
+                    </span>
+                  </div>
+                )}
+
+                {restrictions.level !== 'NONE' && restrictions.level !== 'WARNING' && (
+                  <NavLink
+                    className="flex items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-rose-500 to-pink-600 px-3 py-2 text-xs font-bold text-white shadow-lg shadow-rose-900/50 hover:shadow-rose-900/70 transition-all"
+                    to="/app/planes"
+                  >
+                    <svg className="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                    </svg>
+                    Renovar plan
+                  </NavLink>
+                )}
+              </div>
+            )}
+
             <button className="mt-3 w-full rounded-lg bg-white/5 px-3 py-1.5 text-xs font-medium text-slate-300 hover:bg-white/10 hover:text-white transition-all" onClick={signOut} type="button">
               Cerrar sesión
             </button>
@@ -126,9 +184,12 @@ export function PrivateLayout() {
         </div>
       </aside>
 
-      <main className="mx-auto w-full max-w-[1480px] px-4 py-7 sm:px-7 lg:px-10 lg:py-10">
-        <Outlet />
-      </main>
+      <div className="flex min-h-screen flex-col">
+        <SubscriptionBanner restrictions={restrictions} />
+        <main className="mx-auto w-full max-w-[1480px] flex-1 px-4 py-7 sm:px-7 lg:px-10 lg:py-10">
+          <Outlet context={{ restrictions }} />
+        </main>
+      </div>
     </div>
   );
 }

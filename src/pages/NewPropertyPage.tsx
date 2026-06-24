@@ -1,6 +1,8 @@
 import { DragEvent, FormEvent, useEffect, useState } from 'react';
-import { Link, useNavigate, useParams } from 'react-router-dom';
+import { Link, useNavigate, useParams, useOutletContext } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import toast from 'react-hot-toast';
+import { SubscriptionRestrictions } from '../shared/subscriptionRestrictions';
 import {
   ApiProperty,
   createProperty,
@@ -16,6 +18,7 @@ import {
 import { getJson } from '../shared/services/api';
 import { resolveApiAsset } from '../shared/services/api';
 import { MoneyInput } from '../shared/MoneyInput';
+import { LocationPicker } from '../components/LocationPicker';
 
 // TODO: i18n - Preparar textos para español e inglés
 // Los catálogos ya soportan labelEs y labelEn
@@ -42,6 +45,8 @@ const initialForm = {
   stateCode: '',
   city: '',
   address: '',
+  latitude: '',
+  longitude: '',
   bedrooms: '',
   bathrooms: '',
   landArea: '',
@@ -57,12 +62,13 @@ export function NewPropertyPage() {
   const navigate = useNavigate();
   const { propertyId } = useParams();
   const editing = Boolean(propertyId);
+  const context = useOutletContext<{ restrictions: SubscriptionRestrictions }>();
+  const restrictions = context?.restrictions || { canCreate: true, canEdit: true, canExport: true, canUploadMultiple: true, canInviteUsers: true, level: 'NONE' };
   const [form, setForm] = useState(initialForm);
   const [types, setTypes] = useState<CatalogItem[]>([]);
   const [currencies, setCurrencies] = useState<CatalogItem[]>([]);
   const [countries, setCountries] = useState<CatalogItem[]>([]);
   const [saving, setSaving] = useState(false);
-  const [error, setError] = useState('');
   const [photos, setPhotos] = useState<File[]>([]);
   const [previews, setPreviews] = useState<string[]>([]);
   const [existingImages, setExistingImages] = useState<ApiProperty['images']>([]);
@@ -71,6 +77,7 @@ export function NewPropertyPage() {
   const [deleting, setDeleting] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [uploadingImages, setUploadingImages] = useState(false);
+  const [showLocationPicker, setShowLocationPicker] = useState(false);
 
   useEffect(() => {
     Promise.all([
@@ -83,7 +90,7 @@ export function NewPropertyPage() {
         setCurrencies(currencyItems);
         setCountries(countryItems);
       })
-      .catch(() => setError('No se pudieron cargar los catálogos del backend.'));
+      .catch(() => toast.error('No se pudieron cargar los catálogos del backend.'));
   }, []);
 
   useEffect(() => {
@@ -102,6 +109,8 @@ export function NewPropertyPage() {
           stateCode: property.stateCode,
           city: property.city,
           address: property.address ?? '',
+          latitude: property.latitude === undefined ? '' : String(property.latitude),
+          longitude: property.longitude === undefined ? '' : String(property.longitude),
           bedrooms: property.bedrooms === undefined ? '' : String(property.bedrooms),
           bathrooms: property.bathrooms === undefined ? '' : String(property.bathrooms),
           landArea: property.landArea === undefined ? '' : String(property.landArea),
@@ -113,7 +122,7 @@ export function NewPropertyPage() {
         });
         setExistingImages(property.images ?? []);
       })
-      .catch(requestError => setError(requestError instanceof Error ? requestError.message : 'No fue posible cargar la propiedad.'))
+      .catch(requestError => toast.error(requestError instanceof Error ? requestError.message : 'No fue posible cargar la propiedad.'))
       .finally(() => setLoading(false));
   }, [propertyId]);
 
@@ -131,6 +140,11 @@ export function NewPropertyPage() {
     return value === '' ? undefined : Number(value);
   }
 
+  function optionalDecimal(value: string) {
+    const num = Number(value);
+    return value === '' || isNaN(num) ? undefined : num;
+  }
+
   function normalizeImageUrl(value: string) {
     const imageUrl = value.trim();
     if (!imageUrl) return undefined;
@@ -141,13 +155,19 @@ export function NewPropertyPage() {
 
   async function submit(event: FormEvent) {
     event.preventDefault();
+
+    // Check edit permissions for editing mode
+    if (editing && !restrictions.canEdit) {
+      toast.error('Tu plan no permite editar propiedades. Actualiza tu suscripción para continuar.');
+      return;
+    }
+
     const price = Number(form.price);
     if (!Number.isFinite(price) || price <= 0) {
-      setError('Captura un precio mayor a cero.');
+      toast.error('Captura un precio mayor a cero.');
       return;
     }
     setSaving(true);
-    setError('');
 
     try {
       const payload = {
@@ -162,6 +182,8 @@ export function NewPropertyPage() {
         stateCode: form.stateCode.trim(),
         city: form.city.trim(),
         address: form.address.trim() || undefined,
+        latitude: optionalDecimal(form.latitude),
+        longitude: optionalDecimal(form.longitude),
         bedrooms: optionalNumber(form.bedrooms),
         bathrooms: optionalNumber(form.bathrooms),
         landArea: optionalNumber(form.landArea),
@@ -179,9 +201,10 @@ export function NewPropertyPage() {
         await uploadPropertyImages(saved.id, photos);
         setUploadingImages(false);
       }
+      toast.success(editing ? 'Propiedad actualizada correctamente' : 'Propiedad creada correctamente');
       navigate('/app/propiedades');
     } catch (requestError) {
-      setError(requestError instanceof Error ? requestError.message : 'No fue posible guardar la propiedad.');
+      toast.error(requestError instanceof Error ? requestError.message : 'No fue posible guardar la propiedad.');
     } finally {
       setSaving(false);
     }
@@ -190,12 +213,12 @@ export function NewPropertyPage() {
   async function handleDelete() {
     if (!propertyId) return;
     setDeleting(true);
-    setError('');
     try {
       await deleteProperty(propertyId);
+      toast.success('Propiedad eliminada correctamente');
       navigate('/app/propiedades');
     } catch (requestError) {
-      setError(requestError instanceof Error ? requestError.message : 'No fue posible eliminar la propiedad.');
+      toast.error(requestError instanceof Error ? requestError.message : 'No fue posible eliminar la propiedad.');
       setShowDeleteModal(false);
     } finally {
       setDeleting(false);
@@ -206,19 +229,25 @@ export function NewPropertyPage() {
     if (!files) return;
     const selected = Array.from(files);
     if (selected.some(file => !['image/jpeg', 'image/png', 'image/webp'].includes(file.type))) {
-      setError(t('propertyForm.errorFormats'));
+      toast.error(t('propertyForm.errorFormats'));
       return;
     }
     if (selected.some(file => file.size > 8 * 1024 * 1024)) {
-      setError(t('propertyForm.errorSize'));
+      toast.error(t('propertyForm.errorSize'));
       return;
     }
+
+    // Check multiple upload restriction
+    if (!restrictions.canUploadMultiple && (existingImages.length + photos.length + selected.length) > 1) {
+      toast.error('Tu plan solo permite subir 1 imagen por propiedad. Actualiza a PRO para subir hasta 12 imágenes.');
+      return;
+    }
+
     if (existingImages.length + photos.length + selected.length > 12) {
-      setError(t('propertyForm.errorLimit'));
+      toast.error(t('propertyForm.errorLimit'));
       return;
     }
     setPhotos(current => [...current, ...selected]);
-    setError('');
   }
 
   function handleDragOver(event: DragEvent<HTMLLabelElement>) {
@@ -243,8 +272,9 @@ export function NewPropertyPage() {
       const updated = await deletePropertyImage(propertyId, imageId);
       setExistingImages(updated.images);
       setForm(current => ({ ...current, imageUrl: updated.imageUrl ?? '' }));
+      toast.success('Foto eliminada');
     } catch (requestError) {
-      setError(requestError instanceof Error ? requestError.message : 'No fue posible eliminar la foto.');
+      toast.error(requestError instanceof Error ? requestError.message : 'No fue posible eliminar la foto.');
     }
   }
 
@@ -253,8 +283,9 @@ export function NewPropertyPage() {
     try {
       const updated = await setPropertyCover(propertyId, imageId);
       setForm(current => ({ ...current, imageUrl: updated.imageUrl ?? '' }));
+      toast.success('Portada actualizada');
     } catch (requestError) {
-      setError(requestError instanceof Error ? requestError.message : 'No fue posible cambiar la portada.');
+      toast.error(requestError instanceof Error ? requestError.message : 'No fue posible cambiar la portada.');
     }
   }
 
@@ -333,6 +364,46 @@ export function NewPropertyPage() {
             <label className={labelClass}>Dirección
               <input className={inputClass} maxLength={255} value={form.address} onChange={event => update('address', event.target.value)} />
             </label>
+            <div className="sm:col-span-2">
+              <label className={labelClass}>
+                Coordenadas GPS
+                <div className="mt-2 grid gap-3 sm:grid-cols-2">
+                  <input
+                    className={inputClass}
+                    max="90"
+                    min="-90"
+                    placeholder="Latitud: 19.4326"
+                    step="0.000001"
+                    type="number"
+                    value={form.latitude}
+                    onChange={event => update('latitude', event.target.value)}
+                  />
+                  <input
+                    className={inputClass}
+                    max="180"
+                    min="-180"
+                    placeholder="Longitud: -99.1332"
+                    step="0.000001"
+                    type="number"
+                    value={form.longitude}
+                    onChange={event => update('longitude', event.target.value)}
+                  />
+                </div>
+                <button
+                  className="mt-3 inline-flex items-center gap-2 rounded-lg border-2 border-indigo-200 bg-indigo-50 px-4 py-2 text-sm font-semibold text-indigo-700 transition hover:bg-indigo-100"
+                  onClick={() => setShowLocationPicker(true)}
+                  type="button"
+                >
+                  <svg className="size-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
+                  </svg>
+                  🗺️ Seleccionar en el mapa
+                </button>
+                <span className="mt-2 block text-xs font-normal text-slate-500">
+                  Usa el mapa para ubicar la propiedad o ingresa las coordenadas manualmente
+                </span>
+              </label>
+            </div>
           </section>
 
           <section className="grid gap-5 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:grid-cols-2 lg:grid-cols-3 sm:p-6">
@@ -477,12 +548,13 @@ export function NewPropertyPage() {
               Mostrar esta propiedad en el catálogo público.
             </label>
           </section>
-          {error && <p className="rounded-xl bg-rose-50 p-4 text-sm font-medium text-rose-700" role="alert">{error}</p>}
-          <button className="w-full rounded-xl bg-indigo-600 px-3.5 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-60" disabled={saving} type="submit">
+          <button className="w-full rounded-xl bg-indigo-600 px-3.5 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-60" disabled={saving || (editing && !restrictions.canEdit)} type="submit">
             {uploadingImages
               ? t('propertyForm.uploading', { count: photos.length })
               : saving
               ? t('propertyForm.saving')
+              : editing && !restrictions.canEdit
+              ? '🔒 ' + t('propertyForm.saveChanges')
               : editing
               ? t('propertyForm.saveChanges')
               : t('propertyForm.saveProperty')}
@@ -498,6 +570,20 @@ export function NewPropertyPage() {
           )}
         </aside>
       </form>
+
+      {/* Selector de ubicación en mapa */}
+      {showLocationPicker && (
+        <LocationPicker
+          latitude={form.latitude}
+          longitude={form.longitude}
+          onLocationChange={(lat, lng) => {
+            update('latitude', lat.toString());
+            update('longitude', lng.toString());
+            toast.success('Ubicación actualizada correctamente');
+          }}
+          onClose={() => setShowLocationPicker(false)}
+        />
+      )}
 
       {/* Modal de confirmación de eliminación */}
       {showDeleteModal && (

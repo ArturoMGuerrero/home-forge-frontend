@@ -1,6 +1,6 @@
 import { getCompanyId, LeadItem, listLeads } from './leads';
 import { ApiProperty, listProperties } from './propertyApi';
-import { apiUrl, deleteVoid, getJson, postForm, postJson, putJson } from './services/api';
+import { apiUrl, deleteJson, deleteVoid, getJson, postForm, postJson, putJson } from './services/api';
 
 export type Appointment = {
   id: string;
@@ -58,7 +58,6 @@ export function updateAppointment(id: string, payload: AppointmentPayload) {
 }
 
 export function deleteAppointment(id: string): Promise<void> {
-  const { deleteJson } = require('./services/api');
   return deleteJson(`/appointments/${id}?companyId=${getCompanyId()}`);
 }
 

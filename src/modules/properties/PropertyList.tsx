@@ -1,16 +1,16 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
+import toast from 'react-hot-toast';
 import { ApiProperty, formatApiPrice, listingLabel, listProperties, propertyImages } from '../../shared/propertyApi';
 
 export function PropertyList() {
   const [properties, setProperties] = useState<ApiProperty[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(false);
 
   useEffect(() => {
     listProperties()
       .then(data => setProperties(data.slice(0, 3)))
-      .catch(() => setError(true))
+      .catch(() => toast.error('No se pudo consultar el inventario.'))
       .finally(() => setLoading(false));
   }, []);
 
@@ -23,8 +23,7 @@ export function PropertyList() {
 
       <div>
         {loading && <p className="py-8 text-center text-sm text-slate-500">Consultando inventario...</p>}
-        {error && <p className="py-8 text-center text-sm text-rose-600">No se pudo consultar el inventario.</p>}
-        {!loading && !error && properties.length === 0 && <p className="py-8 text-center text-sm text-slate-500">Aún no hay propiedades.</p>}
+        {!loading && properties.length === 0 && <p className="py-8 text-center text-sm text-slate-500">Aún no hay propiedades.</p>}
         {properties.map(property => (
           <article className="flex items-center gap-3 border-t border-slate-100 py-4 first:border-0" key={property.id}>
             {propertyImages(property)[0] ? <img alt="" className="size-11 shrink-0 rounded-xl object-cover" src={propertyImages(property)[0]} /> : <span className="grid size-11 shrink-0 place-items-center rounded-xl bg-indigo-50 text-xs font-bold text-indigo-700">{property.propertyType.slice(0, 2)}</span>}

@@ -1,5 +1,6 @@
 import { FormEvent, useEffect, useState } from 'react';
-import { Link, useNavigate, useParams } from 'react-router-dom';
+import { Link, useNavigate, useParams, useOutletContext } from 'react-router-dom';
+import toast from 'react-hot-toast';
 import {
   addLeadActivity,
   deleteLead,
@@ -16,6 +17,8 @@ import {
   updateLead
 } from '../shared/leads';
 import { MoneyInput } from '../shared/MoneyInput';
+import { ConfirmModal } from '../shared/ConfirmModal';
+import { SubscriptionRestrictions } from '../shared/subscriptionRestrictions';
 
 const inputClass = 'w-full rounded-xl border border-slate-200 bg-white px-3.5 py-3 text-sm font-normal text-slate-900 outline-none transition focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100';
 const labelClass = 'grid gap-2 text-sm font-semibold text-slate-700';
@@ -33,6 +36,8 @@ const activityLabels: Record<LeadActivityType, string> = {
 export function LeadDetailPage() {
   const navigate = useNavigate();
   const { leadId = '' } = useParams();
+  const context = useOutletContext<{ restrictions: SubscriptionRestrictions }>();
+  const restrictions = context?.restrictions || { canCreate: true, canEdit: true, canExport: true, level: 'NONE' };
   const [lead, setLead] = useState<LeadItem | null>(null);
   const [activities, setActivities] = useState<LeadActivity[]>([]);
   const [loading, setLoading] = useState(true);
@@ -40,8 +45,8 @@ export function LeadDetailPage() {
   const [savingActivity, setSavingActivity] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
+  const [deletingActivity, setDeletingActivity] = useState(false);
+  const [activityToDelete, setActivityToDelete] = useState<string | null>(null);
   const [activity, setActivity] = useState({
     activityType: 'CALL' as LeadActivityType,
     notes: '',
@@ -53,7 +58,6 @@ export function LeadDetailPage() {
   }, [leadId]);
 
   async function load() {
-    setError('');
     try {
       const [leadResponse, activityResponse] = await Promise.all([
         getLead(leadId),
@@ -62,7 +66,7 @@ export function LeadDetailPage() {
       setLead(leadResponse);
       setActivities(activityResponse);
     } catch (requestError) {
-      setError(requestError instanceof Error ? requestError.message : 'No fue posible cargar el prospecto.');
+      toast.error(requestError instanceof Error ? requestError.message : 'No fue posible cargar el prospecto.');
     } finally {
       setLoading(false);
     }
@@ -79,9 +83,13 @@ export function LeadDetailPage() {
   async function saveProfile(event: FormEvent) {
     event.preventDefault();
     if (!lead) return;
+
+    if (!restrictions.canEdit) {
+      toast.error('No puedes editar prospectos. Tu plan ha expirado.');
+      return;
+    }
+
     setSaving(true);
-    setError('');
-    setSuccess('');
     try {
       const payload: LeadPayload = {
         firstName: lead.firstName.trim(),
@@ -107,9 +115,9 @@ export function LeadDetailPage() {
         notes: lead.notes?.trim() || undefined
       };
       setLead(await updateLead(leadId, payload));
-      setSuccess('Información del prospecto actualizada.');
+      toast.success('Información del prospecto actualizada.');
     } catch (requestError) {
-      setError(requestError instanceof Error ? requestError.message : 'No fue posible actualizar el prospecto.');
+      toast.error(requestError instanceof Error ? requestError.message : 'No fue posible actualizar el prospecto.');
     } finally {
       setSaving(false);
     }
@@ -118,8 +126,6 @@ export function LeadDetailPage() {
   async function saveActivity(event: FormEvent) {
     event.preventDefault();
     setSavingActivity(true);
-    setError('');
-    setSuccess('');
     try {
       const created = await addLeadActivity(leadId, {
         activityType: activity.activityType,
@@ -131,9 +137,9 @@ export function LeadDetailPage() {
         setLead(current => current ? { ...current, nextFollowUpAt: created.nextFollowUpAt } : current);
       }
       setActivity({ activityType: 'CALL', notes: '', nextFollowUpAt: '' });
-      setSuccess('Seguimiento registrado en la línea de tiempo.');
+      toast.success('Seguimiento registrado en la línea de tiempo.');
     } catch (requestError) {
-      setError(requestError instanceof Error ? requestError.message : 'No fue posible registrar el seguimiento.');
+      toast.error(requestError instanceof Error ? requestError.message : 'No fue posible registrar el seguimiento.');
     } finally {
       setSavingActivity(false);
     }
@@ -141,33 +147,35 @@ export function LeadDetailPage() {
 
   async function handleDelete() {
     setDeleting(true);
-    setError('');
     try {
       await deleteLead(leadId);
+      toast.success('Prospecto eliminado correctamente.');
       navigate('/app/prospectos');
     } catch (requestError) {
-      setError(requestError instanceof Error ? requestError.message : 'No fue posible eliminar el prospecto.');
+      toast.error(requestError instanceof Error ? requestError.message : 'No fue posible eliminar el prospecto.');
       setShowDeleteModal(false);
     } finally {
       setDeleting(false);
     }
   }
 
-  async function handleDeleteActivity(activityId: string) {
-    if (!confirm('¿Eliminar esta actividad de la línea de tiempo? Esta acción no se puede deshacer.')) return;
-    setError('');
-    setSuccess('');
+  async function confirmDeleteActivity() {
+    if (!activityToDelete) return;
+    setDeletingActivity(true);
     try {
-      await deleteLeadActivity(leadId, activityId);
-      setActivities(current => current.filter(item => item.id !== activityId));
-      setSuccess('Actividad eliminada de la línea de tiempo.');
+      await deleteLeadActivity(leadId, activityToDelete);
+      setActivities(current => current.filter(item => item.id !== activityToDelete));
+      toast.success('Actividad eliminada de la línea de tiempo.');
+      setActivityToDelete(null);
     } catch (requestError) {
-      setError(requestError instanceof Error ? requestError.message : 'No fue posible eliminar la actividad.');
+      toast.error(requestError instanceof Error ? requestError.message : 'No fue posible eliminar la actividad.');
+    } finally {
+      setDeletingActivity(false);
     }
   }
 
   if (loading) return <p className="rounded-2xl border border-slate-200 bg-white p-8 text-center text-sm text-slate-500">Cargando prospecto...</p>;
-  if (!lead) return <p className="rounded-2xl bg-rose-50 p-6 text-sm text-rose-700">{error || 'Prospecto no encontrado.'}</p>;
+  if (!lead) return <p className="rounded-2xl bg-rose-50 p-6 text-sm text-rose-700">Prospecto no encontrado.</p>;
 
   return (
     <>
@@ -231,9 +239,6 @@ export function LeadDetailPage() {
         </div>
       </header>
 
-      {success && <p className="mb-5 rounded-xl bg-emerald-50 p-4 text-sm font-medium text-emerald-700">{success}</p>}
-      {error && <p className="mb-5 rounded-xl bg-rose-50 p-4 text-sm font-medium text-rose-700">{error}</p>}
-
       <div className="grid gap-7 xl:grid-cols-[1fr_420px]">
         <form className="space-y-6" onSubmit={saveProfile}>
           <section className="grid gap-5 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:grid-cols-2 sm:p-6">
@@ -288,7 +293,9 @@ export function LeadDetailPage() {
             <label className={`${labelClass} sm:col-span-2`}>Notas generales<textarea className={`${inputClass} min-h-32 resize-y`} maxLength={5000} onChange={event => update('notes', event.target.value)} value={lead.notes ?? ''} /></label>
           </section>
 
-          <button className="rounded-xl bg-indigo-600 px-5 py-3 text-sm font-bold text-white disabled:opacity-60" disabled={saving} type="submit">{saving ? 'Guardando...' : 'Guardar información del prospecto'}</button>
+          <button className="rounded-xl bg-indigo-600 px-5 py-3 text-sm font-bold text-white disabled:opacity-60" disabled={saving || !restrictions.canEdit} type="submit">
+            {!restrictions.canEdit ? '🔒 Edición bloqueada' : saving ? 'Guardando...' : 'Guardar información del prospecto'}
+          </button>
         </form>
 
         <aside className="space-y-6">
@@ -323,7 +330,7 @@ export function LeadDetailPage() {
                       <time className="text-xs text-slate-400">{new Date(item.occurredAt).toLocaleString('es-MX')}</time>
                       <button
                         className="opacity-0 transition group-hover:opacity-100 rounded-lg p-1.5 hover:bg-rose-50 text-slate-400 hover:text-rose-600"
-                        onClick={() => handleDeleteActivity(item.id)}
+                        onClick={() => setActivityToDelete(item.id)}
                         title="Eliminar actividad"
                         type="button"
                       >
@@ -341,6 +348,18 @@ export function LeadDetailPage() {
           </section>
         </aside>
       </div>
+
+      <ConfirmModal
+        isOpen={activityToDelete !== null}
+        title="¿Eliminar esta actividad de la línea de tiempo?"
+        message="Esta acción no se puede deshacer."
+        confirmLabel="Eliminar"
+        cancelLabel="Cancelar"
+        onConfirm={confirmDeleteActivity}
+        onCancel={() => setActivityToDelete(null)}
+        loading={deletingActivity}
+        danger={true}
+      />
     </>
   );
 }

@@ -1,5 +1,6 @@
 import { FormEvent, useState } from 'react';
 import { Link, Navigate, useNavigate } from 'react-router-dom';
+import toast from 'react-hot-toast';
 import { isAuthenticated, register } from '../shared/auth';
 
 export function RegisterPage() {
@@ -12,21 +13,19 @@ export function RegisterPage() {
   const [passwordConfirmation, setPasswordConfirmation] = useState('');
   const [acceptedTerms, setAcceptedTerms] = useState(false);
   const [saving, setSaving] = useState(false);
-  const [error, setError] = useState('');
 
   if (isAuthenticated()) return <Navigate to="/app" replace />;
 
   async function submit(event: FormEvent) {
     event.preventDefault();
-    setError('');
 
     if (password !== passwordConfirmation) {
-      setError('Las contraseñas no coinciden.');
+      toast.error('Las contraseñas no coinciden.');
       return;
     }
 
     if (!acceptedTerms) {
-      setError('Debes aceptar los términos para crear tu cuenta.');
+      toast.error('Debes aceptar los términos para crear tu cuenta.');
       return;
     }
 
@@ -39,9 +38,10 @@ export function RegisterPage() {
         phoneE164: phone,
         password
       });
+      toast.success('Cuenta creada exitosamente');
       navigate('/app');
     } catch (requestError) {
-      setError(requestError instanceof Error ? requestError.message : 'No fue posible crear la cuenta.');
+      toast.error(requestError instanceof Error ? requestError.message : 'No fue posible crear la cuenta.');
     } finally {
       setSaving(false);
     }
@@ -117,12 +117,6 @@ export function RegisterPage() {
               <input checked={acceptedTerms} className="mt-0.5 size-4 rounded border-slate-300 accent-indigo-600" onChange={event => setAcceptedTerms(event.target.checked)} type="checkbox" />
               <span>Acepto los <a className="font-semibold text-indigo-600" href="#">términos de servicio</a> y el <a className="font-semibold text-indigo-600" href="#">aviso de privacidad</a>.</span>
             </label>
-
-            {error && (
-              <div className="rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-medium text-rose-700 sm:col-span-2" role="alert">
-                {error}
-              </div>
-            )}
 
             <button className="shrink-0 rounded-xl bg-indigo-600 px-3.5 py-3.5 text-sm font-semibold text-white shadow-sm transition hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60 sm:col-span-2" disabled={saving} type="submit">
               {saving ? 'Creando empresa y cuenta...' : 'Crear mi cuenta'}

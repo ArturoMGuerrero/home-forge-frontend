@@ -1,27 +1,68 @@
 # Dependencies
 node_modules/
+package-lock.json
 
 # Build output
 dist/
+dist-ssr/
+*.local
 
 # Environment variables
 .env
 .env.local
 .env.production
+.env.development.local
+.env.test.local
+.env.production.local
 
 # Logs
 *.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
 frontend.log
 
-# OS files
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
 .DS_Store
-Thumbs.db
-
-# IDE
-.vscode/
-.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
 *.swp
 *.swo
 
 # Test coverage
 coverage/
+.nyc_output
+
+# Temporary files
+.temp/
+.cache/
+.parcel-cache/
+
+# OS files
+Thumbs.db
+Desktop.ini
+
+# Archivos temporales de desarrollo
+*.tmp
+*.bak
+*.backup
+*.draft
+*.wip
+*.simple.tsx
+*.v2.tsx
+*.improved.tsx
+*_backup.*
+
+# Documentación temporal
+TODO.md
+NOTAS.md
+BORRADOR.md
+*_TEMP.md

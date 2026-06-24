@@ -1,14 +1,18 @@
 import { FormEvent, useEffect, useState } from 'react';
+import { useOutletContext } from 'react-router-dom';
+import toast from 'react-hot-toast';
 import { LeadItem } from '../shared/leads';
 import { ApiProperty, formatApiPrice } from '../shared/propertyApi';
 import { createMatch, deleteMatch, listMatches, loadOperationsContext, PropertyMatch, updateMatch } from '../shared/operationsApi';
+import { SubscriptionRestrictions } from '../shared/subscriptionRestrictions';
 
 export function MatchesPage() {
+  const context = useOutletContext<{ restrictions: SubscriptionRestrictions }>();
+  const restrictions = context?.restrictions || { canCreate: true, canEdit: true, canExport: true, canUploadMultiple: true, canInviteUsers: true, level: 'NONE' };
   const [matches, setMatches] = useState<PropertyMatch[]>([]);
   const [leads, setLeads] = useState<LeadItem[]>([]);
   const [properties, setProperties] = useState<ApiProperty[]>([]);
   const [form, setForm] = useState({ leadId: '', propertyId: '', notes: '' });
-  const [error, setError] = useState('');
   const [searchLead, setSearchLead] = useState('');
   const [searchProperty, setSearchProperty] = useState('');
 
@@ -19,19 +23,27 @@ export function MatchesPage() {
         setLeads(leadItems);
         setProperties(propertyItems);
       })
-      .catch(e => setError(e.message));
+      .catch(e => toast.error(e.message));
   }, []);
 
   async function submit(event: FormEvent) {
     event.preventDefault();
+
+    // Check create permission
+    if (!restrictions.canCreate) {
+      toast.error('Tu plan no permite crear nuevas asignaciones de propiedades. Actualiza tu suscripción para continuar.');
+      return;
+    }
+
     try {
       const created = await createMatch({ ...form, notes: form.notes || undefined });
       setMatches(current => [created, ...current]);
       setForm({ leadId: '', propertyId: '', notes: '' });
       setSearchLead('');
       setSearchProperty('');
+      toast.success('Propiedad asignada correctamente');
     } catch (e) {
-      setError(e instanceof Error ? e.message : 'No fue posible asignar la propiedad.');
+      toast.error(e instanceof Error ? e.message : 'No fue posible asignar la propiedad.');
     }
   }
 
@@ -72,8 +84,6 @@ export function MatchesPage() {
         <h1 className="mt-1 text-3xl font-bold">Prospecto y propiedad</h1>
         <p className="mt-2 text-sm text-slate-500">Recomienda inmuebles y registra el nivel de interés de cada prospecto.</p>
       </header>
-
-      {error && <p className="mb-5 rounded-xl bg-rose-50 p-4 text-sm text-rose-700">{error}</p>}
 
       <form className="mb-6 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm" onSubmit={submit}>
         <div className="grid gap-5 md:grid-cols-2">
@@ -227,10 +237,14 @@ export function MatchesPage() {
         {/* Botón de submit */}
         <button
           className="mt-5 w-full rounded-xl bg-indigo-600 px-4 py-3.5 text-sm font-bold text-white shadow-sm transition hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-          disabled={!form.leadId || !form.propertyId}
+          disabled={!form.leadId || !form.propertyId || !restrictions.canCreate}
           type="submit"
         >
-          {selectedProperty ? `Asignar propiedad · ${formatApiPrice(selectedProperty)}` : 'Asignar propiedad'}
+          {!restrictions.canCreate
+            ? '🔒 Asignar propiedad'
+            : selectedProperty
+            ? `Asignar propiedad · ${formatApiPrice(selectedProperty)}`
+            : 'Asignar propiedad'}
         </button>
       </form>
 

@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link, Navigate, useParams } from 'react-router-dom';
+import toast from 'react-hot-toast';
 import { CatalogItem, catalogLabels } from '../shared/catalogs';
 import { getJson } from '../shared/services/api';
 import { getSubscription, Subscription } from '../shared/subscriptionApi';
@@ -9,12 +10,10 @@ export function CatalogPage() {
   const [items, setItems] = useState<CatalogItem[]>([]);
   const [subscription, setSubscription] = useState<Subscription | null>(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
 
   useEffect(() => {
     if (!catalogName) return;
     setLoading(true);
-    setError('');
     Promise.all([
       getJson<CatalogItem[]>(`/catalogs/${catalogName}`),
       getSubscription()
@@ -23,7 +22,7 @@ export function CatalogPage() {
         setItems(catalogItems);
         setSubscription(subscriptionResponse);
       })
-      .catch(() => setError('No fue posible consultar este catálogo.'))
+      .catch(() => toast.error('No fue posible consultar este catálogo.'))
       .finally(() => setLoading(false));
   }, [catalogName]);
 
@@ -41,9 +40,8 @@ export function CatalogPage() {
       </header>
 
       {loading && <p className="rounded-2xl border border-slate-200 bg-white p-8 text-center text-sm text-slate-500">Consultando catálogo...</p>}
-      {error && <p className="rounded-xl bg-rose-50 p-4 text-sm font-medium text-rose-700">{error}</p>}
 
-      {!loading && !error && (
+      {!loading && (
         <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
           <div className="grid grid-cols-[.7fr_1fr_1fr] gap-4 border-b border-slate-200 bg-slate-50 px-5 py-3 text-xs font-bold uppercase tracking-wide text-slate-500">
             <span>Código</span>

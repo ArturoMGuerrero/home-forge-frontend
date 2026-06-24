@@ -1,4 +1,19 @@
-const API_BASE = import.meta.env.VITE_API_BASE ?? 'http://localhost:8080/api';
+// Detectar automáticamente el host: si se accede por IP, usar esa IP para el backend
+function getApiBase(): string {
+  // Si hay una variable de entorno definida, usarla
+  if (import.meta.env.VITE_API_BASE) {
+    return import.meta.env.VITE_API_BASE;
+  }
+
+  // Detectar automáticamente basado en el hostname actual
+  const hostname = window.location.hostname;
+  const port = '8080';
+  const protocol = window.location.protocol;
+
+  return `${protocol}//${hostname}:${port}/api`;
+}
+
+const API_BASE = getApiBase();
 
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
   const res = await fetch(`${API_BASE}${path}`, {

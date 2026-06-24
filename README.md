@@ -107,16 +107,58 @@ npm run test:coverage
 HomeForge-frontend/
 ├── public/              # Archivos estáticos
 ├── src/
-│   ├── components/      # Componentes React
-│   ├── pages/          # Páginas/Vistas
-│   ├── services/       # Servicios API (Axios)
-│   ├── contexts/       # React Contexts
-│   ├── hooks/          # Custom Hooks
-│   ├── types/          # TypeScript Types
-│   ├── i18n/           # Traducciones
-│   ├── utils/          # Utilidades
-│   ├── App.tsx         # Componente principal
-│   └── main.tsx        # Punto de entrada
+│   ├── components/      # Componentes reutilizables
+│   │   ├── Charts.tsx              # Gráficos y visualizaciones
+│   │   ├── ImageLightbox.tsx       # Visor de imágenes
+│   │   ├── LocationPicker.tsx      # Selector de ubicación
+│   │   ├── PropertyComparator.tsx  # Comparador de propiedades
+│   │   ├── PropertyFilters.tsx     # Filtros de propiedades
+│   │   └── PropertyMap.tsx         # Mapa de propiedades
+│   ├── layout/          # Layouts (PrivateLayout, etc.)
+│   ├── modules/         # Módulos de negocio
+│   │   ├── leads/       # Gestión de prospectos
+│   │   ├── properties/  # Gestión de propiedades
+│   │   └── settings/    # Configuración
+│   ├── pages/           # Páginas/Vistas
+│   │   ├── AgendaPage.tsx
+│   │   ├── CatalogPage.tsx
+│   │   ├── DashboardPage.tsx
+│   │   ├── DocumentsPage.tsx
+│   │   ├── LeadDetailPage.tsx
+│   │   ├── LoginPage.tsx
+│   │   ├── MatchesPage.tsx
+│   │   ├── NewPropertyPage.tsx
+│   │   ├── PaymentFailurePage.tsx
+│   │   ├── PaymentPendingPage.tsx
+│   │   ├── PaymentSuccessPage.tsx
+│   │   ├── PlansPage.tsx
+│   │   ├── PropertiesPage.tsx
+│   │   ├── RegisterPage.tsx
+│   │   ├── ReportsPage.tsx
+│   │   ├── SettingsPage.tsx
+│   │   └── UsersPage.tsx
+│   ├── shared/          # Componentes y utilidades compartidas
+│   │   ├── ConfirmModal.tsx
+│   │   ├── SubscriptionBadge.tsx
+│   │   ├── SubscriptionBanner.tsx
+│   │   ├── UpgradeModal.tsx
+│   │   ├── dashboardApi.ts
+│   │   ├── leads.ts
+│   │   ├── operationsApi.ts
+│   │   ├── paymentApi.ts
+│   │   ├── subscriptionApi.ts
+│   │   ├── subscriptionRestrictions.ts
+│   │   ├── useSubscriptionRestrictions.ts
+│   │   └── services/
+│   │       └── api.ts   # Cliente HTTP (Axios)
+│   ├── contexts/        # React Contexts
+│   ├── hooks/           # Custom Hooks
+│   ├── types/           # TypeScript Types
+│   ├── i18n/            # Traducciones (ES/EN)
+│   ├── utils/           # Utilidades
+│   ├── App.tsx          # Componente principal
+│   └── main.tsx         # Punto de entrada
+├── .env.example         # Variables de entorno de ejemplo
 ├── index.html
 ├── package.json
 ├── tsconfig.json
@@ -233,7 +275,10 @@ El frontend incluye:
   "react-router-dom": "^6.x",
   "axios": "^1.x",
   "i18next": "^23.x",
-  "react-i18next": "^13.x"
+  "react-i18next": "^13.x",
+  "recharts": "^2.x",
+  "leaflet": "^1.x",
+  "react-leaflet": "^4.x"
 }
 ```
 
@@ -274,19 +319,33 @@ server {
 
 ## 📱 Funcionalidades
 
-- ✅ Autenticación (registro/login)
-- ✅ Dashboard principal
+- ✅ Autenticación (registro/login/recuperar contraseña)
+- ✅ Dashboard principal con métricas y gráficos
 - ✅ Gestión de propiedades
   - Crear, editar, eliminar
-  - Carga de imágenes
-  - Filtros y búsqueda
+  - Carga de imágenes con lightbox
+  - Filtros avanzados y búsqueda
+  - Mapa de ubicación interactivo
+  - Comparador de propiedades
+  - Selector de ubicación con geocodificación
 - ✅ CRM de prospectos
   - Lista de leads
   - Detalle de prospecto
-  - Actividades y seguimiento
+  - Actividades y seguimiento en timeline
+  - Crear y eliminar actividades
+- ✅ Sistema de suscripciones
+  - Planes Free, Plus y Professional
+  - Integración con pasarela de pagos
+  - Gestión de cobros recurrentes
+  - Restricciones por plan
+  - Páginas de confirmación de pago
 - ✅ Calendario de citas
 - ✅ Gestión de documentos
+- ✅ Catálogo de propiedades
+- ✅ Matching de propiedades con prospectos
+- ✅ Reportes y análisis
 - ✅ Perfil de empresa
+- ✅ Gestión de usuarios
 - ✅ Configuración de usuario
 - ✅ Multi-idioma (ES/EN)
 

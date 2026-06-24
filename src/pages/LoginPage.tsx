@@ -1,5 +1,6 @@
 import { FormEvent, useState } from 'react';
 import { Link, Navigate, useNavigate } from 'react-router-dom';
+import toast from 'react-hot-toast';
 import { isAuthenticated, login } from '../shared/auth';
 
 export function LoginPage() {
@@ -7,20 +8,19 @@ export function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [saving, setSaving] = useState(false);
-  const [error, setError] = useState('');
 
   if (isAuthenticated()) return <Navigate to="/app" replace />;
 
   async function submit(event: FormEvent) {
     event.preventDefault();
     setSaving(true);
-    setError('');
 
     try {
       await login(email, password);
+      toast.success('Sesión iniciada correctamente');
       navigate('/app');
     } catch (requestError) {
-      setError(requestError instanceof Error ? requestError.message : 'No fue posible iniciar sesión.');
+      toast.error(requestError instanceof Error ? requestError.message : 'No fue posible iniciar sesión.');
     } finally {
       setSaving(false);
     }
@@ -79,7 +79,6 @@ export function LoginPage() {
                 value={password}
               />
             </div>
-            {error && <p className="rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-medium text-rose-700" role="alert">{error}</p>}
             <button
               className="w-full shrink-0 rounded-xl bg-indigo-600 px-3.5 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
               disabled={saving}

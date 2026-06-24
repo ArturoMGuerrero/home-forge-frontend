@@ -1,5 +1,6 @@
 import { FormEvent, useState } from 'react';
 import { Link } from 'react-router-dom';
+import toast from 'react-hot-toast';
 import { requestPasswordReset } from '../shared/auth';
 
 export function ForgotPasswordPage() {
@@ -8,21 +9,19 @@ export function ForgotPasswordPage() {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [saving, setSaving] = useState(false);
   const [success, setSuccess] = useState(false);
-  const [error, setError] = useState('');
 
   async function submit(event: FormEvent) {
     event.preventDefault();
     setSaving(true);
-    setError('');
 
     if (newPassword !== confirmPassword) {
-      setError('Las contraseñas no coinciden.');
+      toast.error('Las contraseñas no coinciden.');
       setSaving(false);
       return;
     }
 
     if (newPassword.length < 6) {
-      setError('La contraseña debe tener al menos 6 caracteres.');
+      toast.error('La contraseña debe tener al menos 6 caracteres.');
       setSaving(false);
       return;
     }
@@ -30,8 +29,9 @@ export function ForgotPasswordPage() {
     try {
       await requestPasswordReset(email, newPassword);
       setSuccess(true);
+      toast.success('Contraseña restablecida exitosamente');
     } catch (requestError) {
-      setError(requestError instanceof Error ? requestError.message : 'No fue posible restablecer la contraseña.');
+      toast.error(requestError instanceof Error ? requestError.message : 'No fue posible restablecer la contraseña.');
     } finally {
       setSaving(false);
     }
@@ -142,12 +142,6 @@ export function ForgotPasswordPage() {
                       </p>
                     )}
                   </div>
-                )}
-
-                {error && (
-                  <p className="rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-medium text-rose-700" role="alert">
-                    {error}
-                  </p>
                 )}
 
                 <button

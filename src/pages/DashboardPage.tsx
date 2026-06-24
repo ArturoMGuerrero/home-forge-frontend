@@ -1,15 +1,10 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Icon, IconName } from '../shared/Icon';
-import { buildDashboardMetrics } from '../shared/dashboardMetrics';
-import { LeadItem, LeadStatus, leadStatusLabels, listLeads } from '../shared/leads';
-import {
-  ApiProperty,
-  formatApiPrice,
-  listProperties,
-  propertyStatusClass,
-  propertyStatusLabel
-} from '../shared/propertyApi';
+import { getSession } from '../shared/auth';
+import { getDashboardMetrics, DashboardMetrics } from '../shared/dashboardApi';
+import { TrendAreaChart } from '../components/Charts';
+import { LeadItem, listLeads } from '../shared/leads';
 
 const money = new Intl.NumberFormat('es-MX', {
   style: 'currency',
@@ -17,142 +12,322 @@ const money = new Intl.NumberFormat('es-MX', {
   maximumFractionDigits: 0
 });
 
-const leadStages: LeadStatus[] = ['NEW', 'CONTACTED', 'QUALIFIED', 'TOUR_SCHEDULED', 'TOUR_COMPLETED', 'OFFER_MADE', 'UNDER_CONTRACT', 'CLOSED'];
-
 export function DashboardPage() {
-  const [properties, setProperties] = useState<ApiProperty[]>([]);
+  const [metrics, setMetrics] = useState<DashboardMetrics | null>(null);
   const [leads, setLeads] = useState<LeadItem[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
-  const metrics = useMemo(() => buildDashboardMetrics(properties, leads), [properties, leads]);
 
   useEffect(() => {
-    Promise.all([listProperties(), listLeads()])
-      .then(([propertyItems, leadItems]) => {
-        setProperties(propertyItems);
-        setLeads(leadItems);
+    const session = getSession();
+    if (!session?.companyId) {
+      setLoading(false);
+      return;
+    }
+
+    Promise.all([
+      getDashboardMetrics(session.companyId, '30d'),
+      listLeads()
+    ])
+      .then(([metricsData, leadsData]) => {
+        setMetrics(metricsData);
+        setLeads(leadsData);
       })
-      .catch(requestError => setError(requestError instanceof Error ? requestError.message : 'No fue posible cargar el dashboard.'))
+      .catch(err => console.error('Error cargando dashboard:', err))
       .finally(() => setLoading(false));
   }, []);
 
   if (loading) {
-    return <div className="rounded-3xl border border-slate-200 bg-white p-12 text-center text-sm text-slate-500 shadow-sm">Calculando indicadores del negocio...</div>;
+    return (
+      <div className="rounded-3xl border border-slate-200 bg-white p-12 text-center text-sm text-slate-500 shadow-sm">
+        Cargando tu panel...
+      </div>
+    );
   }
+
+  if (!metrics) {
+    return (
+      <div className="rounded-3xl border border-rose-200 bg-rose-50 p-12 text-center text-sm text-rose-700">
+        No se pudieron cargar las métricas
+      </div>
+    );
+  }
+
+  // Preparar datos para la gráfica (últimos 30 días)
+  const chartData = Object.values(metrics.dailyMetrics).map(day => ({
+    name: new Date(day.date).toLocaleDateString('es-MX', { month: 'short', day: 'numeric' }),
+    'Valor Vendido': Math.round(day.salesValue)
+  }));
+
+  // Seguimientos urgentes (vencidos hoy)
+  const now = new Date();
+  const urgentLeads = leads
+    .filter(l => l.nextFollowUpAt && new Date(l.nextFollowUpAt) <= now)
+    .slice(0, 5);
 
   return (
     <>
+      {/* Header */}
       <header className="mb-8 flex flex-wrap items-end justify-between gap-5">
         <div>
-          <p className="mb-1 text-[11px] font-bold uppercase tracking-[0.16em] text-indigo-600">Panel ejecutivo</p>
-          <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">Resumen de tu operación inmobiliaria</h1>
-          <p className="mt-2 text-sm text-slate-500">Información calculada en tiempo real con propiedades y prospectos registrados.</p>
+          <p className="mb-1 text-[11px] font-bold uppercase tracking-[0.16em] text-indigo-600">
+            Panel ejecutivo
+          </p>
+          <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">
+            ¡Bienvenido de vuelta! 👋
+          </h1>
+          <p className="mt-2 text-sm text-slate-500">
+            Resumen de tu operación • Últimos 30 días
+          </p>
         </div>
         <div className="flex flex-wrap gap-3">
-          <Link className="rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 hover:border-indigo-300 hover:bg-indigo-50" to="/app/prospectos">Ver prospectos</Link>
-          <Link className="rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-700" to="/app/propiedades/nueva">+ Nueva propiedad</Link>
+          <Link
+            className="rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 hover:border-indigo-300 hover:bg-indigo-50"
+            to="/app/reportes"
+          >
+            📊 Ver reportes
+          </Link>
+          <Link
+            className="rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-700"
+            to="/app/propiedades/nueva"
+          >
+            + Nueva propiedad
+          </Link>
         </div>
       </header>
 
-      {error && <p className="mb-5 rounded-xl bg-rose-50 p-4 text-sm font-medium text-rose-700">{error}</p>}
+      {/* 4 KPIs Principales */}
+      <section className="mb-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        <KpiCard
+          icon="currency"
+          iconColor="bg-indigo-600"
+          label="Valor vendido"
+          value={money.format(metrics.soldValue)}
+          sublabel={`${metrics.soldProperties} propiedades vendidas`}
+          trend={metrics.soldProperties > 0 ? 'up' : 'neutral'}
+        />
 
-      <section className="mb-5 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <MoneyCard color="indigo" icon="currency" label="Inventario en venta" note={`${metrics.activeSales} propiedades activas`} value={money.format(metrics.saleInventoryMxn)} />
-        <MoneyCard color="cyan" icon="finance" label="Valor vendido registrado" note={`${metrics.sold} propiedades vendidas`} value={money.format(metrics.soldValueMxn)} />
-        <MoneyCard color="violet" icon="properties" label="Renta mensual ofertada" note={`${metrics.activeRentals} propiedades activas`} value={money.format(metrics.monthlyRentInventoryMxn)} />
-        <MoneyCard color="emerald" icon="workflow" label="Renta mensual colocada" note={`${metrics.rented} propiedades rentadas`} value={money.format(metrics.rentedMonthlyValueMxn)} />
+        <KpiCard
+          icon="workflow"
+          iconColor="bg-cyan-600"
+          label="Leads activos"
+          value={metrics.openLeads.toString()}
+          sublabel={`${metrics.closedLeads} cerrados este mes`}
+          trend={metrics.openLeads > metrics.closedLeads ? 'up' : 'neutral'}
+        />
+
+        <KpiCard
+          icon="finance"
+          iconColor="bg-violet-600"
+          label="Tasa de cierre"
+          value={`${metrics.leadToClosedRate.toFixed(1)}%`}
+          sublabel={`${metrics.closedLeads} de ${metrics.totalLeads} leads`}
+          trend={metrics.leadToClosedRate > 20 ? 'up' : metrics.leadToClosedRate > 10 ? 'neutral' : 'down'}
+        />
+
+        <KpiCard
+          icon="alert"
+          iconColor={metrics.dueFollowUps > 0 ? 'bg-rose-600' : 'bg-emerald-600'}
+          label="Urgente hoy"
+          value={metrics.dueFollowUps.toString()}
+          sublabel={metrics.dueFollowUps > 0 ? 'seguimientos vencidos' : 'todo al día'}
+          trend={metrics.dueFollowUps > 0 ? 'down' : 'up'}
+        />
       </section>
 
-      {metrics.nonMxnProperties > 0 && (
-        <p className="mb-5 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
-          {metrics.nonMxnProperties} {metrics.nonMxnProperties === 1 ? 'propiedad usa' : 'propiedades usan'} otra moneda y no se incluyen en los totales MXN.
-        </p>
-      )}
-
-      <section className="mb-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
-        <CountCard label="En venta" tone="cyan" value={metrics.activeSales} />
-        <CountCard label="Vendidas" tone="emerald" value={metrics.sold} />
-        <CountCard label="En renta" tone="violet" value={metrics.activeRentals} />
-        <CountCard label="Rentadas" tone="indigo" value={metrics.rented} />
-        <CountCard label="No disponibles" tone="slate" value={metrics.unavailable} />
-        <CountCard label="Publicadas" tone="amber" value={metrics.published} />
-      </section>
-
-      <div className="mb-5 grid gap-5 xl:grid-cols-[1.15fr_.85fr]">
-        <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
-          <div className="mb-6 flex items-start justify-between gap-4">
-            <div><p className="text-[11px] font-bold uppercase tracking-[0.16em] text-indigo-600">CRM</p><h2 className="mt-1 text-xl font-bold">Embudo de prospectos</h2></div>
-            <span className="rounded-full bg-indigo-50 px-3 py-1 text-sm font-bold text-indigo-700">{metrics.leadCount} totales</span>
+      {/* Gráfica de Tendencia */}
+      <section className="mb-6 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+        <div className="mb-4 flex items-start justify-between">
+          <div>
+            <h2 className="text-lg font-bold">Tendencia de Ventas</h2>
+            <p className="text-sm text-slate-500">Valor vendido en los últimos 30 días</p>
           </div>
-          <div className="space-y-4">
-            {leadStages.map(status => {
-              const count = metrics.leadStatusCounts[status] ?? 0;
-              const percentage = metrics.leadCount ? Math.max((count / metrics.leadCount) * 100, count ? 4 : 0) : 0;
-              return (
-                <div key={status}>
-                  <div className="mb-1.5 flex justify-between text-sm"><span className="font-medium text-slate-600">{leadStatusLabels[status]}</span><strong>{count}</strong></div>
-                  <div className="h-2.5 overflow-hidden rounded-full bg-slate-100"><div className="h-full rounded-full bg-gradient-to-r from-indigo-500 to-cyan-400" style={{ width: `${percentage}%` }} /></div>
+          <Link
+            className="text-sm font-semibold text-indigo-600 hover:text-indigo-700"
+            to="/app/reportes"
+          >
+            Ver más →
+          </Link>
+        </div>
+        <TrendAreaChart
+          data={chartData}
+          areas={[
+            { key: 'Valor Vendido', name: 'Valor Vendido (MXN)', color: '#10b981' }
+          ]}
+          height={200}
+        />
+      </section>
+
+      {/* Seguimientos Urgentes */}
+      {metrics.dueFollowUps > 0 && (
+        <section className="mb-6 rounded-2xl border border-rose-200 bg-gradient-to-br from-rose-50 to-orange-50 p-6 shadow-sm">
+          <div className="mb-4 flex items-center gap-3">
+            <span className="grid size-10 place-items-center rounded-xl bg-rose-600 text-white">
+              <Icon className="size-5" name="alert" />
+            </span>
+            <div>
+              <h2 className="text-lg font-bold text-rose-900">
+                ⚠️ {metrics.dueFollowUps} seguimiento{metrics.dueFollowUps > 1 ? 's' : ''} vencido{metrics.dueFollowUps > 1 ? 's' : ''}
+              </h2>
+              <p className="text-sm text-rose-700">Requieren tu atención inmediata</p>
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            {urgentLeads.map(lead => (
+              <Link
+                key={lead.id}
+                to={`/app/prospectos/${lead.id}`}
+                className="flex items-center justify-between gap-3 rounded-xl border border-rose-200 bg-white px-4 py-3 hover:border-rose-300 hover:bg-rose-50"
+              >
+                <div className="flex items-center gap-3">
+                  <span className="grid size-10 place-items-center rounded-full bg-rose-100 text-xs font-bold text-rose-700">
+                    {lead.firstName[0]}{lead.lastName[0]}
+                  </span>
+                  <div className="min-w-0">
+                    <strong className="block truncate text-sm text-rose-900">
+                      {lead.firstName} {lead.lastName}
+                    </strong>
+                    <span className="text-xs text-rose-600">
+                      {lead.nextFollowUpAt
+                        ? `Vencido hace ${Math.floor((now.getTime() - new Date(lead.nextFollowUpAt).getTime()) / (1000 * 60 * 60 * 24))} días`
+                        : 'Sin fecha'
+                      }
+                    </span>
+                  </div>
                 </div>
-              );
-            })}
-          </div>
-          <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
-            <MiniMetric label="Activos" value={metrics.openLeads} />
-            <MiniMetric label="Prioridad alta" value={metrics.highPriorityLeads} />
-            <MiniMetric label="Cerrados" value={metrics.closedLeads} />
-            <MiniMetric label="Perdidos" value={metrics.lostLeads} />
-          </div>
-        </section>
-
-        <section className="rounded-2xl border border-slate-200 bg-slate-950 p-5 text-white shadow-sm sm:p-6">
-          <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-cyan-300">Seguimiento</p>
-          <h2 className="mt-1 text-xl font-bold">Agenda comercial</h2>
-          <div className="mt-5 rounded-2xl bg-rose-500/15 p-4">
-            <span className="text-sm text-rose-100">Seguimientos vencidos</span>
-            <strong className="mt-1 block text-4xl">{metrics.dueFollowUps.length}</strong>
-          </div>
-          <div className="mt-5 space-y-3">
-            {metrics.upcomingFollowUps.slice(0, 4).map(lead => (
-              <Link className="flex items-center justify-between gap-3 rounded-xl border border-slate-800 bg-slate-900 px-4 py-3 hover:border-indigo-400" key={lead.id} to={`/app/prospectos/${lead.id}`}>
-                <div className="min-w-0"><strong className="block truncate text-sm">{lead.firstName} {lead.lastName}</strong><span className="text-xs text-slate-400">{new Date(lead.nextFollowUpAt!).toLocaleString('es-MX')}</span></div>
-                <Icon className="size-4 shrink-0 text-cyan-300" name="arrow" />
+                <Icon className="size-4 shrink-0 text-rose-600" name="arrow" />
               </Link>
             ))}
-            {metrics.upcomingFollowUps.length === 0 && <p className="rounded-xl border border-dashed border-slate-700 p-5 text-center text-sm text-slate-400">No hay seguimientos próximos programados.</p>}
+          </div>
+
+          <Link
+            to="/app/prospectos"
+            className="mt-4 block rounded-xl bg-rose-600 px-4 py-2.5 text-center text-sm font-semibold text-white hover:bg-rose-700"
+          >
+            Ver todos los seguimientos
+          </Link>
+        </section>
+      )}
+
+      {/* Todo al día - Mensaje positivo */}
+      {metrics.dueFollowUps === 0 && (
+        <section className="mb-6 rounded-2xl border border-emerald-200 bg-gradient-to-br from-emerald-50 to-cyan-50 p-6 text-center shadow-sm">
+          <div className="mx-auto mb-3 grid size-16 place-items-center rounded-full bg-emerald-600 text-white">
+            <Icon className="size-8" name="workflow" />
+          </div>
+          <h2 className="text-xl font-bold text-emerald-900">¡Todo al día! 🎉</h2>
+          <p className="mt-2 text-sm text-emerald-700">
+            No tienes seguimientos vencidos. Excelente trabajo manteniendo tu pipeline organizado.
+          </p>
+          <div className="mt-4 flex justify-center gap-3">
+            <Link
+              to="/app/prospectos"
+              className="rounded-xl border border-emerald-600 bg-white px-4 py-2 text-sm font-semibold text-emerald-700 hover:bg-emerald-50"
+            >
+              Ver leads
+            </Link>
+            <Link
+              to="/app/agenda"
+              className="rounded-xl bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700"
+            >
+              Ver agenda
+            </Link>
           </div>
         </section>
-      </div>
+      )}
 
-      <div className="grid gap-5 xl:grid-cols-2">
-        <RecentProperties properties={properties.slice(0, 5)} />
-        <RecentLeads leads={leads.slice(0, 5)} />
-      </div>
+      {/* Accesos Rápidos */}
+      <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <QuickAccessCard
+          icon="properties"
+          title="Propiedades"
+          description={`${metrics.activeSales} en venta • ${metrics.activeRentals} en renta`}
+          link="/app/propiedades"
+          color="indigo"
+        />
+
+        <QuickAccessCard
+          icon="workflow"
+          title="CRM de Leads"
+          description={`${metrics.openLeads} activos • ${metrics.highPriorityLeads} prioridad alta`}
+          link="/app/prospectos"
+          color="cyan"
+        />
+
+        <QuickAccessCard
+          icon="calendar"
+          title="Agenda"
+          description={`${metrics.upcomingFollowUps} próximos seguimientos`}
+          link="/app/agenda"
+          color="violet"
+        />
+      </section>
     </>
   );
 }
 
-function MoneyCard({ color, icon, label, note, value }: { color: string; icon: IconName; label: string; note: string; value: string }) {
-  const tones: Record<string, string> = { indigo: 'bg-indigo-600', cyan: 'bg-cyan-600', violet: 'bg-violet-600', emerald: 'bg-emerald-600' };
-  return <article className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm"><span className={`mb-4 grid size-10 place-items-center rounded-xl text-white ${tones[color]}`}><Icon className="size-5" name={icon} /></span><span className="text-sm text-slate-500">{label}</span><strong className="mt-1 block text-2xl font-bold tracking-tight">{value}</strong><small className="mt-2 block text-xs font-medium text-slate-500">{note}</small></article>;
+// Componente KPI Card
+type KpiCardProps = {
+  icon: IconName;
+  iconColor: string;
+  label: string;
+  value: string;
+  sublabel: string;
+  trend: 'up' | 'down' | 'neutral';
+};
+
+function KpiCard({ icon, iconColor, label, value, sublabel, trend }: KpiCardProps) {
+  const trendColors = {
+    up: 'text-emerald-600',
+    down: 'text-rose-600',
+    neutral: 'text-slate-500'
+  };
+
+  const trendIcons = {
+    up: '↗',
+    down: '↘',
+    neutral: '→'
+  };
+
+  return (
+    <article className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm hover:shadow-md transition-shadow">
+      <div className="mb-4 flex items-center justify-between">
+        <span className={`grid size-10 place-items-center rounded-xl text-white ${iconColor}`}>
+          <Icon className="size-5" name={icon} />
+        </span>
+        <span className={`text-2xl ${trendColors[trend]}`}>{trendIcons[trend]}</span>
+      </div>
+      <span className="text-sm text-slate-500">{label}</span>
+      <strong className="mt-1 block text-2xl font-bold tracking-tight">{value}</strong>
+      <small className="mt-2 block text-xs font-medium text-slate-500">{sublabel}</small>
+    </article>
+  );
 }
 
-function CountCard({ label, tone, value }: { label: string; tone: string; value: number }) {
-  const tones: Record<string, string> = { cyan: 'border-cyan-200 bg-cyan-50 text-cyan-800', emerald: 'border-emerald-200 bg-emerald-50 text-emerald-800', violet: 'border-violet-200 bg-violet-50 text-violet-800', indigo: 'border-indigo-200 bg-indigo-50 text-indigo-800', slate: 'border-slate-200 bg-white text-slate-700', amber: 'border-amber-200 bg-amber-50 text-amber-800' };
-  return <article className={`rounded-2xl border p-4 shadow-sm ${tones[tone]}`}><strong className="block text-3xl">{value}</strong><span className="text-xs font-bold uppercase tracking-wide">{label}</span></article>;
-}
+// Componente Quick Access Card
+type QuickAccessCardProps = {
+  icon: IconName;
+  title: string;
+  description: string;
+  link: string;
+  color: 'indigo' | 'cyan' | 'violet';
+};
 
-function MiniMetric({ label, value }: { label: string; value: number }) {
-  return <div className="rounded-xl bg-slate-50 p-3 text-center"><strong className="block text-xl">{value}</strong><span className="text-[11px] text-slate-500">{label}</span></div>;
-}
+function QuickAccessCard({ icon, title, description, link, color }: QuickAccessCardProps) {
+  const colors = {
+    indigo: 'border-indigo-200 bg-indigo-50 text-indigo-600 hover:bg-indigo-100',
+    cyan: 'border-cyan-200 bg-cyan-50 text-cyan-600 hover:bg-cyan-100',
+    violet: 'border-violet-200 bg-violet-50 text-violet-600 hover:bg-violet-100'
+  };
 
-function RecentProperties({ properties }: { properties: ApiProperty[] }) {
-  return <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6"><div className="mb-4 flex items-center justify-between"><h2 className="text-xl font-bold">Propiedades recientes</h2><Link className="text-sm font-semibold text-indigo-600" to="/app/propiedades">Ver todas</Link></div>{properties.map(property => <Link className="flex items-center gap-3 border-t border-slate-100 py-4 first:border-0 hover:bg-slate-50" key={property.id} to={`/app/propiedades/${property.id}/editar`}><span className="grid size-10 place-items-center rounded-xl bg-indigo-50"><Icon className="size-5 text-indigo-600" name="properties" /></span><div className="min-w-0 flex-1"><strong className="block truncate text-sm">{property.title}</strong><span className="text-xs text-slate-500">{formatApiPrice(property)}</span></div><span className={`rounded-full px-2.5 py-1 text-[10px] font-bold ${propertyStatusClass(property.status)}`}>{propertyStatusLabel(property.status)}</span></Link>)}{properties.length === 0 && <EmptyState text="No hay propiedades registradas." />}</section>;
-}
-
-function RecentLeads({ leads }: { leads: LeadItem[] }) {
-  return <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6"><div className="mb-4 flex items-center justify-between"><h2 className="text-xl font-bold">Prospectos recientes</h2><Link className="text-sm font-semibold text-indigo-600" to="/app/prospectos">Ver todos</Link></div>{leads.map(lead => <Link className="flex items-center gap-3 border-t border-slate-100 py-4 first:border-0 hover:bg-slate-50" key={lead.id} to={`/app/prospectos/${lead.id}`}><span className="grid size-10 place-items-center rounded-full bg-cyan-50 text-xs font-bold text-cyan-700">{lead.firstName[0]}{lead.lastName[0]}</span><div className="min-w-0 flex-1"><strong className="block truncate text-sm">{lead.firstName} {lead.lastName}</strong><span className="text-xs text-slate-500">{lead.city || lead.email || 'Sin ubicación'}</span></div><span className="rounded-full bg-slate-100 px-2.5 py-1 text-[10px] font-bold text-slate-700">{leadStatusLabels[lead.status]}</span></Link>)}{leads.length === 0 && <EmptyState text="No hay prospectos registrados." />}</section>;
-}
-
-function EmptyState({ text }: { text: string }) {
-  return <p className="rounded-xl border border-dashed border-slate-200 p-6 text-center text-sm text-slate-500">{text}</p>;
+  return (
+    <Link
+      to={link}
+      className={`rounded-2xl border p-5 shadow-sm transition-all hover:shadow-md ${colors[color]}`}
+    >
+      <Icon className="mb-3 size-8" name={icon} />
+      <h3 className="font-bold">{title}</h3>
+      <p className="mt-1 text-sm opacity-80">{description}</p>
+    </Link>
+  );
 }

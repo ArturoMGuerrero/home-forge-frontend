@@ -1,5 +1,6 @@
 import './shared/i18n/i18n';
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
+import { Toaster } from 'react-hot-toast';
 import { PrivateLayout } from './layout/PrivateLayout';
 import { DashboardPage } from './pages/DashboardPage';
 import { LeadsPage } from './pages/LeadsPage';
@@ -22,6 +23,9 @@ import { MatchesPage } from './pages/MatchesPage';
 import { DocumentsPage } from './pages/DocumentsPage';
 import { ReportsPage } from './pages/ReportsPage';
 import { ForgotPasswordPage } from './pages/ForgotPasswordPage';
+import { PaymentSuccessPage } from './pages/PaymentSuccessPage';
+import { PaymentFailurePage } from './pages/PaymentFailurePage';
+import { PaymentPendingPage } from './pages/PaymentPendingPage';
 
 function ProtectedApp() {
   return isAuthenticated() ? <PrivateLayout /> : <Navigate to="/login" replace />;
@@ -30,6 +34,30 @@ function ProtectedApp() {
 export default function App() {
   return (
     <BrowserRouter>
+      <Toaster
+        position="top-right"
+        toastOptions={{
+          duration: 4000,
+          style: {
+            background: '#363636',
+            color: '#fff',
+          },
+          success: {
+            duration: 3000,
+            iconTheme: {
+              primary: '#10b981',
+              secondary: '#fff',
+            },
+          },
+          error: {
+            duration: 5000,
+            iconTheme: {
+              primary: '#ef4444',
+              secondary: '#fff',
+            },
+          },
+        }}
+      />
       <Routes>
         <Route path="/" element={<Navigate to="/propiedades" replace />} />
         <Route path="/login" element={<LoginPage />} />

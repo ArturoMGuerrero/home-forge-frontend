@@ -1,5 +1,5 @@
 import { getSession } from './auth';
-import { getJson, postJson, putJson } from './services/api';
+import { deleteJson, deleteVoid, getJson, postJson, putJson } from './services/api';
 
 const STORAGE_KEY = 'casaflow_leads';
 
@@ -65,7 +65,6 @@ export function updateLead(leadId: string, lead: LeadPayload): Promise<LeadItem>
 }
 
 export function deleteLead(leadId: string): Promise<void> {
-  const { deleteJson } = require('./services/api');
   return deleteJson(`/leads/${leadId}?companyId=${getCompanyId()}`);
 }
 
@@ -81,7 +80,6 @@ export function addLeadActivity(
 }
 
 export function deleteLeadActivity(leadId: string, activityId: string): Promise<void> {
-  const { deleteVoid } = require('./services/api');
   return deleteVoid(`/leads/${leadId}/activities/${activityId}?companyId=${getCompanyId()}`);
 }
 

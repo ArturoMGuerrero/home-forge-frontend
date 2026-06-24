@@ -1,19 +1,21 @@
 import { FormEvent, useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useOutletContext } from 'react-router-dom';
+import toast from 'react-hot-toast';
 import { getSession } from '../shared/auth';
 import { CompanyUser, createCompanyUser, listCompanyUsers, UserListResponse } from '../shared/usersApi';
+import { SubscriptionRestrictions } from '../shared/subscriptionRestrictions';
 
 const inputClass = 'w-full rounded-xl border border-slate-200 bg-white px-3.5 py-3 text-sm font-normal text-slate-900 outline-none transition focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100';
 const labelClass = 'grid gap-2 text-sm font-semibold text-slate-700';
 
 export function UsersPage() {
   const session = getSession();
+  const context = useOutletContext<{ restrictions: SubscriptionRestrictions }>();
+  const restrictions = context?.restrictions || { canCreate: true, canEdit: true, canExport: true, canUploadMultiple: true, canInviteUsers: true, level: 'NONE' };
   const [data, setData] = useState<UserListResponse | null>(null);
   const [form, setForm] = useState({ fullName: '', email: '', phoneE164: '', role: 'AGENT' as 'ADMIN' | 'AGENT', password: '' });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
 
   useEffect(() => {
     load();
@@ -22,15 +24,20 @@ export function UsersPage() {
   function load() {
     listCompanyUsers()
       .then(setData)
-      .catch(requestError => setError(requestError instanceof Error ? requestError.message : 'No fue posible cargar los usuarios.'))
+      .catch(requestError => toast.error(requestError instanceof Error ? requestError.message : 'No fue posible cargar los usuarios.'))
       .finally(() => setLoading(false));
   }
 
   async function submit(event: FormEvent) {
     event.preventDefault();
+
+    // Check invite users permission
+    if (!restrictions.canInviteUsers) {
+      toast.error('Tu plan no permite invitar nuevos usuarios. Actualiza tu suscripción para continuar.');
+      return;
+    }
+
     setSaving(true);
-    setError('');
-    setSuccess('');
     try {
       const created = await createCompanyUser({
         ...form,
@@ -38,9 +45,9 @@ export function UsersPage() {
       });
       setData(current => current ? { ...current, usedSeats: current.usedSeats + 1, users: [...current.users, created] } : current);
       setForm({ fullName: '', email: '', phoneE164: '', role: 'AGENT', password: '' });
-      setSuccess('Usuario creado. Ya puede iniciar sesión con su correo y contraseña.');
+      toast.success('Usuario creado. Ya puede iniciar sesión con su correo y contraseña.');
     } catch (requestError) {
-      setError(requestError instanceof Error ? requestError.message : 'No fue posible crear el usuario.');
+      toast.error(requestError instanceof Error ? requestError.message : 'No fue posible crear el usuario.');
     } finally {
       setSaving(false);
     }
@@ -51,9 +58,10 @@ export function UsersPage() {
   }
 
   if (loading) return <p className="rounded-2xl border border-slate-200 bg-white p-8 text-center text-sm text-slate-500">Cargando usuarios...</p>;
-  if (!data) return <RestrictedCard message={error || 'No fue posible consultar los usuarios.'} />;
+  if (!data) return <RestrictedCard message="No fue posible consultar los usuarios." />;
 
   const limitReached = data.usedSeats >= data.userLimit;
+  const canInvite = restrictions.canInviteUsers && !limitReached;
 
   return (
     <>
@@ -76,7 +84,14 @@ export function UsersPage() {
         </section>
 
         <aside>
-          {limitReached ? (
+          {!restrictions.canInviteUsers ? (
+            <section className="rounded-2xl border border-rose-200 bg-rose-50 p-6">
+              <span className="text-xs font-bold uppercase tracking-wider text-rose-600">Función bloqueada</span>
+              <h2 className="mt-2 text-xl font-bold text-rose-950">No puedes invitar usuarios</h2>
+              <p className="mt-3 text-sm leading-6 text-rose-800">Tu plan actual no permite invitar nuevos usuarios. Actualiza tu suscripción para continuar.</p>
+              <Link className="mt-5 inline-flex rounded-xl bg-rose-900 px-4 py-3 text-sm font-bold text-white" to="/app/planes">Actualizar plan</Link>
+            </section>
+          ) : limitReached ? (
             <section className="rounded-2xl border border-amber-200 bg-amber-50 p-6">
               <span className="text-xs font-bold uppercase tracking-wider text-amber-600">Límite alcanzado</span>
               <h2 className="mt-2 text-xl font-bold text-amber-950">Tu plan permite {data.userLimit} usuarios</h2>
@@ -93,12 +108,10 @@ export function UsersPage() {
                 <label className={labelClass}>Teléfono<input className={inputClass} onChange={event => setForm({ ...form, phoneE164: event.target.value })} pattern="^\+[1-9][0-9]{1,14}$" placeholder="+524421234567" value={form.phoneE164} /></label>
                 <label className={labelClass}>Rol<select className={inputClass} onChange={event => setForm({ ...form, role: event.target.value as 'ADMIN' | 'AGENT' })} value={form.role}><option value="AGENT">Asesor</option><option value="ADMIN">Administrador</option></select></label>
                 <label className={labelClass}>Contraseña temporal<input className={inputClass} minLength={8} onChange={event => setForm({ ...form, password: event.target.value })} required type="password" value={form.password} /></label>
-                <button className="rounded-xl bg-indigo-600 px-4 py-3 text-sm font-bold text-white disabled:opacity-60" disabled={saving} type="submit">{saving ? 'Creando...' : 'Crear usuario'}</button>
+                <button className="rounded-xl bg-indigo-600 px-4 py-3 text-sm font-bold text-white disabled:opacity-60 disabled:cursor-not-allowed" disabled={saving || !restrictions.canInviteUsers} type="submit">{saving ? 'Creando...' : !restrictions.canInviteUsers ? '🔒 Crear usuario' : 'Crear usuario'}</button>
               </div>
             </form>
           )}
-          {success && <p className="mt-4 rounded-xl bg-emerald-50 p-4 text-sm font-medium text-emerald-700">{success}</p>}
-          {error && <p className="mt-4 rounded-xl bg-rose-50 p-4 text-sm font-medium text-rose-700">{error}</p>}
         </aside>
       </div>
     </>

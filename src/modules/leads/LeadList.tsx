@@ -1,10 +1,13 @@
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Link } from 'react-router-dom';
+import { Link, useOutletContext } from 'react-router-dom';
+import toast from 'react-hot-toast';
 import { LeadItem, leadStatusLabels, listLeads } from '../../shared/leads';
 import { CreateLeadModal } from './CreateLeadModal';
 import { ExportButton } from '../../shared/ExportButton';
 import { exportToExcel, formatCurrency, formatDate } from '../../shared/excelExport';
+import { UpgradeModal } from '../../shared/UpgradeModal';
+import { SubscriptionRestrictions } from '../../shared/subscriptionRestrictions';
 
 const statusClass: Record<string, string> = {
   QUALIFIED: 'bg-violet-100 text-violet-800',
@@ -55,18 +58,19 @@ type Props = { expanded?: boolean };
 
 export function LeadList({ expanded = false }: Props) {
   const { t } = useTranslation();
+  const context = useOutletContext<{ restrictions: SubscriptionRestrictions }>();
+  const restrictions = context?.restrictions || { canCreate: true, canExport: true, level: 'NONE' };
   const [leads, setLeads] = useState<LeadItem[]>([]);
-  const [error, setError] = useState('');
   const [modalOpen, setModalOpen] = useState(false);
+  const [upgradeModalOpen, setUpgradeModalOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<LeadItem['status'] | 'ALL'>('ALL');
   const [priorityFilter, setPriorityFilter] = useState<LeadItem['priority'] | 'ALL'>('ALL');
 
   function load() {
-    setError('');
     listLeads()
       .then(setLeads)
-      .catch(() => setError('No fue posible consultar los prospectos. Verifica que el backend esté activo.'));
+      .catch(() => toast.error('No fue posible consultar los prospectos. Verifica que el backend esté activo.'));
   }
 
   useEffect(() => {
@@ -94,7 +98,19 @@ export function LeadList({ expanded = false }: Props) {
     return true;
   });
 
+  function handleCreateLead() {
+    if (!restrictions.canCreate) {
+      setUpgradeModalOpen(true);
+      return;
+    }
+    setModalOpen(true);
+  }
+
   function handleExport() {
+    if (!restrictions.canExport) {
+      setUpgradeModalOpen(true);
+      return;
+    }
     exportToExcel(
       filteredLeads,
       [
@@ -119,11 +135,19 @@ export function LeadList({ expanded = false }: Props) {
         <div><p className="mb-1 text-[11px] font-bold uppercase tracking-[0.16em] text-indigo-600">{t('crm')}</p><h2 className="text-xl font-bold">{expanded ? 'Todos los prospectos' : t('recentLeads')}</h2></div>
         <div className="flex gap-3">
           {expanded && <ExportButton onExport={handleExport} variant="secondary" />}
-          <button className="shrink-0 rounded-xl bg-indigo-600 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2" onClick={() => setModalOpen(true)} type="button">+ {t('newLead')}</button>
+          <button
+            className={`shrink-0 rounded-xl px-3.5 py-2.5 text-sm font-semibold shadow-sm transition focus:outline-none focus:ring-2 focus:ring-offset-2 ${
+              restrictions.canCreate
+                ? 'bg-indigo-600 text-white hover:bg-indigo-700 focus:ring-indigo-500'
+                : 'bg-slate-200 text-slate-500 cursor-not-allowed'
+            }`}
+            onClick={handleCreateLead}
+            type="button"
+          >
+            {restrictions.canCreate ? `+ ${t('newLead')}` : `🔒 ${t('newLead')}`}
+          </button>
         </div>
       </div>
-
-      {error && <p className="mb-3 rounded-xl bg-rose-50 px-3 py-2 text-xs font-medium text-rose-700">{error}</p>}
 
       {expanded && (
         <div className="mb-5 space-y-4">
@@ -354,6 +378,12 @@ export function LeadList({ expanded = false }: Props) {
         })}
       </div>
       <CreateLeadModal open={modalOpen} onClose={() => setModalOpen(false)} onCreated={created => setLeads(current => [created, ...current])} />
+      <UpgradeModal
+        feature="crear nuevos prospectos"
+        isOpen={upgradeModalOpen}
+        level={restrictions.level === 'BLOCKED' ? 'BLOCKED' : 'LIMITED'}
+        onClose={() => setUpgradeModalOpen(false)}
+      />
     </section>
   );
 }

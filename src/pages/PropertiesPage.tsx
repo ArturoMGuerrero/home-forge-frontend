@@ -1,23 +1,28 @@
 import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useOutletContext } from 'react-router-dom';
+import toast from 'react-hot-toast';
 import { ApiProperty, formatApiPrice, listingLabel, listProperties, propertyImages, propertyStatusClass, propertyStatusLabel } from '../shared/propertyApi';
 import { ExportButton } from '../shared/ExportButton';
 import { exportToExcel, formatCurrency } from '../shared/excelExport';
+import { UpgradeModal } from '../shared/UpgradeModal';
+import { SubscriptionRestrictions } from '../shared/subscriptionRestrictions';
 
 export function PropertiesPage() {
+  const context = useOutletContext<{ restrictions: SubscriptionRestrictions }>();
+  const restrictions = context?.restrictions || { canCreate: true, canExport: true, level: 'NONE' };
   const [properties, setProperties] = useState<ApiProperty[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('ALL');
   const [listingTypeFilter, setListingTypeFilter] = useState<string>('ALL');
   const [propertyTypeFilter, setPropertyTypeFilter] = useState<string>('ALL');
   const [sortBy, setSortBy] = useState<'recent' | 'price-asc' | 'price-desc' | 'alpha'>('recent');
+  const [upgradeModalOpen, setUpgradeModalOpen] = useState(false);
 
   useEffect(() => {
     listProperties()
       .then(setProperties)
-      .catch(() => setError('No fue posible consultar las propiedades. Verifica que el backend esté activo.'))
+      .catch(() => toast.error('No fue posible consultar las propiedades. Verifica que el backend esté activo.'))
       .finally(() => setLoading(false));
   }, []);
 
@@ -57,6 +62,10 @@ export function PropertiesPage() {
   });
 
   function handleExport() {
+    if (!restrictions.canExport) {
+      setUpgradeModalOpen(true);
+      return;
+    }
     exportToExcel(
       filteredProperties,
       [
@@ -82,6 +91,12 @@ export function PropertiesPage() {
     );
   }
 
+  function handleCreateProperty() {
+    if (!restrictions.canCreate) {
+      setUpgradeModalOpen(true);
+    }
+  }
+
   return (
     <>
       <header className="mb-8 flex flex-wrap items-end justify-between gap-4">
@@ -92,14 +107,25 @@ export function PropertiesPage() {
         </div>
         <div className="flex gap-3">
           <ExportButton onExport={handleExport} variant="secondary" />
-          <Link className="shrink-0 rounded-xl bg-indigo-600 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-indigo-700" to="/app/propiedades/nueva">+ Agregar propiedad</Link>
+          {restrictions.canCreate ? (
+            <Link className="shrink-0 rounded-xl bg-indigo-600 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-indigo-700" to="/app/propiedades/nueva">
+              + Agregar propiedad
+            </Link>
+          ) : (
+            <button
+              className="shrink-0 rounded-xl bg-slate-200 px-3.5 py-2.5 text-sm font-semibold text-slate-500 cursor-not-allowed"
+              onClick={handleCreateProperty}
+              type="button"
+            >
+              🔒 Agregar propiedad
+            </button>
+          )}
         </div>
       </header>
 
       {loading && <p className="rounded-2xl border border-slate-200 bg-white p-8 text-center text-sm text-slate-500">Consultando propiedades...</p>}
-      {error && <p className="rounded-xl bg-rose-50 p-4 text-sm font-medium text-rose-700">{error}</p>}
 
-      {!loading && !error && (
+      {!loading && (
         <>
           {/* Búsqueda y Filtros */}
           <div className="mb-6 space-y-4 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
@@ -269,6 +295,12 @@ export function PropertiesPage() {
           </article>
         ))}
       </div>
+      <UpgradeModal
+        feature="crear nuevas propiedades"
+        isOpen={upgradeModalOpen}
+        level={restrictions.level === 'BLOCKED' ? 'BLOCKED' : 'LIMITED'}
+        onClose={() => setUpgradeModalOpen(false)}
+      />
     </>
   );
 }

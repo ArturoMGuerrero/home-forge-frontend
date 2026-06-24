@@ -1,4 +1,5 @@
 import { FormEvent, useEffect, useRef, useState } from 'react';
+import toast from 'react-hot-toast';
 import { getCompanyId, LeadItem } from '../../shared/leads';
 import { MoneyInput } from '../../shared/MoneyInput';
 import { postJson } from '../../shared/services/api';
@@ -12,7 +13,6 @@ type Props = {
 export function CreateLeadModal({ open, onClose, onCreated }: Props) {
   const dialogRef = useRef<HTMLDialogElement>(null);
   const [saving, setSaving] = useState(false);
-  const [error, setError] = useState('');
   const [form, setForm] = useState({ firstName: '', lastName: '', email: '', phoneE164: '', listingType: 'SALE', budgetMax: '', currencyCode: 'MXN', city: '' });
 
   useEffect(() => {
@@ -23,14 +23,12 @@ export function CreateLeadModal({ open, onClose, onCreated }: Props) {
   }, [open]);
 
   function close() {
-    setError('');
     onClose();
   }
 
   async function submit(event: FormEvent) {
     event.preventDefault();
     setSaving(true);
-    setError('');
     const payload = {
       companyId: getCompanyId(),
       ...form,
@@ -41,9 +39,10 @@ export function CreateLeadModal({ open, onClose, onCreated }: Props) {
       const created = await postJson<LeadItem>('/leads', payload);
       onCreated(created);
       setForm({ firstName: '', lastName: '', email: '', phoneE164: '', listingType: 'SALE', budgetMax: '', currencyCode: 'MXN', city: '' });
+      toast.success('Prospecto creado correctamente');
       close();
     } catch (requestError) {
-      setError(requestError instanceof Error ? requestError.message : 'No fue posible guardar el prospecto.');
+      toast.error(requestError instanceof Error ? requestError.message : 'No fue posible guardar el prospecto.');
     } finally {
       setSaving(false);
     }
@@ -76,7 +75,6 @@ export function CreateLeadModal({ open, onClose, onCreated }: Props) {
             </select>
           </label>
         </div>
-        {error && <p className="mt-4 rounded-xl bg-rose-50 p-3 text-sm text-rose-700">{error}</p>}
         <div className="mt-7 flex justify-end gap-3">
           <button className="shrink-0 rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm font-semibold text-slate-700 transition hover:border-cyan-300 hover:bg-cyan-50 focus:outline-none focus:ring-2 focus:ring-cyan-500" onClick={close} type="button">Cancelar</button>
           <button className="shrink-0 rounded-xl bg-indigo-600 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60" disabled={saving} type="submit">{saving ? 'Guardando...' : 'Guardar prospecto'}</button>

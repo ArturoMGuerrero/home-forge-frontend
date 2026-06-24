@@ -1,10 +1,14 @@
 import { DragEvent, FormEvent, useEffect, useRef, useState } from 'react';
+import { useOutletContext } from 'react-router-dom';
+import toast from 'react-hot-toast';
 import { LeadItem } from '../shared/leads';
 import { ApiProperty } from '../shared/propertyApi';
 import { deleteDocument, documentDownloadUrl, listDocuments, loadOperationsContext, StoredDocument, uploadDocument } from '../shared/operationsApi';
 import { DocumentPreviewModal } from '../components/DocumentPreviewModal';
 import { ExportButton } from '../shared/ExportButton';
 import { exportToExcel, formatDate } from '../shared/excelExport';
+import { UpgradeModal } from '../shared/UpgradeModal';
+import { SubscriptionRestrictions } from '../shared/subscriptionRestrictions';
 
 function sizeLabel(size?: number) {
   if (!size) return '-';
@@ -12,22 +16,24 @@ function sizeLabel(size?: number) {
 }
 
 export function DocumentsPage() {
+  const context = useOutletContext<{ restrictions: SubscriptionRestrictions }>();
+  const restrictions = context?.restrictions || { canCreate: true, canExport: true, level: 'NONE' };
   const [documents, setDocuments] = useState<StoredDocument[]>([]);
   const [leads, setLeads] = useState<LeadItem[]>([]);
   const [properties, setProperties] = useState<ApiProperty[]>([]);
   const [file, setFile] = useState<File>();
   const [form, setForm] = useState({ leadId: '', propertyId: '', documentType: 'IDENTIFICATION', status: 'PENDING', notes: '' });
-  const [error, setError] = useState('');
   const [saving, setSaving] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
   const [previewDocument, setPreviewDocument] = useState<StoredDocument>();
+  const [upgradeModalOpen, setUpgradeModalOpen] = useState(false);
   const formRef = useRef<HTMLFormElement>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [typeFilter, setTypeFilter] = useState<string>('ALL');
   const [statusFilter, setStatusFilter] = useState<string>('ALL');
   const [entityFilter, setEntityFilter] = useState<string>('ALL');
 
-  useEffect(() => { Promise.all([listDocuments(), loadOperationsContext()]).then(([items, [leadItems, propertyItems]]) => { setDocuments(items); setLeads(leadItems); setProperties(propertyItems); }).catch(e => setError(e.message)); }, []);
+  useEffect(() => { Promise.all([listDocuments(), loadOperationsContext()]).then(([items, [leadItems, propertyItems]]) => { setDocuments(items); setLeads(leadItems); setProperties(propertyItems); }).catch(e => toast.error(e.message)); }, []);
 
   const filteredDocuments = documents.filter(doc => {
     // Búsqueda por nombre
@@ -52,6 +58,10 @@ export function DocumentsPage() {
   });
 
   function handleExport() {
+    if (!restrictions.canExport) {
+      setUpgradeModalOpen(true);
+      return;
+    }
     const statusLabels: Record<string, string> = { PENDING: 'Pendiente', APPROVED: 'Aprobado', REJECTED: 'Rechazado' };
     exportToExcel(
       filteredDocuments,
@@ -72,16 +82,20 @@ export function DocumentsPage() {
 
   async function submit(event: FormEvent) {
     event.preventDefault();
+    if (!restrictions.canCreate) {
+      setUpgradeModalOpen(true);
+      return;
+    }
     if (!file) return;
     setSaving(true);
-    setError('');
     try {
       const created = await uploadDocument({ ...form, leadId: form.leadId || undefined, propertyId: form.propertyId || undefined, file });
       setDocuments(current => [created, ...current]);
       setFile(undefined);
       setForm({ leadId: '', propertyId: '', documentType: 'IDENTIFICATION', status: 'PENDING', notes: '' });
       formRef.current?.reset();
-    } catch (e) { setError(e instanceof Error ? e.message : 'No fue posible subir el documento.'); } finally { setSaving(false); }
+      toast.success('Documento guardado correctamente');
+    } catch (e) { toast.error(e instanceof Error ? e.message : 'No fue posible subir el documento.'); } finally { setSaving(false); }
   }
 
   async function remove(id: string) {
@@ -108,14 +122,13 @@ export function DocumentsPage() {
       const extension = '.' + droppedFile.name.split('.').pop()?.toLowerCase();
       if (validTypes.includes(extension)) {
         setFile(droppedFile);
-        setError('');
       } else {
-        setError('Tipo de archivo no válido. Solo PDF, DOC, DOCX, JPG, JPEG, PNG.');
+        toast.error('Tipo de archivo no válido. Solo PDF, DOC, DOCX, JPG, JPEG, PNG.');
       }
     }
   }
 
-  return <>{previewDocument && <DocumentPreviewModal document={previewDocument} onClose={() => setPreviewDocument(undefined)} />}<header className="mb-8 flex items-end justify-between gap-4"><div><p className="text-[11px] font-bold uppercase tracking-[.16em] text-indigo-600">Expedientes</p><h1 className="mt-1 text-3xl font-bold">Documentos</h1><p className="mt-2 text-sm text-slate-500">Guarda archivos relacionados con prospectos y propiedades. Máximo 8 MB por archivo.</p></div>{documents.length > 0 && <ExportButton onExport={handleExport} variant="secondary" />}</header>{error && <p className="mb-5 rounded-xl bg-rose-50 p-4 text-sm font-semibold text-rose-700">{error}</p>}
+  return <>{previewDocument && <DocumentPreviewModal document={previewDocument} onClose={() => setPreviewDocument(undefined)} />}<header className="mb-8 flex items-end justify-between gap-4"><div><p className="text-[11px] font-bold uppercase tracking-[.16em] text-indigo-600">Expedientes</p><h1 className="mt-1 text-3xl font-bold">Documentos</h1><p className="mt-2 text-sm text-slate-500">Guarda archivos relacionados con prospectos y propiedades. Máximo 8 MB por archivo.</p></div>{documents.length > 0 && <ExportButton onExport={handleExport} variant="secondary" />}</header>
 
   {/* Búsqueda y Filtros */}
   {documents.length > 0 && (
@@ -259,5 +272,12 @@ export function DocumentsPage() {
     </div>
   )}
 
-  <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm"><div className="hidden grid-cols-[1.5fr_1fr_1fr_.5fr_auto] gap-4 bg-slate-50 px-5 py-3 text-xs font-bold uppercase text-slate-500 md:grid"><span>Archivo</span><span>Relacionado con</span><span>Tipo</span><span>Tamaño</span><span>Acciones</span></div>{filteredDocuments.map(item => <article className="grid gap-3 border-t border-slate-100 px-5 py-4 first:border-0 md:grid-cols-[1.5fr_1fr_1fr_.5fr_auto] md:items-center" key={item.id}><div><strong className="block truncate text-sm">{item.fileName}</strong><span className="text-xs text-slate-400">{new Date(item.createdAt).toLocaleDateString('es-MX')}</span></div><span className="text-sm text-slate-600">{item.leadName || item.propertyTitle || 'General'}</span><span className="text-sm text-slate-600">{item.documentType}</span><span className="text-sm text-slate-500">{sizeLabel(item.fileSize)}</span><div className="flex gap-2"><button className="rounded-lg bg-indigo-50 px-3 py-2 text-xs font-bold text-indigo-700 hover:bg-indigo-100 transition" onClick={() => setPreviewDocument(item)}>Vista previa</button><a className="rounded-lg bg-slate-50 px-3 py-2 text-xs font-bold text-slate-700 hover:bg-slate-100 transition" href={documentDownloadUrl(item.id)}>Descargar</a><button className="rounded-lg bg-rose-50 px-3 py-2 text-xs font-bold text-rose-700 hover:bg-rose-100 transition" onClick={() => remove(item.id)}>Eliminar</button></div></article>)}{documents.length === 0 && filteredDocuments.length === 0 && <p className="p-10 text-center text-sm text-slate-500">No hay documentos guardados.</p>}</div></>;
+  <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm"><div className="hidden grid-cols-[1.5fr_1fr_1fr_.5fr_auto] gap-4 bg-slate-50 px-5 py-3 text-xs font-bold uppercase text-slate-500 md:grid"><span>Archivo</span><span>Relacionado con</span><span>Tipo</span><span>Tamaño</span><span>Acciones</span></div>{filteredDocuments.map(item => <article className="grid gap-3 border-t border-slate-100 px-5 py-4 first:border-0 md:grid-cols-[1.5fr_1fr_1fr_.5fr_auto] md:items-center" key={item.id}><div><strong className="block truncate text-sm">{item.fileName}</strong><span className="text-xs text-slate-400">{new Date(item.createdAt).toLocaleDateString('es-MX')}</span></div><span className="text-sm text-slate-600">{item.leadName || item.propertyTitle || 'General'}</span><span className="text-sm text-slate-600">{item.documentType}</span><span className="text-sm text-slate-500">{sizeLabel(item.fileSize)}</span><div className="flex gap-2"><button className="rounded-lg bg-indigo-50 px-3 py-2 text-xs font-bold text-indigo-700 hover:bg-indigo-100 transition" onClick={() => setPreviewDocument(item)}>Vista previa</button><a className="rounded-lg bg-slate-50 px-3 py-2 text-xs font-bold text-slate-700 hover:bg-slate-100 transition" href={documentDownloadUrl(item.id)}>Descargar</a><button className="rounded-lg bg-rose-50 px-3 py-2 text-xs font-bold text-rose-700 hover:bg-rose-100 transition" onClick={() => remove(item.id)}>Eliminar</button></div></article>)}{documents.length === 0 && filteredDocuments.length === 0 && <p className="p-10 text-center text-sm text-slate-500">No hay documentos guardados.</p>}</div>
+  <UpgradeModal
+    feature="subir nuevos documentos"
+    isOpen={upgradeModalOpen}
+    level={restrictions.level === 'BLOCKED' ? 'BLOCKED' : 'LIMITED'}
+    onClose={() => setUpgradeModalOpen(false)}
+  />
+  </>;
 }

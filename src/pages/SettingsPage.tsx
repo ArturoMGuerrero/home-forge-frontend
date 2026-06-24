@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
+import toast from 'react-hot-toast';
 import { CatalogIndex, catalogLabels, primaryCatalogs, workflowCatalogs } from '../shared/catalogs';
 import { Icon, IconName } from '../shared/Icon';
 import { getJson } from '../shared/services/api';
@@ -19,7 +20,6 @@ export function SettingsPage() {
   const [catalogs, setCatalogs] = useState<string[]>([]);
   const [subscription, setSubscription] = useState<Subscription | null>(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
 
   useEffect(() => {
     Promise.all([getJson<CatalogIndex>('/catalogs'), getSubscription()])
@@ -27,7 +27,7 @@ export function SettingsPage() {
         setCatalogs(response.catalogs);
         setSubscription(subscriptionResponse);
       })
-      .catch(() => setError('No fue posible consultar la configuración del backend.'))
+      .catch(() => toast.error('No fue posible consultar la configuración del backend.'))
       .finally(() => setLoading(false));
   }, []);
 
@@ -44,9 +44,8 @@ export function SettingsPage() {
       </header>
 
       {loading && <p className="rounded-2xl border border-slate-200 bg-white p-8 text-center text-sm text-slate-500">Cargando configuración...</p>}
-      {error && <p className="rounded-xl bg-rose-50 p-4 text-sm font-medium text-rose-700">{error}</p>}
 
-      {!loading && !error && (
+      {!loading && (
         <>
           <section className="mb-10">
             <div className="mb-5">
