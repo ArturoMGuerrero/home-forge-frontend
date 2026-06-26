@@ -27,6 +27,11 @@ export function LocationPicker({ latitude, longitude, onLocationChange, onClose 
   const [currentLat, setCurrentLat] = useState(parseCoordinate(latitude, 19.4326));
   const [currentLng, setCurrentLng] = useState(parseCoordinate(longitude, -99.1332));
 
+  // Redondear a 6 decimales
+  const roundTo6Decimals = (value: number): number => {
+    return Math.round(value * 1000000) / 1000000;
+  };
+
   useEffect(() => {
     // Bloquear scroll del body
     document.body.style.overflow = 'hidden';
@@ -126,15 +131,15 @@ export function LocationPicker({ latitude, longitude, onLocationChange, onClose 
       // Evento al arrastrar
       marker.on('dragend', () => {
         const pos = marker.getLatLng();
-        setCurrentLat(pos.lat);
-        setCurrentLng(pos.lng);
+        setCurrentLat(roundTo6Decimals(pos.lat));
+        setCurrentLng(roundTo6Decimals(pos.lng));
       });
 
       // Click en el mapa
       map.on('click', (e: L.LeafletMouseEvent) => {
         marker.setLatLng(e.latlng);
-        setCurrentLat(e.latlng.lat);
-        setCurrentLng(e.latlng.lng);
+        setCurrentLat(roundTo6Decimals(e.latlng.lat));
+        setCurrentLng(roundTo6Decimals(e.latlng.lng));
       });
 
       setLoading(false);
@@ -167,8 +172,8 @@ export function LocationPicker({ latitude, longitude, onLocationChange, onClose 
 
       if (results.length > 0) {
         const { lat, lon } = results[0];
-        const latNum = parseFloat(lat);
-        const lngNum = parseFloat(lon);
+        const latNum = roundTo6Decimals(parseFloat(lat));
+        const lngNum = roundTo6Decimals(parseFloat(lon));
 
         setCurrentLat(latNum);
         setCurrentLng(lngNum);
@@ -202,8 +207,8 @@ export function LocationPicker({ latitude, longitude, onLocationChange, onClose 
     setLoading(true);
     navigator.geolocation.getCurrentPosition(
       (position) => {
-        const lat = position.coords.latitude;
-        const lng = position.coords.longitude;
+        const lat = roundTo6Decimals(position.coords.latitude);
+        const lng = roundTo6Decimals(position.coords.longitude);
 
         setCurrentLat(lat);
         setCurrentLng(lng);
@@ -324,9 +329,10 @@ export function LocationPicker({ latitude, longitude, onLocationChange, onClose 
                       onChange={e => {
                         const val = parseFloat(e.target.value);
                         if (!isNaN(val) && val >= -90 && val <= 90) {
-                          setCurrentLat(val);
-                          if (markerRef.current) markerRef.current.setLatLng([val, currentLng]);
-                          if (mapInstanceRef.current) mapInstanceRef.current.setView([val, currentLng]);
+                          const rounded = roundTo6Decimals(val);
+                          setCurrentLat(rounded);
+                          if (markerRef.current) markerRef.current.setLatLng([rounded, currentLng]);
+                          if (mapInstanceRef.current) mapInstanceRef.current.setView([rounded, currentLng]);
                         }
                       }}
                     />
@@ -341,9 +347,10 @@ export function LocationPicker({ latitude, longitude, onLocationChange, onClose 
                       onChange={e => {
                         const val = parseFloat(e.target.value);
                         if (!isNaN(val) && val >= -180 && val <= 180) {
-                          setCurrentLng(val);
-                          if (markerRef.current) markerRef.current.setLatLng([currentLat, val]);
-                          if (mapInstanceRef.current) mapInstanceRef.current.setView([currentLat, val]);
+                          const rounded = roundTo6Decimals(val);
+                          setCurrentLng(rounded);
+                          if (markerRef.current) markerRef.current.setLatLng([currentLat, rounded]);
+                          if (mapInstanceRef.current) mapInstanceRef.current.setView([currentLat, rounded]);
                         }
                       }}
                     />

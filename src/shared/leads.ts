@@ -1,5 +1,5 @@
 import { getSession } from './auth';
-import { deleteJson, deleteVoid, getJson, postJson, putJson } from './services/api';
+import { deleteJson, deleteVoid, getJson, patchJson, postJson, putJson } from './services/api';
 
 const STORAGE_KEY = 'casaflow_leads';
 
@@ -33,6 +33,8 @@ export type LeadItem = {
   assignedTo?: string;
   nextFollowUpAt?: string;
   notes?: string;
+  score?: number;
+  scoreUpdatedAt?: string;
 };
 
 export type LeadStatus = 'NEW' | 'CONTACTED' | 'QUALIFIED' | 'TOUR_SCHEDULED' | 'TOUR_COMPLETED' | 'OFFER_MADE' | 'UNDER_CONTRACT' | 'CLOSED' | 'LOST';
@@ -48,6 +50,12 @@ export type LeadActivity = {
   occurredAt: string;
   nextFollowUpAt?: string;
   createdAt: string;
+  userId?: string;
+  durationMinutes?: number;
+  outcome?: string;
+  propertyId?: string;
+  attachments?: string;
+  metadata?: string;
 };
 
 export type LeadPayload = Omit<LeadItem, 'id' | 'companyId'>;
@@ -64,6 +72,10 @@ export function updateLead(leadId: string, lead: LeadPayload): Promise<LeadItem>
   return putJson<LeadItem>(`/leads/${leadId}`, { companyId: getCompanyId(), ...lead });
 }
 
+export function changeLeadStatus(leadId: string, status: LeadStatus): Promise<LeadItem> {
+  return patchJson<LeadItem>(`/leads/${leadId}/status`, { companyId: getCompanyId(), status });
+}
+
 export function deleteLead(leadId: string): Promise<void> {
   return deleteJson(`/leads/${leadId}?companyId=${getCompanyId()}`);
 }
@@ -74,13 +86,50 @@ export function listLeadActivities(leadId: string): Promise<LeadActivity[]> {
 
 export function addLeadActivity(
   leadId: string,
-  activity: { activityType: LeadActivityType; notes: string; occurredAt?: string; nextFollowUpAt?: string }
+  activity: {
+    activityType: LeadActivityType;
+    notes: string;
+    occurredAt?: string;
+    nextFollowUpAt?: string;
+    userId?: string;
+    durationMinutes?: number;
+    outcome?: string;
+    propertyId?: string;
+    attachments?: string;
+    metadata?: string;
+  }
 ): Promise<LeadActivity> {
   return postJson<LeadActivity>(`/leads/${leadId}/activities`, { companyId: getCompanyId(), ...activity });
 }
 
+export function listActivitiesByUser(userId: string): Promise<LeadActivity[]> {
+  return getJson<LeadActivity[]>(`/leads/activities/user/${userId}?companyId=${getCompanyId()}`);
+}
+
+export function listActivitiesByProperty(propertyId: string): Promise<LeadActivity[]> {
+  return getJson<LeadActivity[]>(`/leads/activities/property/${propertyId}?companyId=${getCompanyId()}`);
+}
+
 export function deleteLeadActivity(leadId: string, activityId: string): Promise<void> {
   return deleteVoid(`/leads/${leadId}/activities/${activityId}?companyId=${getCompanyId()}`);
+}
+
+export type LeadScoreHistory = {
+  id: string;
+  companyId: string;
+  leadId: string;
+  oldScore: number;
+  newScore: number;
+  reason?: string;
+  createdAt: string;
+};
+
+export function calculateLeadScore(leadId: string): Promise<{ score: number }> {
+  return postJson<{ score: number }>(`/leads/${leadId}/calculate-score?companyId=${getCompanyId()}`, {});
+}
+
+export function getLeadScoreHistory(leadId: string): Promise<LeadScoreHistory[]> {
+  return getJson<LeadScoreHistory[]>(`/leads/${leadId}/score-history`);
 }
 
 export const leadStatusLabels: Record<LeadStatus, string> = {

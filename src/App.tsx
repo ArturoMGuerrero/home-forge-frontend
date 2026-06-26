@@ -16,11 +16,16 @@ import { CompanyProfileSettingsPage } from './pages/CompanyProfileSettingsPage';
 import { PublicCompanyPage } from './pages/PublicCompanyPage';
 import { PublicPropertyDetailPage } from './pages/PublicPropertyDetailPage';
 import { LeadDetailPage } from './pages/LeadDetailPage';
+import LeadsPipelinePage from './pages/LeadsPipelinePage';
+import FollowUpTasksPage from './pages/FollowUpTasksPage';
 import { UsersPage } from './pages/UsersPage';
+import { UsersManagementPage } from './pages/UsersManagementPage';
 import { isAuthenticated } from './shared/auth';
 import { AgendaPage } from './pages/AgendaPage';
 import { MatchesPage } from './pages/MatchesPage';
 import { DocumentsPage } from './pages/DocumentsPage';
+import ContractsPage from './pages/ContractsPage';
+import TemplatesPage from './pages/TemplatesPage';
 import { ReportsPage } from './pages/ReportsPage';
 import { ForgotPasswordPage } from './pages/ForgotPasswordPage';
 import { PaymentSuccessPage } from './pages/PaymentSuccessPage';
@@ -69,6 +74,8 @@ export default function App() {
         <Route path="/app" element={<ProtectedApp />}>
           <Route index element={<DashboardPage />} />
           <Route path="prospectos" element={<LeadsPage />} />
+          <Route path="prospectos/pipeline" element={<LeadsPipelinePage />} />
+          <Route path="prospectos/tareas" element={<FollowUpTasksPage />} />
           <Route path="prospectos/:leadId" element={<LeadDetailPage />} />
           <Route path="propiedades" element={<PropertiesPage />} />
           <Route path="propiedades/nueva" element={<NewPropertyPage />} />
@@ -76,8 +83,10 @@ export default function App() {
           <Route path="agenda" element={<AgendaPage />} />
           <Route path="asignaciones" element={<MatchesPage />} />
           <Route path="documentos" element={<DocumentsPage />} />
+          <Route path="contratos" element={<ContractsPage />} />
+          <Route path="contratos/plantillas" element={<TemplatesPage />} />
           <Route path="reportes" element={<ReportsPage />} />
-          <Route path="usuarios" element={<UsersPage />} />
+          <Route path="usuarios" element={<UsersManagementPage />} />
           <Route path="planes" element={<PlansPage />} />
           <Route path="configuracion" element={<SettingsPage />} />
           <Route path="configuracion/empresa" element={<CompanyProfileSettingsPage />} />

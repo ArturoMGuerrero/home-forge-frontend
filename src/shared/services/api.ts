@@ -39,6 +39,10 @@ export async function putJson<T>(path: string, body?: unknown): Promise<T> {
   return request<T>(path, { method: 'PUT', body: body === undefined ? undefined : JSON.stringify(body) });
 }
 
+export async function patchJson<T>(path: string, body: unknown): Promise<T> {
+  return request<T>(path, { method: 'PATCH', body: JSON.stringify(body) });
+}
+
 export async function deleteJson<T>(path: string): Promise<T> {
   return request<T>(path, { method: 'DELETE' });
 }
@@ -52,11 +56,35 @@ export async function deleteVoid(path: string): Promise<void> {
 }
 
 export async function postForm<T>(path: string, body: FormData): Promise<T> {
-  const res = await fetch(`${API_BASE}${path}`, { method: 'POST', body });
+  const fullUrl = `${API_BASE}${path}`;
+  console.log('POST Form to:', fullUrl);
+  console.log('FormData entries:', Array.from(body.entries()).map(([key, value]) => ({
+    key,
+    value: value instanceof File ? `File: ${value.name} (${value.size} bytes, ${value.type})` : value
+  })));
+
+  const res = await fetch(fullUrl, { method: 'POST', body });
+
+  console.log('Response status:', res.status, res.statusText);
+
   if (!res.ok) {
-    const response = await res.json().catch(() => null) as { error?: string } | null;
-    throw new Error(response?.error ?? `API error ${res.status}`);
+    const contentType = res.headers.get('content-type');
+    let errorMessage = `API error ${res.status}`;
+
+    if (contentType?.includes('application/json')) {
+      const response = await res.json().catch(() => null) as { error?: string; message?: string } | null;
+      errorMessage = response?.error || response?.message || errorMessage;
+    } else {
+      const text = await res.text().catch(() => '');
+      if (text) {
+        errorMessage = text.substring(0, 200);
+      }
+    }
+
+    console.error('API Error:', errorMessage);
+    throw new Error(errorMessage);
   }
+
   return res.json();
 }
 

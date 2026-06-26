@@ -328,11 +328,24 @@ server {
   - Mapa de ubicación interactivo
   - Comparador de propiedades
   - Selector de ubicación con geocodificación
-- ✅ CRM de prospectos
-  - Lista de leads
+- ✅ CRM de prospectos completo
+  - Lista de leads con scoring
+  - Pipeline de ventas Kanban (drag & drop)
   - Detalle de prospecto
-  - Actividades y seguimiento en timeline
+  - Actividades extendidas en timeline
   - Crear y eliminar actividades
+  - Scoring automático de leads (0-100 puntos)
+  - Asignación automática con reglas personalizables
+- ✅ Automatización de seguimiento
+  - Tareas automáticas por cambio de estado
+  - Recordatorios y vencimientos
+  - Priorización de tareas
+- ✅ Documentos y contratos
+  - Plantillas reutilizables con variables
+  - Generación de contratos personalizados
+  - Firma electrónica
+  - Gestión de estados (Borrador → Firma → Completado)
+  - Versionado de plantillas y documentos
 - ✅ Sistema de suscripciones
   - Planes Free, Plus y Professional
   - Integración con pasarela de pagos
@@ -340,7 +353,7 @@ server {
   - Restricciones por plan
   - Páginas de confirmación de pago
 - ✅ Calendario de citas
-- ✅ Gestión de documentos
+- ✅ Gestión de archivos adjuntos
 - ✅ Catálogo de propiedades
 - ✅ Matching de propiedades con prospectos
 - ✅ Reportes y análisis

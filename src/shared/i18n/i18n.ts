@@ -66,6 +66,53 @@ export const resources = {
       button: 'Export to Excel',
       fileName: 'export',
       exporting: 'Exporting...'
+    },
+    agenda: {
+      title: 'Agenda',
+      subtitle: 'Manage your appointments and tours',
+      newAppointment: 'New appointment',
+      today: 'Today',
+      noAppointments: 'No appointments for today',
+      noAppointmentsHint: 'Click "New appointment" to add one',
+      deleteConfirm: 'Delete this appointment?',
+      deleteMessage: 'This action cannot be undone.',
+      delete: 'Delete',
+      cancel: 'Cancel',
+      markComplete: 'Mark as completed',
+      appointmentDeleted: 'Appointment deleted',
+      appointmentCompleted: 'Appointment marked as completed',
+      appointmentCreated: 'Appointment added to agenda',
+      modal: {
+        title: 'New appointment',
+        subtitle: 'Add an appointment to your agenda',
+        titleField: 'Title',
+        type: 'Type',
+        status: 'Status',
+        start: 'Start',
+        end: 'End (optional)',
+        lead: 'Lead (optional)',
+        property: 'Property (optional)',
+        location: 'Location (optional)',
+        notes: 'Notes (optional)',
+        searchLead: 'Search lead...',
+        searchProperty: 'Search property...',
+        noLink: 'No link',
+        saving: 'Saving...',
+        addAppointment: 'Add appointment'
+      },
+      types: {
+        TOUR: 'Tour',
+        CALL: 'Call',
+        MEETING: 'Meeting',
+        FOLLOW_UP: 'Follow-up',
+        OTHER: 'Other'
+      },
+      statuses: {
+        SCHEDULED: 'Scheduled',
+        COMPLETED: 'Completed',
+        CANCELED: 'Canceled'
+      },
+      weekDays: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
     }
   } },
   es: { translation: {
@@ -132,6 +179,53 @@ export const resources = {
       button: 'Exportar a Excel',
       fileName: 'exportacion',
       exporting: 'Exportando...'
+    },
+    agenda: {
+      title: 'Agenda',
+      subtitle: 'Gestiona tus citas y recorridos',
+      newAppointment: 'Nueva cita',
+      today: 'Hoy',
+      noAppointments: 'No hay citas para hoy',
+      noAppointmentsHint: 'Haz clic en "Nueva cita" para agregar una',
+      deleteConfirm: '¿Eliminar esta cita?',
+      deleteMessage: 'Esta acción no se puede deshacer.',
+      delete: 'Eliminar',
+      cancel: 'Cancelar',
+      markComplete: 'Marcar realizada',
+      appointmentDeleted: 'Cita eliminada',
+      appointmentCompleted: 'Cita marcada como realizada',
+      appointmentCreated: 'Cita agregada a la agenda',
+      modal: {
+        title: 'Nueva cita',
+        subtitle: 'Agrega una cita a tu agenda',
+        titleField: 'Título',
+        type: 'Tipo',
+        status: 'Estado',
+        start: 'Inicio',
+        end: 'Fin (opcional)',
+        lead: 'Prospecto (opcional)',
+        property: 'Propiedad (opcional)',
+        location: 'Lugar (opcional)',
+        notes: 'Notas (opcional)',
+        searchLead: 'Buscar prospecto...',
+        searchProperty: 'Buscar propiedad...',
+        noLink: 'Sin vincular',
+        saving: 'Guardando...',
+        addAppointment: 'Agregar cita'
+      },
+      types: {
+        TOUR: 'Recorrido',
+        CALL: 'Llamada',
+        MEETING: 'Reunión',
+        FOLLOW_UP: 'Seguimiento',
+        OTHER: 'Otro'
+      },
+      statuses: {
+        SCHEDULED: 'Programada',
+        COMPLETED: 'Realizada',
+        CANCELED: 'Cancelada'
+      },
+      weekDays: ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb']
     }
   } }
 };

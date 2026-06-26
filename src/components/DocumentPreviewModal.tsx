@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react';
-import { StoredDocument, documentDownloadUrl } from '../shared/operationsApi';
+import { StoredDocument, documentDownloadUrl, documentViewUrl } from '../shared/operationsApi';
 
 type Props = {
   document: StoredDocument;
@@ -28,6 +28,7 @@ export function DocumentPreviewModal({ document: doc, onClose }: Props) {
   }, [onClose]);
 
   const downloadUrl = documentDownloadUrl(doc.id);
+  const viewUrl = documentViewUrl(doc.id);
   const isPdf = doc.contentType === 'application/pdf' || doc.fileName.toLowerCase().endsWith('.pdf');
   const isImage = doc.contentType?.startsWith('image/') || /\.(jpg|jpeg|png)$/i.test(doc.fileName);
   const isWordDoc = doc.contentType?.includes('word') || /\.(doc|docx)$/i.test(doc.fileName);
@@ -72,7 +73,7 @@ export function DocumentPreviewModal({ document: doc, onClose }: Props) {
         <div className="flex-1 overflow-auto">
           {isPdf && (
             <iframe
-              src={downloadUrl}
+              src={viewUrl}
               className="w-full h-full min-h-[600px]"
               title={doc.fileName}
             />
@@ -81,7 +82,7 @@ export function DocumentPreviewModal({ document: doc, onClose }: Props) {
           {isImage && (
             <div className="flex items-center justify-center p-6 bg-slate-50">
               <img
-                src={downloadUrl}
+                src={viewUrl}
                 alt={doc.fileName}
                 className="max-w-full max-h-[70vh] rounded-lg shadow-lg"
               />

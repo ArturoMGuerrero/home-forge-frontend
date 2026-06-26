@@ -88,13 +88,34 @@ export function listDocuments() {
 }
 
 export function uploadDocument(data: { leadId?: string; propertyId?: string; documentType: string; status: string; notes?: string; file: File }) {
+  console.log('uploadDocument called with:', {
+    fileName: data.file.name,
+    fileSize: data.file.size,
+    fileType: data.file.type,
+    documentType: data.documentType,
+    status: data.status,
+    leadId: data.leadId,
+    propertyId: data.propertyId,
+    notes: data.notes
+  });
+
   const form = new FormData();
-  form.append('file', data.file);
-  const query = new URLSearchParams({ companyId: getCompanyId(), documentType: data.documentType, status: data.status });
+  form.append('file', data.file, data.file.name);
+
+  const query = new URLSearchParams({
+    companyId: getCompanyId(),
+    documentType: data.documentType,
+    status: data.status
+  });
+
   if (data.leadId) query.set('leadId', data.leadId);
   if (data.propertyId) query.set('propertyId', data.propertyId);
   if (data.notes) query.set('notes', data.notes);
-  return postForm<StoredDocument>(`/documents?${query}`, form);
+
+  const url = `/documents?${query.toString()}`;
+  console.log('Upload URL:', url);
+
+  return postForm<StoredDocument>(url, form);
 }
 
 export function deleteDocument(id: string) {
@@ -103,6 +124,10 @@ export function deleteDocument(id: string) {
 
 export function documentDownloadUrl(id: string) {
   return apiUrl(`/documents/${id}/download?companyId=${getCompanyId()}`);
+}
+
+export function documentViewUrl(id: string) {
+  return apiUrl(`/documents/${id}/view?companyId=${getCompanyId()}`);
 }
 
 export function loadOperationsContext(): Promise<[LeadItem[], ApiProperty[]]> {

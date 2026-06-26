@@ -1,14 +1,15 @@
-import { DragEvent, FormEvent, useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useOutletContext } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { LeadItem } from '../shared/leads';
 import { ApiProperty } from '../shared/propertyApi';
-import { deleteDocument, documentDownloadUrl, listDocuments, loadOperationsContext, StoredDocument, uploadDocument } from '../shared/operationsApi';
+import { deleteDocument, documentDownloadUrl, listDocuments, loadOperationsContext, StoredDocument } from '../shared/operationsApi';
 import { DocumentPreviewModal } from '../components/DocumentPreviewModal';
+import { UploadDocumentModal } from '../components/UploadDocumentModal';
 import { ExportButton } from '../shared/ExportButton';
 import { exportToExcel, formatDate } from '../shared/excelExport';
-import { UpgradeModal } from '../shared/UpgradeModal';
 import { SubscriptionRestrictions } from '../shared/subscriptionRestrictions';
+import { PageHeader } from '../shared/ui/PageHeader';
 
 function sizeLabel(size?: number) {
   if (!size) return '-';
@@ -21,13 +22,8 @@ export function DocumentsPage() {
   const [documents, setDocuments] = useState<StoredDocument[]>([]);
   const [leads, setLeads] = useState<LeadItem[]>([]);
   const [properties, setProperties] = useState<ApiProperty[]>([]);
-  const [file, setFile] = useState<File>();
-  const [form, setForm] = useState({ leadId: '', propertyId: '', documentType: 'IDENTIFICATION', status: 'PENDING', notes: '' });
-  const [saving, setSaving] = useState(false);
-  const [isDragging, setIsDragging] = useState(false);
   const [previewDocument, setPreviewDocument] = useState<StoredDocument>();
-  const [upgradeModalOpen, setUpgradeModalOpen] = useState(false);
-  const formRef = useRef<HTMLFormElement>(null);
+  const [uploadModalOpen, setUploadModalOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [typeFilter, setTypeFilter] = useState<string>('ALL');
   const [statusFilter, setStatusFilter] = useState<string>('ALL');
@@ -59,7 +55,7 @@ export function DocumentsPage() {
 
   function handleExport() {
     if (!restrictions.canExport) {
-      setUpgradeModalOpen(true);
+      toast.error('Esta funcionalidad requiere un plan superior');
       return;
     }
     const statusLabels: Record<string, string> = { PENDING: 'Pendiente', APPROVED: 'Aprobado', REJECTED: 'Rechazado' };
@@ -80,22 +76,8 @@ export function DocumentsPage() {
     );
   }
 
-  async function submit(event: FormEvent) {
-    event.preventDefault();
-    if (!restrictions.canCreate) {
-      setUpgradeModalOpen(true);
-      return;
-    }
-    if (!file) return;
-    setSaving(true);
-    try {
-      const created = await uploadDocument({ ...form, leadId: form.leadId || undefined, propertyId: form.propertyId || undefined, file });
-      setDocuments(current => [created, ...current]);
-      setFile(undefined);
-      setForm({ leadId: '', propertyId: '', documentType: 'IDENTIFICATION', status: 'PENDING', notes: '' });
-      formRef.current?.reset();
-      toast.success('Documento guardado correctamente');
-    } catch (e) { toast.error(e instanceof Error ? e.message : 'No fue posible subir el documento.'); } finally { setSaving(false); }
+  function handleDocumentUploaded(doc: StoredDocument) {
+    setDocuments(current => [doc, ...current]);
   }
 
   async function remove(id: string) {
@@ -103,36 +85,43 @@ export function DocumentsPage() {
     setDocuments(current => current.filter(item => item.id !== id));
   }
 
-  function handleDragOver(event: DragEvent<HTMLLabelElement>) {
-    event.preventDefault();
-    setIsDragging(true);
-  }
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
+      {previewDocument && <DocumentPreviewModal document={previewDocument} onClose={() => setPreviewDocument(undefined)} />}
 
-  function handleDragLeave(event: DragEvent<HTMLLabelElement>) {
-    event.preventDefault();
-    setIsDragging(false);
-  }
+      <UploadDocumentModal
+        isOpen={uploadModalOpen}
+        onClose={() => setUploadModalOpen(false)}
+        onDocumentUploaded={handleDocumentUploaded}
+        leads={leads}
+        properties={properties}
+        restrictions={restrictions}
+      />
 
-  function handleDrop(event: DragEvent<HTMLLabelElement>) {
-    event.preventDefault();
-    setIsDragging(false);
-    const droppedFile = event.dataTransfer.files[0];
-    if (droppedFile) {
-      const validTypes = ['.pdf', '.doc', '.docx', '.jpg', '.jpeg', '.png'];
-      const extension = '.' + droppedFile.name.split('.').pop()?.toLowerCase();
-      if (validTypes.includes(extension)) {
-        setFile(droppedFile);
-      } else {
-        toast.error('Tipo de archivo no válido. Solo PDF, DOC, DOCX, JPG, JPEG, PNG.');
-      }
-    }
-  }
+      <PageHeader
+        title="Documentos"
+        subtitle="Gestiona archivos relacionados con prospectos y propiedades"
+        badge={{ value: documents.length, label: 'documentos' }}
+        actions={
+          <div className="flex gap-3">
+            {documents.length > 0 && <ExportButton onExport={handleExport} variant="secondary" />}
+            <button
+              className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-indigo-900/20 transition hover:shadow-xl hover:shadow-indigo-900/30"
+              onClick={() => setUploadModalOpen(true)}
+            >
+              <svg className="size-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+              </svg>
+              Subir documento
+            </button>
+          </div>
+        }
+      />
 
-  return <>{previewDocument && <DocumentPreviewModal document={previewDocument} onClose={() => setPreviewDocument(undefined)} />}<header className="mb-8 flex items-end justify-between gap-4"><div><p className="text-[11px] font-bold uppercase tracking-[.16em] text-indigo-600">Expedientes</p><h1 className="mt-1 text-3xl font-bold">Documentos</h1><p className="mt-2 text-sm text-slate-500">Guarda archivos relacionados con prospectos y propiedades. Máximo 8 MB por archivo.</p></div>{documents.length > 0 && <ExportButton onExport={handleExport} variant="secondary" />}</header>
-
-  {/* Búsqueda y Filtros */}
-  {documents.length > 0 && (
-    <div className="mb-6 space-y-4 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+      <div className="p-4 lg:p-6">
+        {/* Búsqueda y Filtros */}
+        {documents.length > 0 && (
+          <div className="mb-6 space-y-4 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
       {/* Búsqueda */}
       <div className="relative">
         <svg className="pointer-events-none absolute left-3.5 top-1/2 size-5 -translate-y-1/2 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -230,54 +219,138 @@ export function DocumentsPage() {
           </button>
         </div>
       )}
-    </div>
-  )}
+          </div>
+        )}
 
-  <form ref={formRef} className="mb-6 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm" onSubmit={submit}><div className="mb-5"><label
-    className={`group relative flex cursor-pointer flex-col items-center justify-center gap-3 rounded-2xl border-2 border-dashed px-6 py-10 text-center transition-all ${
-      isDragging
-        ? 'border-indigo-500 bg-indigo-100 scale-[1.02]'
-        : file
-        ? 'border-green-400 bg-green-50'
-        : 'border-slate-300 bg-slate-50 hover:border-indigo-400 hover:bg-indigo-50'
-    }`}
-    onDragOver={handleDragOver}
-    onDragLeave={handleDragLeave}
-    onDrop={handleDrop}
-  >
-    <div className={`rounded-full p-4 transition-all ${isDragging ? 'bg-indigo-200' : file ? 'bg-green-200' : 'bg-slate-200 group-hover:bg-indigo-100'}`}>
-      <svg className={`size-8 transition-colors ${isDragging ? 'text-indigo-600' : file ? 'text-green-600' : 'text-slate-400 group-hover:text-indigo-600'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-      </svg>
-    </div>
-    <div>
-      <p className={`text-sm font-semibold transition-colors ${isDragging ? 'text-indigo-700' : file ? 'text-green-700' : 'text-slate-700'}`}>
-        {isDragging ? 'Suelta el archivo aquí' : file ? file.name : 'Arrastra un archivo o haz clic para seleccionar'}
-      </p>
-      <p className={`mt-1 text-xs transition-colors ${isDragging ? 'text-indigo-600' : file ? 'text-green-600' : 'text-slate-500'}`}>
-        {file ? `${sizeLabel(file.size)} • Listo para subir` : 'PDF, DOC, DOCX, JPG, JPEG, PNG • Máximo 8MB'}
-      </p>
-    </div>
-    <input accept=".pdf,.doc,.docx,.jpg,.jpeg,.png" className="sr-only" onChange={e => setFile(e.target.files?.[0])} required type="file" />
-  </label></div><div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4"><label className="grid gap-2 text-sm font-semibold text-slate-700">Tipo<select className="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-3 text-sm font-normal outline-none transition focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100" onChange={e => setForm({ ...form, documentType: e.target.value })} value={form.documentType}><option value="IDENTIFICATION">Identificación</option><option value="PROOF_OF_ADDRESS">Comprobante de domicilio</option><option value="PROOF_OF_INCOME">Comprobante de ingresos</option><option value="CONTRACT">Contrato</option><option value="PROPERTY_DEED">Escritura</option><option value="OTHER">Otro</option></select></label><label className="grid gap-2 text-sm font-semibold text-slate-700">Prospecto<select className="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-3 text-sm font-normal outline-none transition focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100" onChange={e => setForm({ ...form, leadId: e.target.value })} value={form.leadId}><option value="">Sin prospecto</option>{leads.map(lead => <option key={lead.id} value={lead.id}>{lead.firstName} {lead.lastName}</option>)}</select></label><label className="grid gap-2 text-sm font-semibold text-slate-700">Propiedad<select className="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-3 text-sm font-normal outline-none transition focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100" onChange={e => setForm({ ...form, propertyId: e.target.value })} value={form.propertyId}><option value="">Sin propiedad</option>{properties.map(property => <option key={property.id} value={property.id}>{property.code} · {property.title}</option>)}</select></label><label className="grid gap-2 text-sm font-semibold text-slate-700">Estado<select className="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-3 text-sm font-normal outline-none transition focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100" onChange={e => setForm({ ...form, status: e.target.value })} value={form.status}><option value="PENDING">Pendiente</option><option value="RECEIVED">Recibido</option><option value="VALIDATED">Validado</option><option value="REJECTED">Rechazado</option></select></label><label className="grid gap-2 text-sm font-semibold text-slate-700 md:col-span-2">Notas<input className="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-3 text-sm font-normal outline-none transition placeholder:text-slate-400 focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100" onChange={e => setForm({ ...form, notes: e.target.value })} placeholder="Observaciones adicionales..." value={form.notes} /></label></div><button className="mt-4 w-full rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 px-4 py-3.5 text-sm font-semibold text-white shadow-lg shadow-indigo-900/20 transition hover:shadow-xl hover:shadow-indigo-900/30 disabled:opacity-60 disabled:cursor-not-allowed md:w-auto md:px-8" disabled={saving}>{saving ? 'Subiendo documento...' : 'Guardar documento'}</button></form>
+        {/* Estado vacío cuando no hay resultados */}
+        {filteredDocuments.length === 0 && documents.length > 0 && (
+          <div className="py-12 text-center">
+            <svg className="mx-auto mb-3 size-12 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+            <p className="text-sm font-medium text-slate-600">No se encontraron documentos</p>
+            <p className="mt-1 text-xs text-slate-500">Intenta ajustar los filtros de búsqueda</p>
+          </div>
+        )}
 
-  {/* Estado vacío cuando no hay resultados */}
-  {filteredDocuments.length === 0 && documents.length > 0 && (
-    <div className="py-12 text-center">
-      <svg className="mx-auto mb-3 size-12 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-      </svg>
-      <p className="text-sm font-medium text-slate-600">No se encontraron documentos</p>
-      <p className="mt-1 text-xs text-slate-500">Intenta ajustar los filtros de búsqueda</p>
-    </div>
-  )}
+        <div className="space-y-3">
+        {filteredDocuments.map(item => (
+          <article className="group overflow-hidden rounded-2xl border border-slate-200 bg-white transition hover:border-indigo-300 hover:shadow-lg hover:shadow-indigo-500/10" key={item.id}>
+            {/* Header */}
+            <div className="flex items-start gap-4 border-b border-slate-100 bg-gradient-to-br from-slate-50 to-white p-5">
+              {/* Icono del documento */}
+              <div className="flex size-14 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 text-white shadow-lg shadow-indigo-500/30 ring-4 ring-indigo-50">
+                <svg className="size-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+              </div>
 
-  <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm"><div className="hidden grid-cols-[1.5fr_1fr_1fr_.5fr_auto] gap-4 bg-slate-50 px-5 py-3 text-xs font-bold uppercase text-slate-500 md:grid"><span>Archivo</span><span>Relacionado con</span><span>Tipo</span><span>Tamaño</span><span>Acciones</span></div>{filteredDocuments.map(item => <article className="grid gap-3 border-t border-slate-100 px-5 py-4 first:border-0 md:grid-cols-[1.5fr_1fr_1fr_.5fr_auto] md:items-center" key={item.id}><div><strong className="block truncate text-sm">{item.fileName}</strong><span className="text-xs text-slate-400">{new Date(item.createdAt).toLocaleDateString('es-MX')}</span></div><span className="text-sm text-slate-600">{item.leadName || item.propertyTitle || 'General'}</span><span className="text-sm text-slate-600">{item.documentType}</span><span className="text-sm text-slate-500">{sizeLabel(item.fileSize)}</span><div className="flex gap-2"><button className="rounded-lg bg-indigo-50 px-3 py-2 text-xs font-bold text-indigo-700 hover:bg-indigo-100 transition" onClick={() => setPreviewDocument(item)}>Vista previa</button><a className="rounded-lg bg-slate-50 px-3 py-2 text-xs font-bold text-slate-700 hover:bg-slate-100 transition" href={documentDownloadUrl(item.id)}>Descargar</a><button className="rounded-lg bg-rose-50 px-3 py-2 text-xs font-bold text-rose-700 hover:bg-rose-100 transition" onClick={() => remove(item.id)}>Eliminar</button></div></article>)}{documents.length === 0 && filteredDocuments.length === 0 && <p className="p-10 text-center text-sm text-slate-500">No hay documentos guardados.</p>}</div>
-  <UpgradeModal
-    feature="subir nuevos documentos"
-    isOpen={upgradeModalOpen}
-    level={restrictions.level === 'BLOCKED' ? 'BLOCKED' : 'LIMITED'}
-    onClose={() => setUpgradeModalOpen(false)}
-  />
-  </>;
+              {/* Información del documento */}
+              <div className="min-w-0 flex-1">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0 flex-1">
+                    <h3 className="truncate text-lg font-bold text-slate-900 group-hover:text-indigo-600 transition">
+                      {item.fileName}
+                    </h3>
+                    <div className="mt-1.5 flex flex-wrap items-center gap-2">
+                      <span className="inline-flex items-center gap-1.5 rounded-lg bg-blue-100 px-2.5 py-1 text-xs font-semibold text-blue-800">
+                        <svg className="size-3" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M6 2a2 2 0 00-2 2v12a2 2 0 002 2h8a2 2 0 002-2V7.414A2 2 0 0015.414 6L12 2.586A2 2 0 0010.586 2H6zm5 6a1 1 0 10-2 0v3.586l-1.293-1.293a1 1 0 10-1.414 1.414l3 3a1 1 0 001.414 0l3-3a1 1 0 00-1.414-1.414L11 11.586V8z" clipRule="evenodd" />
+                        </svg>
+                        {item.documentType}
+                      </span>
+                      <span className={`inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs font-semibold ${
+                        item.status === 'APPROVED' ? 'bg-emerald-100 text-emerald-800' :
+                        item.status === 'REJECTED' ? 'bg-rose-100 text-rose-800' :
+                        item.status === 'VALIDATED' ? 'bg-cyan-100 text-cyan-800' :
+                        'bg-amber-100 text-amber-800'
+                      }`}>
+                        <span className="size-1.5 rounded-full bg-current opacity-75"></span>
+                        {item.status === 'APPROVED' ? 'Aprobado' :
+                         item.status === 'REJECTED' ? 'Rechazado' :
+                         item.status === 'VALIDATED' ? 'Validado' :
+                         item.status === 'RECEIVED' ? 'Recibido' : 'Pendiente'}
+                      </span>
+                      <span className="text-xs text-slate-500">
+                        {new Date(item.createdAt).toLocaleDateString('es-MX', { day: 'numeric', month: 'short', year: 'numeric' })}
+                      </span>
+                    </div>
+                  </div>
+                  <div className="flex flex-col items-end gap-1">
+                    <span className="text-sm font-bold text-slate-600">{sizeLabel(item.fileSize)}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Relacionado con */}
+            {(item.leadName || item.propertyTitle) && (
+              <div className="border-b border-slate-100 bg-slate-50/50 px-5 py-3">
+                <div className="flex items-center gap-2 text-sm">
+                  <svg className="size-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+                  </svg>
+                  <span className="text-slate-600">Relacionado con:</span>
+                  <span className="font-semibold text-slate-900">{item.leadName || item.propertyTitle}</span>
+                </div>
+              </div>
+            )}
+
+            {/* Notas */}
+            {item.notes && (
+              <div className="border-b border-slate-100 bg-white px-5 py-3">
+                <p className="text-sm text-slate-600 line-clamp-2">{item.notes}</p>
+              </div>
+            )}
+
+            {/* Acciones */}
+            <div className="flex flex-wrap gap-2 bg-slate-50/50 px-5 py-4">
+              <button
+                className="inline-flex items-center gap-2 rounded-xl border border-indigo-200 bg-indigo-50 px-4 py-2 text-sm font-semibold text-indigo-700 transition hover:bg-indigo-100 hover:border-indigo-300"
+                onClick={() => setPreviewDocument(item)}
+              >
+                <svg className="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                </svg>
+                Vista previa
+              </button>
+              <a
+                className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 hover:border-slate-300"
+                href={documentDownloadUrl(item.id)}
+              >
+                <svg className="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                </svg>
+                Descargar
+              </a>
+              <button
+                className="inline-flex items-center gap-2 rounded-xl border border-rose-200 bg-rose-50 px-4 py-2 text-sm font-semibold text-rose-700 transition hover:bg-rose-100 hover:border-rose-300"
+                onClick={() => remove(item.id)}
+              >
+                <svg className="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                </svg>
+                Eliminar
+              </button>
+            </div>
+          </article>
+        ))}
+
+        {/* Estado vacío */}
+        {documents.length === 0 && filteredDocuments.length === 0 && (
+          <div className="flex flex-col items-center justify-center rounded-2xl border-2 border-dashed border-slate-200 bg-slate-50 py-16">
+            <div className="rounded-full bg-indigo-100 p-4">
+              <svg className="size-12 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              </svg>
+            </div>
+            <p className="mt-4 text-base font-semibold text-slate-700">No hay documentos guardados</p>
+            <p className="mt-1 text-sm text-slate-500">Haz clic en "Subir documento" para comenzar</p>
+          </div>
+        )}
+        </div>
+      </div>
+    </div>
+  );
 }

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link, useOutletContext } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { ApiProperty, formatApiPrice, listingLabel, listProperties, propertyImages, propertyStatusClass, propertyStatusLabel } from '../shared/propertyApi';
@@ -6,6 +6,7 @@ import { ExportButton } from '../shared/ExportButton';
 import { exportToExcel, formatCurrency } from '../shared/excelExport';
 import { UpgradeModal } from '../shared/UpgradeModal';
 import { SubscriptionRestrictions } from '../shared/subscriptionRestrictions';
+import { PageHeader } from '../shared/ui/PageHeader';
 
 export function PropertiesPage() {
   const context = useOutletContext<{ restrictions: SubscriptionRestrictions }>();
@@ -99,29 +100,29 @@ export function PropertiesPage() {
 
   return (
     <>
-      <header className="mb-8 flex flex-wrap items-end justify-between gap-4">
-        <div>
-          <p className="mb-1 text-[11px] font-bold uppercase tracking-[0.16em] text-indigo-600">Inventario</p>
-          <h1 className="text-3xl font-bold">Propiedades</h1>
-          <p className="mt-2 text-sm text-slate-500">Administra inmuebles en venta y renta desde PostgreSQL.</p>
-        </div>
-        <div className="flex gap-3">
-          <ExportButton onExport={handleExport} variant="secondary" />
-          {restrictions.canCreate ? (
-            <Link className="shrink-0 rounded-xl bg-indigo-600 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-indigo-700" to="/app/propiedades/nueva">
-              + Agregar propiedad
-            </Link>
-          ) : (
-            <button
-              className="shrink-0 rounded-xl bg-slate-200 px-3.5 py-2.5 text-sm font-semibold text-slate-500 cursor-not-allowed"
-              onClick={handleCreateProperty}
-              type="button"
-            >
-              🔒 Agregar propiedad
-            </button>
-          )}
-        </div>
-      </header>
+      <PageHeader
+        title="Propiedades"
+        subtitle="Administra inmuebles en venta y renta desde PostgreSQL"
+        badge={{ value: properties.length, label: 'propiedades' }}
+        actions={
+          <div className="flex gap-3">
+            <ExportButton onExport={handleExport} variant="secondary" />
+            {restrictions.canCreate ? (
+              <Link className="shrink-0 rounded-xl bg-indigo-600 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-indigo-700" to="/app/propiedades/nueva">
+                + Agregar propiedad
+              </Link>
+            ) : (
+              <button
+                className="shrink-0 rounded-xl bg-slate-200 px-3.5 py-2.5 text-sm font-semibold text-slate-500 cursor-not-allowed"
+                onClick={handleCreateProperty}
+                type="button"
+              >
+                🔒 Agregar propiedad
+              </button>
+            )}
+          </div>
+        }
+      />
 
       {loading && <p className="rounded-2xl border border-slate-200 bg-white p-8 text-center text-sm text-slate-500">Consultando propiedades...</p>}
 
@@ -259,40 +260,106 @@ export function PropertiesPage() {
         </>
       )}
 
-      <div className="grid gap-5 lg:grid-cols-2">
+      <div className="grid gap-5 p-4 lg:grid-cols-2 lg:p-6">
         {filteredProperties.map(property => (
-          <article className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm" key={property.id}>
-            <div className="flex gap-4 p-5">
+          <Link
+            className="group block overflow-hidden rounded-2xl border border-slate-200 bg-white transition hover:border-indigo-300 hover:shadow-lg hover:shadow-indigo-500/10"
+            key={property.id}
+            to={`/app/propiedades/${property.id}/editar`}
+          >
+            {/* Header con imagen y badges */}
+            <div className="flex gap-4 border-b border-slate-100 bg-gradient-to-br from-slate-50 to-white p-5">
               {propertyImages(property)[0] ? (
-                <div className="relative size-28 shrink-0">
-                  <img alt={property.title} className="size-28 rounded-xl object-cover" src={propertyImages(property)[0]} />
-                  {propertyImages(property).length > 1 && <span className="absolute bottom-2 right-2 rounded-full bg-slate-950/75 px-2 py-1 text-[10px] font-bold text-white">{propertyImages(property).length} fotos</span>}
+                <div className="relative size-32 shrink-0">
+                  <img alt={property.title} className="size-32 rounded-2xl object-cover ring-4 ring-slate-100" src={propertyImages(property)[0]} />
+                  {propertyImages(property).length > 1 && (
+                    <div className="absolute bottom-2 right-2 flex items-center gap-1 rounded-full bg-slate-950/90 px-2.5 py-1 text-[10px] font-bold text-white backdrop-blur-sm">
+                      <svg className="size-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                      </svg>
+                      {propertyImages(property).length}
+                    </div>
+                  )}
                 </div>
               ) : (
-                <span className="grid size-28 shrink-0 place-items-center rounded-xl bg-indigo-50 text-lg font-bold text-indigo-700">{property.propertyType.slice(0, 2)}</span>
+                <div className="grid size-32 shrink-0 place-items-center rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 text-2xl font-bold text-white ring-4 ring-indigo-50 shadow-lg shadow-indigo-500/30">
+                  {property.propertyType.slice(0, 2)}
+                </div>
               )}
               <div className="min-w-0 flex-1">
-                <div className="flex flex-wrap gap-2">
-                  <span className={`rounded-full px-2.5 py-1 text-[11px] font-bold ${property.listingType === 'RENT' ? 'bg-violet-100 text-violet-800' : 'bg-cyan-100 text-cyan-800'}`}>{listingLabel(property.listingType)}</span>
-                  <span className={`rounded-full px-2.5 py-1 text-[11px] font-bold ${propertyStatusClass(property.status)}`}>{propertyStatusLabel(property.status)}</span>
-                  <span className={`rounded-full px-2.5 py-1 text-[11px] font-bold ${property.published ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'}`}>{property.published ? 'Publicada' : 'Borrador'}</span>
+                <div className="flex flex-wrap gap-2 mb-3">
+                  <span className={`inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs font-semibold ${property.listingType === 'RENT' ? 'bg-violet-100 text-violet-800' : 'bg-cyan-100 text-cyan-800'}`}>
+                    <span className="size-1.5 rounded-full bg-current opacity-75"></span>
+                    {listingLabel(property.listingType)}
+                  </span>
+                  <span className={`inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs font-semibold ${propertyStatusClass(property.status)}`}>
+                    <span className="size-1.5 rounded-full bg-current opacity-75"></span>
+                    {propertyStatusLabel(property.status)}
+                  </span>
+                  <span className={`inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs font-semibold ${property.published ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'}`}>
+                    {property.published ? (
+                      <svg className="size-3" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                      </svg>
+                    ) : (
+                      <svg className="size-3" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                      </svg>
+                    )}
+                    {property.published ? 'Publicada' : 'Borrador'}
+                  </span>
                 </div>
-                <h2 className="mt-3 truncate text-lg font-bold">{property.title}</h2>
-                <p className="mt-1 text-sm text-slate-500">{property.code} · {property.city}, {property.stateCode}</p>
-                <strong className="mt-3 block text-lg text-indigo-700">{formatApiPrice(property)}</strong>
-                <Link className="mt-3 inline-flex rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-700 transition hover:border-indigo-300 hover:bg-indigo-50 hover:text-indigo-700" to={`/app/propiedades/${property.id}/editar`}>
-                  Editar propiedad
-                </Link>
+                <h2 className="truncate text-lg font-bold text-slate-900 group-hover:text-indigo-600 transition">{property.title}</h2>
+                <p className="mt-1 text-sm text-slate-500 flex items-center gap-2">
+                  <span className="font-mono text-xs bg-slate-100 px-2 py-0.5 rounded">{property.code}</span>
+                  <span>·</span>
+                  <span>{property.city}, {property.stateCode}</span>
+                </p>
+                <div className="mt-3 inline-flex items-baseline gap-2">
+                  <strong className="text-2xl font-bold text-indigo-600">{formatApiPrice(property)}</strong>
+                </div>
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-px border-t border-slate-100 bg-slate-100 text-center text-xs sm:grid-cols-5">
-              <Feature value={property.bedrooms} label="Recámaras" />
-              <Feature value={property.bathrooms} label="Baños" />
-              <Feature value={property.parkingSpaces} label="Autos" />
-              <Feature value={property.landArea} label="Terreno m²" />
-              <Feature value={property.constructionArea} label="Construcción m²" />
+
+            {/* Features grid */}
+            <div className="grid grid-cols-3 gap-px border-b border-slate-100 bg-slate-100 text-center text-xs lg:grid-cols-5">
+              <Feature icon={
+                <svg className="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                </svg>
+              } value={property.bedrooms} label="Recámaras" />
+              <Feature icon={
+                <svg className="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 14v3m4-3v3m4-3v3M3 21h18M3 10h18M3 7l9-4 9 4M4 10h16v11H4V10z" />
+                </svg>
+              } value={property.bathrooms} label="Baños" />
+              <Feature icon={
+                <svg className="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                </svg>
+              } value={property.parkingSpaces} label="Autos" />
+              <Feature icon={
+                <svg className="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
+                </svg>
+              } value={property.landArea} label="Terreno m²" />
+              <Feature icon={
+                <svg className="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                </svg>
+              } value={property.constructionArea} label="Construcción m²" />
             </div>
-          </article>
+
+            {/* Footer con acción */}
+            <div className="bg-slate-50/50 px-5 py-3 text-center">
+              <span className="inline-flex items-center gap-2 text-sm font-semibold text-indigo-600 group-hover:text-indigo-700 transition">
+                Editar propiedad
+                <svg className="size-4 transition group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+              </span>
+            </div>
+          </Link>
         ))}
       </div>
       <UpgradeModal
@@ -305,11 +372,14 @@ export function PropertiesPage() {
   );
 }
 
-function Feature({ value, label }: { value?: number; label: string }) {
+function Feature({ icon, value, label }: { icon: React.ReactNode; value?: number; label: string }) {
   return (
-    <div className="bg-white px-3 py-3">
-      <strong className="block text-sm text-slate-800">{value ?? '-'}</strong>
-      <span className="text-slate-400">{label}</span>
+    <div className="bg-white px-3 py-3 hover:bg-indigo-50 transition">
+      <div className="flex items-center justify-center gap-1.5 mb-1 text-indigo-600">
+        {icon}
+        <strong className="text-base text-slate-800">{value ?? '-'}</strong>
+      </div>
+      <span className="block text-[10px] text-slate-500 font-medium">{label}</span>
     </div>
   );
 }

@@ -8,15 +8,12 @@ import { SubscriptionBanner } from '../shared/SubscriptionBanner';
 import { useSubscriptionRestrictions } from '../shared/useSubscriptionRestrictions';
 
 const navigation: Array<{ label: string; to: string; icon: IconName; end?: boolean }> = [
-  { label: 'Panel', to: '/app', icon: 'dashboard', end: true },
+  { label: 'Dashboard', to: '/app', icon: 'dashboard', end: true },
   { label: 'Prospectos', to: '/app/prospectos', icon: 'leads' },
   { label: 'Propiedades', to: '/app/propiedades', icon: 'properties' },
   { label: 'Agenda', to: '/app/agenda', icon: 'calendar' },
-  { label: 'Asignaciones', to: '/app/asignaciones', icon: 'link' },
   { label: 'Documentos', to: '/app/documentos', icon: 'document' },
   { label: 'Reportes', to: '/app/reportes', icon: 'reports' },
-  { label: 'Usuarios', to: '/app/usuarios', icon: 'users' },
-  { label: 'Planes', to: '/app/planes', icon: 'plans' },
   { label: 'Configuración', to: '/app/configuracion', icon: 'settings' }
 ];
 

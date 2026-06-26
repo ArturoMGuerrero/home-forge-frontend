@@ -1,17 +1,15 @@
-import { FormEvent, useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useOutletContext } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { LeadItem } from '../shared/leads';
 import { ApiProperty } from '../shared/propertyApi';
-import { Appointment, createAppointment, deleteAppointment, listAppointments, loadOperationsContext, updateAppointment } from '../shared/operationsApi';
+import { Appointment, deleteAppointment, listAppointments, loadOperationsContext, updateAppointment } from '../shared/operationsApi';
+import { AppointmentModal } from '../components/AppointmentModal';
+import { ConfirmModal } from '../shared/ConfirmModal';
+import { SubscriptionRestrictions } from '../shared/subscriptionRestrictions';
 import { ExportButton } from '../shared/ExportButton';
 import { exportToExcel, formatDateTime } from '../shared/excelExport';
-import { UpgradeModal } from '../shared/UpgradeModal';
-import { SubscriptionRestrictions } from '../shared/subscriptionRestrictions';
-import { ConfirmModal } from '../shared/ConfirmModal';
-
-const inputClass = 'w-full rounded-xl border border-slate-200 bg-white px-3.5 py-3 text-sm outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100';
-const initialForm = { title: '', appointmentType: 'TOUR' as Appointment['appointmentType'], status: 'SCHEDULED' as Appointment['status'], startsAt: '', endsAt: '', leadId: '', propertyId: '', location: '', notes: '' };
+import { PageHeader } from '../shared/ui/PageHeader';
 
 export function AgendaPage() {
   const context = useOutletContext<{ restrictions: SubscriptionRestrictions }>();
@@ -19,73 +17,74 @@ export function AgendaPage() {
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [leads, setLeads] = useState<LeadItem[]>([]);
   const [properties, setProperties] = useState<ApiProperty[]>([]);
-  const [form, setForm] = useState(initialForm);
-  const [saving, setSaving] = useState(false);
-  const [upgradeModalOpen, setUpgradeModalOpen] = useState(false);
-  const [searchLead, setSearchLead] = useState('');
-  const [searchProperty, setSearchProperty] = useState('');
+  const [modalOpen, setModalOpen] = useState(false);
   const [appointmentToDelete, setAppointmentToDelete] = useState<string | null>(null);
   const [deleting, setDeleting] = useState(false);
+  const [currentDate, setCurrentDate] = useState(new Date());
 
   useEffect(() => {
     Promise.all([listAppointments(), loadOperationsContext()])
-      .then(([items, [leadItems, propertyItems]]) => { setAppointments(items); setLeads(leadItems); setProperties(propertyItems); })
+      .then(([items, [leadItems, propertyItems]]) => {
+        setAppointments(items);
+        setLeads(leadItems);
+        setProperties(propertyItems);
+      })
       .catch(requestError => toast.error(requestError instanceof Error ? requestError.message : 'No fue posible cargar la agenda.'));
   }, []);
 
-  const grouped = useMemo(() => appointments.reduce<Record<string, Appointment[]>>((result, item) => {
-    const key = new Date(item.startsAt).toLocaleDateString('es-MX', { dateStyle: 'full' });
-    (result[key] ??= []).push(item);
-    return result;
-  }, {}), [appointments]);
+  // Generar días del mes actual
+  const calendarDays = useMemo(() => {
+    const year = currentDate.getFullYear();
+    const month = currentDate.getMonth();
+    const firstDay = new Date(year, month, 1);
+    const lastDay = new Date(year, month + 1, 0);
+    const daysInMonth = lastDay.getDate();
+    const startingDayOfWeek = firstDay.getDay();
 
-  const filteredLeads = leads.filter(lead => {
-    if (!searchLead) return true;
-    const query = searchLead.toLowerCase();
-    const fullName = `${lead.firstName} ${lead.lastName}`.toLowerCase();
-    return fullName.includes(query) || lead.email?.toLowerCase().includes(query);
-  });
+    const days: Array<{ date: Date | null; appointments: Appointment[] }> = [];
 
-  const filteredProperties = properties.filter(property => {
-    if (!searchProperty) return true;
-    const query = searchProperty.toLowerCase();
-    return (
-      property.code?.toLowerCase().includes(query) ||
-      property.title?.toLowerCase().includes(query) ||
-      property.city?.toLowerCase().includes(query)
-    );
-  });
-
-  async function submit(event: FormEvent) {
-    event.preventDefault();
-    if (!restrictions.canCreate) {
-      setUpgradeModalOpen(true);
-      return;
+    // Días vacíos antes del primer día del mes
+    for (let i = 0; i < startingDayOfWeek; i++) {
+      days.push({ date: null, appointments: [] });
     }
-    setSaving(true);
-    try {
-      const created = await createAppointment({
-        title: form.title.trim(),
-        appointmentType: form.appointmentType,
-        status: form.status,
-        startsAt: new Date(form.startsAt).toISOString(),
-        endsAt: form.endsAt ? new Date(form.endsAt).toISOString() : undefined,
-        leadId: form.leadId || undefined,
-        propertyId: form.propertyId || undefined,
-        location: form.location.trim() || undefined,
-        notes: form.notes.trim() || undefined
+
+    // Días del mes
+    for (let day = 1; day <= daysInMonth; day++) {
+      const date = new Date(year, month, day);
+      const dayAppointments = appointments.filter(apt => {
+        const aptDate = new Date(apt.startsAt);
+        return (
+          aptDate.getFullYear() === year &&
+          aptDate.getMonth() === month &&
+          aptDate.getDate() === day
+        );
       });
-      setAppointments(current => [...current, created].sort((a, b) => a.startsAt.localeCompare(b.startsAt)));
-      setForm(initialForm);
-      toast.success('Cita agregada a la agenda');
-    } catch (requestError) {
-      toast.error(requestError instanceof Error ? requestError.message : 'No fue posible guardar la cita.');
-    } finally { setSaving(false); }
+      days.push({ date, appointments: dayAppointments });
+    }
+
+    return days;
+  }, [currentDate, appointments]);
+
+  const selectedDayAppointments = useMemo(() => {
+    const today = new Date();
+    return appointments.filter(apt => {
+      const aptDate = new Date(apt.startsAt);
+      return (
+        aptDate.getFullYear() === today.getFullYear() &&
+        aptDate.getMonth() === today.getMonth() &&
+        aptDate.getDate() === today.getDate()
+      );
+    }).sort((a, b) => a.startsAt.localeCompare(b.startsAt));
+  }, [appointments]);
+
+  function handleAppointmentCreated(appointment: Appointment) {
+    setAppointments(current => [...current, appointment].sort((a, b) => a.startsAt.localeCompare(b.startsAt)));
   }
 
   async function complete(item: Appointment) {
     const updated = await updateAppointment(item.id, { ...item, status: 'COMPLETED' });
-    setAppointments(current => current.map(candidate => candidate.id === item.id ? updated : candidate));
+    setAppointments(current => current.map(candidate => (candidate.id === item.id ? updated : candidate)));
+    toast.success('Cita marcada como realizada');
   }
 
   async function confirmDelete() {
@@ -105,7 +104,7 @@ export function AgendaPage() {
 
   function handleExport() {
     if (!restrictions.canExport) {
-      setUpgradeModalOpen(true);
+      toast.error('Esta funcionalidad requiere un plan superior');
       return;
     }
     const typeLabels: Record<string, string> = { TOUR: 'Recorrido', CALL: 'Llamada', MEETING: 'Reunión', FOLLOW_UP: 'Seguimiento', OTHER: 'Otro' };
@@ -118,8 +117,8 @@ export function AgendaPage() {
         { header: 'Estado', key: item => statusLabels[item.status] || item.status, width: 15 },
         { header: 'Inicio', key: item => formatDateTime(item.startsAt), width: 20 },
         { header: 'Fin', key: item => formatDateTime(item.endsAt), width: 20 },
-        { header: 'Prospecto', key: item => item.leadId ? leads.find(l => l.id === item.leadId)?.firstName + ' ' + (leads.find(l => l.id === item.leadId)?.lastName || '') : '', width: 25 },
-        { header: 'Propiedad', key: item => item.propertyId ? properties.find(p => p.id === item.propertyId)?.title || '' : '', width: 30 },
+        { header: 'Prospecto', key: item => (item.leadId ? leads.find(l => l.id === item.leadId)?.firstName + ' ' + (leads.find(l => l.id === item.leadId)?.lastName || '') : ''), width: 25 },
+        { header: 'Propiedad', key: item => (item.propertyId ? properties.find(p => p.id === item.propertyId)?.title || '' : ''), width: 30 },
         { header: 'Ubicación', key: 'location', width: 30 },
         { header: 'Notas', key: 'notes', width: 40 }
       ],
@@ -128,112 +127,232 @@ export function AgendaPage() {
     );
   }
 
+  function previousMonth() {
+    setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1));
+  }
+
+  function nextMonth() {
+    setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1));
+  }
+
+  function goToToday() {
+    setCurrentDate(new Date());
+  }
+
+  const monthName = currentDate.toLocaleDateString('es-MX', { month: 'long', year: 'numeric' });
+  const weekDays = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
+
   return (
-    <>
-      <header className="mb-8 flex items-end justify-between gap-4"><div><p className="text-[11px] font-bold uppercase tracking-[.16em] text-indigo-600">Operación</p><h1 className="mt-1 text-3xl font-bold">Agenda</h1><p className="mt-2 text-sm text-slate-500">Organiza llamadas, reuniones, recorridos y seguimientos.</p></div>{appointments.length > 0 && <ExportButton onExport={handleExport} variant="secondary" />}</header>
-      <div className="grid gap-6 xl:grid-cols-[380px_1fr]">
-        <form className="h-fit rounded-2xl border border-slate-200 bg-white p-5 shadow-sm" onSubmit={submit}>
-          <h2 className="text-xl font-bold">Nueva cita</h2>
-          <div className="mt-5 grid gap-4">
-            <label className="text-sm font-semibold">Título<input className={inputClass} maxLength={180} onChange={e => setForm({ ...form, title: e.target.value })} required value={form.title} /></label>
-            <div className="grid grid-cols-2 gap-3">
-              <label className="text-sm font-semibold">Tipo<select className={inputClass} onChange={e => setForm({ ...form, appointmentType: e.target.value as Appointment['appointmentType'] })} value={form.appointmentType}><option value="TOUR">Recorrido</option><option value="CALL">Llamada</option><option value="MEETING">Reunión</option><option value="FOLLOW_UP">Seguimiento</option><option value="OTHER">Otro</option></select></label>
-              <label className="text-sm font-semibold">Estado<select className={inputClass} onChange={e => setForm({ ...form, status: e.target.value as Appointment['status'] })} value={form.status}><option value="SCHEDULED">Programada</option><option value="COMPLETED">Realizada</option><option value="CANCELED">Cancelada</option></select></label>
-            </div>
-            <label className="text-sm font-semibold">Inicio<input className={inputClass} onChange={e => setForm({ ...form, startsAt: e.target.value })} required type="datetime-local" value={form.startsAt} /></label>
-            <label className="text-sm font-semibold">Fin<input className={inputClass} onChange={e => setForm({ ...form, endsAt: e.target.value })} type="datetime-local" value={form.endsAt} /></label>
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
+      <AppointmentModal isOpen={modalOpen} onClose={() => setModalOpen(false)} onAppointmentCreated={handleAppointmentCreated} leads={leads} properties={properties} restrictions={restrictions} />
 
-            {/* Prospecto con búsqueda */}
-            <div>
-              <label className="text-sm font-semibold">Prospecto</label>
-              <div className="relative mb-2 mt-2">
-                <svg className="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                </svg>
-                <input
-                  className="w-full rounded-lg border border-slate-200 py-2 pl-11 pr-9 text-sm transition focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-100"
-                  onChange={e => setSearchLead(e.target.value)}
-                  placeholder="Buscar prospecto..."
-                  type="text"
-                  value={searchLead}
-                />
-                {searchLead && (
-                  <button
-                    className="absolute right-2.5 top-1/2 -translate-y-1/2 rounded p-1 text-slate-400 transition hover:bg-slate-100 hover:text-slate-600"
-                    onClick={() => setSearchLead('')}
-                    type="button"
-                  >
-                    <svg className="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                  </button>
-                )}
-              </div>
-              <select className={inputClass} onChange={e => { setForm({ ...form, leadId: e.target.value }); setSearchLead(''); }} value={form.leadId}>
-                <option value="">Sin vincular ({filteredLeads.length})</option>
-                {filteredLeads.map(lead => <option key={lead.id} value={lead.id}>{lead.firstName} {lead.lastName}</option>)}
-              </select>
-            </div>
-
-            {/* Propiedad con búsqueda */}
-            <div>
-              <label className="text-sm font-semibold">Propiedad</label>
-              <div className="relative mb-2 mt-2">
-                <svg className="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                </svg>
-                <input
-                  className="w-full rounded-lg border border-slate-200 py-2 pl-11 pr-9 text-sm transition focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-100"
-                  onChange={e => setSearchProperty(e.target.value)}
-                  placeholder="Buscar propiedad..."
-                  type="text"
-                  value={searchProperty}
-                />
-                {searchProperty && (
-                  <button
-                    className="absolute right-2.5 top-1/2 -translate-y-1/2 rounded p-1 text-slate-400 transition hover:bg-slate-100 hover:text-slate-600"
-                    onClick={() => setSearchProperty('')}
-                    type="button"
-                  >
-                    <svg className="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                  </button>
-                )}
-              </div>
-              <select className={inputClass} onChange={e => { setForm({ ...form, propertyId: e.target.value }); setSearchProperty(''); }} value={form.propertyId}>
-                <option value="">Sin vincular ({filteredProperties.length})</option>
-                {filteredProperties.map(property => <option key={property.id} value={property.id}>{property.code} · {property.title}</option>)}
-              </select>
-            </div>
-
-            <label className="text-sm font-semibold">Lugar<input className={inputClass} maxLength={255} onChange={e => setForm({ ...form, location: e.target.value })} value={form.location} /></label>
-            <label className="text-sm font-semibold">Notas<textarea className={`${inputClass} min-h-24`} onChange={e => setForm({ ...form, notes: e.target.value })} value={form.notes} /></label>
-            <button className="rounded-xl bg-indigo-600 px-4 py-3 text-sm font-bold text-white disabled:opacity-60" disabled={saving}>{saving ? 'Guardando...' : 'Agregar a agenda'}</button>
+      <PageHeader
+        title="Agenda"
+        subtitle="Gestiona tus citas y recorridos"
+        badge={{ value: appointments.length, label: 'citas' }}
+        actions={
+          <div className="flex gap-3">
+            {appointments.length > 0 && <ExportButton onExport={handleExport} variant="secondary" />}
+            <button
+              className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-indigo-900/20 transition hover:shadow-xl hover:shadow-indigo-900/30"
+              onClick={() => setModalOpen(true)}
+            >
+              <svg className="size-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+              </svg>
+              Nueva cita
+            </button>
           </div>
-        </form>
-        <section className="space-y-5">
-          {Object.entries(grouped).map(([date, items]) => <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm" key={date}><h2 className="mb-3 capitalize font-bold text-slate-700">{date}</h2>{items.map(item => <article className="flex flex-wrap items-center gap-4 border-t border-slate-100 py-4 first:border-0" key={item.id}><time className="w-20 text-sm font-bold text-indigo-700">{new Date(item.startsAt).toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' })}</time><div className="min-w-0 flex-1"><strong className="block">{item.title}</strong><p className="text-sm text-slate-500">{item.location || 'Sin ubicación'}{item.notes ? ` · ${item.notes}` : ''}</p></div><span className={`rounded-full px-3 py-1 text-xs font-bold ${item.status === 'COMPLETED' ? 'bg-emerald-100 text-emerald-800' : item.status === 'CANCELED' ? 'bg-slate-200 text-slate-700' : 'bg-indigo-100 text-indigo-800'}`}>{item.status}</span><div className="flex gap-2">{item.status === 'SCHEDULED' && <button className="rounded-lg border border-slate-200 px-3 py-2 text-xs font-bold hover:bg-slate-50" onClick={() => complete(item)}>Marcar realizada</button>}<button className="rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-xs font-bold text-rose-700 hover:bg-rose-100" onClick={() => setAppointmentToDelete(item.id)}>Eliminar</button></div></article>)}</div>)}
-          {appointments.length === 0 && <p className="rounded-2xl border border-dashed border-slate-300 p-10 text-center text-sm text-slate-500">No hay citas programadas.</p>}
-        </section>
+        }
+      />
+
+      <div className="p-4 lg:p-6">
+        <div className="grid gap-6 lg:grid-cols-[1fr_380px]">
+        {/* Calendario */}
+        <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+          {/* Controles del calendario */}
+          <div className="mb-6 flex items-center justify-between">
+            <h2 className="text-xl font-bold capitalize">{monthName}</h2>
+            <div className="flex gap-2">
+              <button className="rounded-lg border border-slate-200 px-3 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50" onClick={goToToday}>
+                Hoy
+              </button>
+              <button className="rounded-lg border border-slate-200 p-2 text-slate-700 transition hover:bg-slate-50" onClick={previousMonth}>
+                <svg className="size-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                </svg>
+              </button>
+              <button className="rounded-lg border border-slate-200 p-2 text-slate-700 transition hover:bg-slate-50" onClick={nextMonth}>
+                <svg className="size-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+              </button>
+            </div>
+          </div>
+
+          {/* Días de la semana */}
+          <div className="mb-2 grid grid-cols-7 gap-2">
+            {weekDays.map(day => (
+              <div key={day} className="p-2 text-center text-xs font-bold uppercase text-slate-500">
+                {day}
+              </div>
+            ))}
+          </div>
+
+          {/* Días del mes */}
+          <div className="grid grid-cols-7 gap-2">
+            {calendarDays.map((day, index) => (
+              <div
+                key={index}
+                className={`min-h-24 rounded-lg border p-2 transition ${
+                  day.date
+                    ? day.date.toDateString() === new Date().toDateString()
+                      ? 'border-indigo-500 bg-indigo-50'
+                      : day.appointments.length > 0
+                      ? 'border-slate-300 bg-slate-50 hover:bg-slate-100'
+                      : 'border-slate-200 hover:bg-slate-50'
+                    : 'border-transparent bg-slate-50'
+                }`}
+              >
+                {day.date && (
+                  <>
+                    <div className={`mb-1 text-right text-sm font-bold ${day.date.toDateString() === new Date().toDateString() ? 'text-indigo-600' : 'text-slate-700'}`}>{day.date.getDate()}</div>
+                    <div className="space-y-1">
+                      {day.appointments.slice(0, 2).map(apt => (
+                        <div key={apt.id} className="truncate rounded bg-indigo-100 px-1.5 py-0.5 text-xs font-medium text-indigo-700" title={apt.title}>
+                          {new Date(apt.startsAt).toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' })} {apt.title}
+                        </div>
+                      ))}
+                      {day.appointments.length > 2 && <div className="text-xs font-medium text-slate-500">+{day.appointments.length - 2} más</div>}
+                    </div>
+                  </>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Lista de citas del día actual */}
+        <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+          <div className="mb-4 flex items-center gap-2">
+            <svg className="size-5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+            </svg>
+            <h2 className="text-lg font-bold">Hoy</h2>
+          </div>
+          {selectedDayAppointments.length > 0 ? (
+            <div className="space-y-3">
+              {selectedDayAppointments.map(apt => (
+                <article key={apt.id} className="group overflow-hidden rounded-2xl border border-slate-200 bg-white transition hover:border-indigo-300 hover:shadow-lg hover:shadow-indigo-500/10">
+                  {/* Header con hora y estado */}
+                  <div className="flex items-start gap-3 border-b border-slate-100 bg-gradient-to-br from-slate-50 to-white p-4">
+                    {/* Icono de la cita */}
+                    <div className={`flex size-12 shrink-0 items-center justify-center rounded-2xl shadow-lg ring-4 ${
+                      apt.status === 'COMPLETED' ? 'bg-gradient-to-br from-emerald-500 to-teal-600 ring-emerald-50' :
+                      apt.status === 'CANCELED' ? 'bg-gradient-to-br from-slate-400 to-slate-600 ring-slate-50' :
+                      'bg-gradient-to-br from-indigo-500 to-purple-600 ring-indigo-50'
+                    }`}>
+                      <svg className="size-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        {apt.appointmentType === 'TOUR' ? (
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                        ) : apt.appointmentType === 'CALL' ? (
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                        ) : (
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        )}
+                      </svg>
+                    </div>
+
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="min-w-0 flex-1">
+                          <h3 className="font-bold text-slate-900 group-hover:text-indigo-600 transition">{apt.title}</h3>
+                          <div className="mt-1.5 flex items-center gap-2">
+                            <span className="inline-flex items-center gap-1.5 rounded-lg bg-indigo-100 px-2.5 py-1 text-xs font-semibold text-indigo-700">
+                              <svg className="size-3" fill="currentColor" viewBox="0 0 20 20">
+                                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clipRule="evenodd" />
+                              </svg>
+                              {new Date(apt.startsAt).toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' })}
+                            </span>
+                            <span className={`inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs font-semibold ${
+                              apt.status === 'COMPLETED' ? 'bg-emerald-100 text-emerald-800' :
+                              apt.status === 'CANCELED' ? 'bg-slate-200 text-slate-700' :
+                              'bg-cyan-100 text-cyan-800'
+                            }`}>
+                              <span className="size-1.5 rounded-full bg-current opacity-75"></span>
+                              {apt.status === 'COMPLETED' ? 'Realizada' : apt.status === 'CANCELED' ? 'Cancelada' : 'Programada'}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Detalles */}
+                  {(apt.location || apt.notes) && (
+                    <div className="space-y-2 border-b border-slate-100 bg-white px-4 py-3">
+                      {apt.location && (
+                        <div className="flex items-start gap-2 text-sm">
+                          <svg className="size-4 mt-0.5 shrink-0 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                          </svg>
+                          <span className="text-slate-700">{apt.location}</span>
+                        </div>
+                      )}
+                      {apt.notes && (
+                        <div className="flex items-start gap-2 text-sm">
+                          <svg className="size-4 mt-0.5 shrink-0 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z" />
+                          </svg>
+                          <span className="text-slate-600">{apt.notes}</span>
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Acciones */}
+                  <div className="flex flex-wrap gap-2 bg-slate-50/50 px-4 py-3">
+                    {apt.status === 'SCHEDULED' && (
+                      <button
+                        className="inline-flex items-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-2 text-sm font-semibold text-emerald-700 transition hover:bg-emerald-100 hover:border-emerald-300"
+                        onClick={() => complete(apt)}
+                      >
+                        <svg className="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        Marcar realizada
+                      </button>
+                    )}
+                    <button
+                      className="inline-flex items-center gap-2 rounded-xl border border-rose-200 bg-rose-50 px-4 py-2 text-sm font-semibold text-rose-700 transition hover:bg-rose-100 hover:border-rose-300"
+                      onClick={() => setAppointmentToDelete(apt.id)}
+                    >
+                      <svg className="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                      </svg>
+                      Eliminar
+                    </button>
+                  </div>
+                </article>
+              ))}
+            </div>
+          ) : (
+            <div className="flex flex-col items-center justify-center rounded-2xl border-2 border-dashed border-slate-200 bg-slate-50 py-12 text-center">
+              <div className="rounded-full bg-indigo-100 p-4">
+                <svg className="size-10 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+              </div>
+              <p className="mt-4 text-base font-semibold text-slate-700">No hay citas para hoy</p>
+              <p className="mt-1 text-sm text-slate-500">Haz clic en "Nueva cita" para agregar una</p>
+            </div>
+          )}
+        </div>
+        </div>
       </div>
-      <UpgradeModal
-        feature="crear nuevas citas"
-        isOpen={upgradeModalOpen}
-        level={restrictions.level === 'BLOCKED' ? 'BLOCKED' : 'LIMITED'}
-        onClose={() => setUpgradeModalOpen(false)}
-      />
-      <ConfirmModal
-        isOpen={appointmentToDelete !== null}
-        title="¿Eliminar esta cita?"
-        message="Esta acción no se puede deshacer."
-        confirmLabel="Eliminar"
-        cancelLabel="Cancelar"
-        onConfirm={confirmDelete}
-        onCancel={() => setAppointmentToDelete(null)}
-        loading={deleting}
-        danger={true}
-      />
-    </>
+
+      <ConfirmModal isOpen={appointmentToDelete !== null} title="¿Eliminar esta cita?" message="Esta acción no se puede deshacer." confirmLabel="Eliminar" cancelLabel="Cancelar" onConfirm={confirmDelete} onCancel={() => setAppointmentToDelete(null)} loading={deleting} danger={true} />
+    </div>
   );
 }

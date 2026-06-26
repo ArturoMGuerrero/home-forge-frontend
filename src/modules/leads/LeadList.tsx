@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useOutletContext } from 'react-router-dom';
 import toast from 'react-hot-toast';
@@ -54,32 +54,65 @@ function formatPhone(phone?: string): string {
   return phone;
 }
 
-type Props = { expanded?: boolean };
+type Props = {
+  expanded?: boolean;
+  leads?: LeadItem[];
+  searchQuery?: string;
+  setSearchQuery?: (query: string) => void;
+  statusFilter?: LeadItem['status'] | 'ALL';
+  setStatusFilter?: (status: LeadItem['status'] | 'ALL') => void;
+  priorityFilter?: LeadItem['priority'] | 'ALL';
+  setPriorityFilter?: (priority: LeadItem['priority'] | 'ALL') => void;
+  filteredLeads?: LeadItem[];
+};
 
-export function LeadList({ expanded = false }: Props) {
+export function LeadList({
+  expanded = false,
+  leads: leadsFromProps,
+  searchQuery: searchQueryFromProps,
+  setSearchQuery: setSearchQueryFromProps,
+  statusFilter: statusFilterFromProps,
+  setStatusFilter: setStatusFilterFromProps,
+  priorityFilter: priorityFilterFromProps,
+  setPriorityFilter: setPriorityFilterFromProps,
+  filteredLeads: filteredLeadsFromProps
+}: Props) {
   const { t } = useTranslation();
   const context = useOutletContext<{ restrictions: SubscriptionRestrictions }>();
   const restrictions = context?.restrictions || { canCreate: true, canExport: true, level: 'NONE' };
-  const [leads, setLeads] = useState<LeadItem[]>([]);
+  const [leadsState, setLeadsState] = useState<LeadItem[]>([]);
   const [modalOpen, setModalOpen] = useState(false);
   const [upgradeModalOpen, setUpgradeModalOpen] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [statusFilter, setStatusFilter] = useState<LeadItem['status'] | 'ALL'>('ALL');
-  const [priorityFilter, setPriorityFilter] = useState<LeadItem['priority'] | 'ALL'>('ALL');
+  const [searchQueryState, setSearchQueryState] = useState('');
+  const [statusFilterState, setStatusFilterState] = useState<LeadItem['status'] | 'ALL'>('ALL');
+  const [priorityFilterState, setPriorityFilterState] = useState<LeadItem['priority'] | 'ALL'>('ALL');
+
+  // Use props if provided, otherwise use internal state
+  const leads = leadsFromProps ?? leadsState;
+  const searchQuery = searchQueryFromProps ?? searchQueryState;
+  const setSearchQuery = setSearchQueryFromProps ?? setSearchQueryState;
+  const statusFilter = statusFilterFromProps ?? statusFilterState;
+  const setStatusFilter = setStatusFilterFromProps ?? setStatusFilterState;
+  const priorityFilter = priorityFilterFromProps ?? priorityFilterState;
+  const setPriorityFilter = setPriorityFilterFromProps ?? setPriorityFilterState;
 
   function load() {
-    listLeads()
-      .then(setLeads)
-      .catch(() => toast.error('No fue posible consultar los prospectos. Verifica que el backend esté activo.'));
+    if (!leadsFromProps) {
+      listLeads()
+        .then(setLeadsState)
+        .catch(() => toast.error('No fue posible consultar los prospectos. Verifica que el backend esté activo.'));
+    }
   }
 
   useEffect(() => {
-    load();
-    window.addEventListener('casaflow:leads', load);
-    return () => window.removeEventListener('casaflow:leads', load);
-  }, []);
+    if (!leadsFromProps) {
+      load();
+      window.addEventListener('casaflow:leads', load);
+      return () => window.removeEventListener('casaflow:leads', load);
+    }
+  }, [leadsFromProps]);
 
-  const filteredLeads = leads.filter(lead => {
+  const filteredLeads = filteredLeadsFromProps ?? leads.filter(lead => {
     // Búsqueda por texto
     if (searchQuery) {
       const query = searchQuery.toLowerCase();
@@ -121,7 +154,6 @@ export function LeadList({ expanded = false }: Props) {
         { header: 'Prioridad', key: item => priorityLabels[item.priority] || item.priority, width: 12 },
         { header: 'Presupuesto', key: item => formatBudget(item.budgetMin, item.budgetMax, item.currencyCode), width: 25 },
         { header: 'Origen', key: 'source', width: 20 },
-        { header: 'Fecha creación', key: item => formatDate(item.createdAt as string), width: 15 },
         { header: 'Notas', key: 'notes', width: 40 }
       ],
       'prospectos-homeforge',
@@ -130,24 +162,25 @@ export function LeadList({ expanded = false }: Props) {
   }
 
   return (
-    <section className="min-w-0 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
-      <div className="mb-5 flex items-center justify-between gap-4">
-        <div><p className="mb-1 text-[11px] font-bold uppercase tracking-[0.16em] text-indigo-600">{t('crm')}</p><h2 className="text-xl font-bold">{expanded ? 'Todos los prospectos' : t('recentLeads')}</h2></div>
-        <div className="flex gap-3">
-          {expanded && <ExportButton onExport={handleExport} variant="secondary" />}
-          <button
-            className={`shrink-0 rounded-xl px-3.5 py-2.5 text-sm font-semibold shadow-sm transition focus:outline-none focus:ring-2 focus:ring-offset-2 ${
-              restrictions.canCreate
-                ? 'bg-indigo-600 text-white hover:bg-indigo-700 focus:ring-indigo-500'
-                : 'bg-slate-200 text-slate-500 cursor-not-allowed'
-            }`}
-            onClick={handleCreateLead}
-            type="button"
-          >
-            {restrictions.canCreate ? `+ ${t('newLead')}` : `🔒 ${t('newLead')}`}
-          </button>
+    <section className="min-w-0 p-4 lg:p-6">
+      {!expanded && (
+        <div className="mb-5 flex items-center justify-between gap-4">
+          <div><p className="mb-1 text-[11px] font-bold uppercase tracking-[0.16em] text-indigo-600">{t('crm')}</p><h2 className="text-xl font-bold">{t('recentLeads')}</h2></div>
+          <div className="flex gap-3">
+            <button
+              className={`shrink-0 rounded-xl px-3.5 py-2.5 text-sm font-semibold shadow-sm transition focus:outline-none focus:ring-2 focus:ring-offset-2 ${
+                restrictions.canCreate
+                  ? 'bg-indigo-600 text-white hover:bg-indigo-700 focus:ring-indigo-500'
+                  : 'bg-slate-200 text-slate-500 cursor-not-allowed'
+              }`}
+              onClick={handleCreateLead}
+              type="button"
+            >
+              {restrictions.canCreate ? `+ ${t('newLead')}` : `🔒 ${t('newLead')}`}
+            </button>
+          </div>
         </div>
-      </div>
+      )}
 
       {expanded && (
         <div className="mb-5 space-y-4">
@@ -274,110 +307,143 @@ export function LeadList({ expanded = false }: Props) {
 
           return (
             <Link
-              className="group block rounded-xl border border-slate-200 bg-white p-4 transition hover:border-indigo-200 hover:shadow-md hover:shadow-indigo-100/50"
+              className="group block overflow-hidden rounded-2xl border border-slate-200 bg-white transition hover:border-indigo-300 hover:shadow-lg hover:shadow-indigo-500/10"
               key={lead.id}
               to={`/app/prospectos/${lead.id}`}
             >
-              <div className="flex items-start gap-3">
+              {/* Header con avatar y badges */}
+              <div className="flex items-start gap-4 border-b border-slate-100 bg-gradient-to-br from-slate-50 to-white p-5">
                 <div className="relative">
-                  <span className="grid size-12 shrink-0 place-items-center rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 text-sm font-bold text-white shadow-lg">
+                  <div className="grid size-14 shrink-0 place-items-center rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 text-lg font-bold text-white shadow-lg shadow-indigo-500/30 ring-4 ring-indigo-50">
                     {lead.firstName[0]}{lead.lastName[0]}
-                  </span>
+                  </div>
                   {lead.priority === 'HIGH' && (
-                    <span className="absolute -right-1 -top-1 size-4 rounded-full bg-rose-500 ring-2 ring-white" title="Alta prioridad" />
+                    <div className="absolute -right-1 -top-1 flex size-5 items-center justify-center rounded-full bg-rose-500 ring-2 ring-white" title="Alta prioridad">
+                      <svg className="size-3 text-white" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                      </svg>
+                    </div>
                   )}
                 </div>
 
                 <div className="min-w-0 flex-1">
-                  <div className="mb-2 flex items-start justify-between gap-3">
+                  <div className="flex items-start justify-between gap-3">
                     <div className="min-w-0 flex-1">
-                      <strong className="block truncate text-base font-semibold text-slate-900 group-hover:text-indigo-600">
+                      <h3 className="truncate text-lg font-bold text-slate-900 group-hover:text-indigo-600 transition">
                         {lead.firstName} {lead.lastName}
-                      </strong>
-                      <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-slate-500">
-                        {phone && (
-                          <span className="flex items-center gap-1">
-                            <svg className="size-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
-                            </svg>
-                            {phone}
-                          </span>
-                        )}
-                        {lead.email && (
-                          <span className="flex items-center gap-1 truncate">
-                            <svg className="size-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                            </svg>
-                            <span className="truncate">{lead.email}</span>
+                      </h3>
+                      <div className="mt-1.5 flex items-center gap-2">
+                        <span className={`inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs font-semibold ${statusClass[lead.status] ?? 'bg-slate-100 text-slate-700'}`}>
+                          <span className="size-1.5 rounded-full bg-current opacity-75"></span>
+                          {leadStatusLabels[lead.status]}
+                        </span>
+                        {lead.priority !== 'MEDIUM' && (
+                          <span className={`inline-flex items-center gap-1 rounded-lg px-2 py-1 text-xs font-semibold ${priorityClass[lead.priority]}`}>
+                            {lead.priority === 'HIGH' ? '⚡' : '📋'} {priorityLabels[lead.priority]}
                           </span>
                         )}
                       </div>
                     </div>
-                    <div className="flex shrink-0 flex-col items-end gap-1.5">
-                      <span className={`rounded-full px-2.5 py-1 text-[11px] font-semibold ${statusClass[lead.status] ?? 'bg-slate-100 text-slate-700'}`}>
-                        {leadStatusLabels[lead.status]}
-                      </span>
-                      {lead.priority !== 'MEDIUM' && (
-                        <span className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${priorityClass[lead.priority]}`}>
-                          {priorityLabels[lead.priority]}
+                    {lead.score !== undefined && lead.score > 0 && (
+                      <div className="flex flex-col items-center rounded-xl bg-white px-3 py-2 shadow-sm ring-1 ring-slate-200">
+                        <span className={`text-xl font-bold leading-none ${
+                          lead.score >= 70 ? 'text-emerald-600' :
+                          lead.score >= 40 ? 'text-amber-600' :
+                          'text-slate-400'
+                        }`}>
+                          {lead.score}
                         </span>
-                      )}
-                    </div>
-                  </div>
-
-                  <div className="mt-3 flex flex-wrap gap-2 text-xs">
-                    {budget && (
-                      <span className="flex items-center gap-1.5 rounded-lg bg-emerald-50 px-2.5 py-1.5 font-semibold text-emerald-700">
-                        <svg className="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                        {budget}
-                      </span>
-                    )}
-                    {lead.propertyType && (
-                      <span className="flex items-center gap-1.5 rounded-lg bg-indigo-50 px-2.5 py-1.5 font-medium text-indigo-700">
-                        <svg className="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-                        </svg>
-                        {lead.propertyType}
-                      </span>
-                    )}
-                    {lead.bedroomsMin !== undefined && lead.bedroomsMin > 0 && (
-                      <span className="flex items-center gap-1.5 rounded-lg bg-purple-50 px-2.5 py-1.5 font-medium text-purple-700">
-                        <svg className="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-                        </svg>
-                        {lead.bedroomsMin}+ rec
-                      </span>
-                    )}
-                    {lead.city && (
-                      <span className="flex items-center gap-1.5 rounded-lg bg-slate-50 px-2.5 py-1.5 font-medium text-slate-600">
-                        <svg className="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                        </svg>
-                        {lead.city}
-                      </span>
+                        <span className="text-[10px] font-medium uppercase tracking-wide text-slate-500">Score</span>
+                      </div>
                     )}
                   </div>
-
-                  {lead.nextFollowUpAt && (
-                    <div className="mt-3 flex items-center gap-2 rounded-lg bg-amber-50 px-3 py-2 text-xs">
-                      <svg className="size-4 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                      </svg>
-                      <span className="font-medium text-amber-700">
-                        Próximo seguimiento: {new Date(lead.nextFollowUpAt).toLocaleDateString('es-MX', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}
-                      </span>
-                    </div>
-                  )}
                 </div>
               </div>
+
+              {/* Información de contacto */}
+              <div className="space-y-2 border-b border-slate-100 bg-white px-5 py-4">
+                {phone && (
+                  <div className="flex items-center gap-2.5 text-sm">
+                    <div className="flex size-8 items-center justify-center rounded-lg bg-indigo-50 text-indigo-600">
+                      <svg className="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                      </svg>
+                    </div>
+                    <span className="font-medium text-slate-700">{phone}</span>
+                  </div>
+                )}
+                {lead.email && (
+                  <div className="flex items-center gap-2.5 text-sm">
+                    <div className="flex size-8 items-center justify-center rounded-lg bg-purple-50 text-purple-600">
+                      <svg className="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                      </svg>
+                    </div>
+                    <span className="truncate font-medium text-slate-700">{lead.email}</span>
+                  </div>
+                )}
+              </div>
+
+              {/* Detalles del prospecto */}
+              <div className="flex flex-wrap gap-2 bg-slate-50/50 px-5 py-4">
+                {budget && (
+                  <div className="inline-flex items-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2">
+                    <svg className="size-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <span className="text-sm font-bold text-emerald-700">{budget}</span>
+                  </div>
+                )}
+                {lead.propertyType && (
+                  <div className="inline-flex items-center gap-2 rounded-xl border border-blue-200 bg-blue-50 px-3 py-2">
+                    <svg className="size-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                    </svg>
+                    <span className="text-sm font-semibold text-blue-700">{lead.propertyType}</span>
+                  </div>
+                )}
+                {lead.bedroomsMin !== undefined && lead.bedroomsMin > 0 && (
+                  <div className="inline-flex items-center gap-2 rounded-xl border border-violet-200 bg-violet-50 px-3 py-2">
+                    <svg className="size-4 text-violet-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                    </svg>
+                    <span className="text-sm font-semibold text-violet-700">{lead.bedroomsMin}+ recámaras</span>
+                  </div>
+                )}
+                {lead.city && (
+                  <div className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2">
+                    <svg className="size-4 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
+                    <span className="text-sm font-semibold text-slate-700">{lead.city}</span>
+                  </div>
+                )}
+              </div>
+
+              {/* Próximo seguimiento */}
+              {lead.nextFollowUpAt && (
+                <div className="flex items-center gap-3 border-t border-amber-200 bg-gradient-to-r from-amber-50 to-orange-50 px-5 py-3">
+                  <div className="flex size-8 items-center justify-center rounded-lg bg-amber-100">
+                    <svg className="size-4 text-amber-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-xs font-medium text-amber-600">Próximo seguimiento</p>
+                    <p className="text-sm font-bold text-amber-900">
+                      {new Date(lead.nextFollowUpAt).toLocaleDateString('es-MX', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}
+                    </p>
+                  </div>
+                </div>
+              )}
             </Link>
           );
         })}
       </div>
-      <CreateLeadModal open={modalOpen} onClose={() => setModalOpen(false)} onCreated={created => setLeads(current => [created, ...current])} />
+      {!leadsFromProps && (
+        <CreateLeadModal open={modalOpen} onClose={() => setModalOpen(false)} onCreated={created => setLeadsState(current => [created, ...current])} />
+      )}
       <UpgradeModal
         feature="crear nuevos prospectos"
         isOpen={upgradeModalOpen}

@@ -341,6 +341,34 @@ export function LeadDetailPage() {
                     </div>
                   </div>
                   <p className="mt-2 whitespace-pre-line text-sm leading-6 text-slate-600">{item.notes}</p>
+                  <div className="mt-2 flex flex-wrap gap-2">
+                    {item.durationMinutes && (
+                      <span className="inline-flex items-center gap-1 rounded-lg bg-gray-100 px-2 py-1 text-xs font-medium text-gray-700">
+                        <svg className="size-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        {item.durationMinutes} min
+                      </span>
+                    )}
+                    {item.outcome && (
+                      <span className={`inline-flex items-center gap-1 rounded-lg px-2 py-1 text-xs font-medium ${
+                        item.outcome === 'SUCCESS' ? 'bg-green-100 text-green-800' :
+                        item.outcome === 'SCHEDULED' ? 'bg-blue-100 text-blue-800' :
+                        item.outcome === 'NO_ANSWER' ? 'bg-yellow-100 text-yellow-800' :
+                        'bg-gray-100 text-gray-700'
+                      }`}>
+                        {item.outcome === 'SUCCESS' ? '✓ Exitoso' :
+                         item.outcome === 'SCHEDULED' ? '📅 Agendado' :
+                         item.outcome === 'NO_ANSWER' ? '📞 Sin respuesta' :
+                         item.outcome}
+                      </span>
+                    )}
+                    {item.propertyId && (
+                      <span className="inline-flex items-center gap-1 rounded-lg bg-purple-100 px-2 py-1 text-xs font-medium text-purple-800">
+                        🏠 Propiedad vinculada
+                      </span>
+                    )}
+                  </div>
                   {item.nextFollowUpAt && <p className="mt-2 rounded-lg bg-indigo-50 px-3 py-2 text-xs font-semibold text-indigo-700">Siguiente contacto: {new Date(item.nextFollowUpAt).toLocaleString('es-MX')}</p>}
                 </article>
               ))}
