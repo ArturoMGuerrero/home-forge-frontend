@@ -12,11 +12,13 @@ export type Plan = {
   featured?: boolean;
 };
 
+export type SubscriptionStatus = 'TRIAL' | 'ACTIVE' | 'EXPIRED' | 'SUSPENDED' | 'CANCELLED' | 'PENDING';
+
 export type Subscription = {
   companyId: string;
   planCode: PlanCode;
   userLimit: number;
-  status: 'TRIAL' | 'ACTIVE' | 'PAST_DUE' | 'CANCELED';
+  status: SubscriptionStatus;
   trialStartedAt?: string;
   trialEndsAt?: string;
   trialDaysRemaining: number;

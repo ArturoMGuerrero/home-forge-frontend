@@ -10,7 +10,8 @@ function getApiBase(): string {
   const port = '8080';
   const protocol = window.location.protocol;
 
-  return `${protocol}//${hostname}:${port}/api`;
+  // return `${protocol}//${hostname}:${port}/api`;
+  return `https://electro-der-lenders-means.trycloudflare.com/api`
 }
 
 const API_BASE = getApiBase();

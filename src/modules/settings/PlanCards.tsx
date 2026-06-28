@@ -1,11 +1,11 @@
-import { Plan, PlanCode } from '../../shared/subscriptionApi';
+import { Plan, PlanCode, SubscriptionStatus } from '../../shared/subscriptionApi';
 
 type PlanCardsProps = {
   plans: Plan[];
   currentPlan: PlanCode;
   changing?: PlanCode;
   onSelect: (plan: PlanCode) => void;
-  subscriptionStatus?: 'TRIAL' | 'ACTIVE' | 'EXPIRED' | 'SUSPENDED' | 'CANCELLED' | 'PENDING';
+  subscriptionStatus?: SubscriptionStatus;
 };
 
 export function PlanCards({ plans, currentPlan, changing, onSelect, subscriptionStatus }: PlanCardsProps) {
