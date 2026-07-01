@@ -346,13 +346,28 @@ server {
   - Firma electrónica
   - Gestión de estados (Borrador → Firma → Completado)
   - Versionado de plantillas y documentos
+- ✅ Notificaciones y comunicación
+  - Notificaciones por Email, WhatsApp, Push, SMS
+  - Plantillas de mensajes reutilizables
+  - Variables dinámicas en mensajes
+  - Filtros por estado y tipo
+  - Programación de envíos
+  - Seguimiento de entregas (Pendiente → Enviado → Entregado → Leído)
 - ✅ Sistema de suscripciones
   - Planes Free, Plus y Professional
   - Integración con pasarela de pagos
   - Gestión de cobros recurrentes
   - Restricciones por plan
   - Páginas de confirmación de pago
-- ✅ Calendario de citas
+- ✅ Calendario y citas
+  - Vista mensual interactiva
+  - Creación de citas con modal
+  - Tipos de cita (tour, reunión, llamada, videollamada, firma)
+  - Ubicaciones (presencial, virtual, teléfono, en propiedad)
+  - Recordatorios configurables
+  - Gestión de disponibilidad de agentes
+  - Horarios por día de la semana
+  - Filtros por rango de fechas, usuario, lead, estado
 - ✅ Gestión de archivos adjuntos
 - ✅ Catálogo de propiedades
 - ✅ Matching de propiedades con prospectos
