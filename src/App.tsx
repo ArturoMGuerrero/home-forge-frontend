@@ -30,6 +30,7 @@ import NotificationsPage from './pages/NotificationsPage';
 import MessageTemplatesPage from './pages/MessageTemplatesPage';
 import TemplateEditorPage from './pages/TemplateEditorPage';
 import CalendarPage from './pages/CalendarPage';
+import AgentAvailabilityPage from './pages/AgentAvailabilityPage';
 import { ReportsPage } from './pages/ReportsPage';
 import { ForgotPasswordPage } from './pages/ForgotPasswordPage';
 import { PaymentSuccessPage } from './pages/PaymentSuccessPage';
@@ -86,6 +87,7 @@ export default function App() {
           <Route path="propiedades/:propertyId/editar" element={<NewPropertyPage />} />
           <Route path="agenda" element={<AgendaPage />} />
           <Route path="calendario" element={<CalendarPage />} />
+          <Route path="calendario/disponibilidad" element={<AgentAvailabilityPage />} />
           <Route path="asignaciones" element={<MatchesPage />} />
           <Route path="documentos" element={<DocumentsPage />} />
           <Route path="contratos" element={<ContractsPage />} />

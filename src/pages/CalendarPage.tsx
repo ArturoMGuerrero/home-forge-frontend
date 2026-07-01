@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { listAppointments, Appointment, AppointmentStatus, appointmentTypeLabels, appointmentStatusLabels } from '../shared/appointments';
 import NewAppointmentModal from '../components/NewAppointmentModal';
 
@@ -6,6 +7,7 @@ const DAYS = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
 const MONTHS = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
 
 export default function CalendarPage() {
+  const navigate = useNavigate();
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
@@ -106,12 +108,20 @@ export default function CalendarPage() {
           <h1 className="text-2xl font-bold text-gray-900">Calendario de Citas</h1>
           <p className="text-gray-600 mt-1">Gestiona tus citas y eventos</p>
         </div>
-        <button
-          onClick={() => setShowNewModal(true)}
-          className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-        >
-          + Nueva Cita
-        </button>
+        <div className="flex gap-2">
+          <button
+            onClick={() => navigate('/app/calendario/disponibilidad')}
+            className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
+          >
+            Mi Disponibilidad
+          </button>
+          <button
+            onClick={() => setShowNewModal(true)}
+            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+          >
+            + Nueva Cita
+          </button>
+        </div>
       </div>
 
       <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
