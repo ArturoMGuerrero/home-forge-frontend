@@ -13,6 +13,7 @@ const navigation: Array<{ label: string; to: string; icon: IconName; end?: boole
   { label: 'Propiedades', to: '/app/propiedades', icon: 'properties' },
   { label: 'Agenda', to: '/app/agenda', icon: 'calendar' },
   { label: 'Documentos', to: '/app/documentos', icon: 'document' },
+  { label: 'Notificaciones', to: '/app/notificaciones', icon: 'document' },
   { label: 'Reportes', to: '/app/reportes', icon: 'reports' },
   { label: 'Configuración', to: '/app/configuracion', icon: 'settings' }
 ];

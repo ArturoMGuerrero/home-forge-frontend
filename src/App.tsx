@@ -26,6 +26,9 @@ import { MatchesPage } from './pages/MatchesPage';
 import { DocumentsPage } from './pages/DocumentsPage';
 import ContractsPage from './pages/ContractsPage';
 import TemplatesPage from './pages/TemplatesPage';
+import NotificationsPage from './pages/NotificationsPage';
+import MessageTemplatesPage from './pages/MessageTemplatesPage';
+import TemplateEditorPage from './pages/TemplateEditorPage';
 import { ReportsPage } from './pages/ReportsPage';
 import { ForgotPasswordPage } from './pages/ForgotPasswordPage';
 import { PaymentSuccessPage } from './pages/PaymentSuccessPage';
@@ -85,6 +88,10 @@ export default function App() {
           <Route path="documentos" element={<DocumentsPage />} />
           <Route path="contratos" element={<ContractsPage />} />
           <Route path="contratos/plantillas" element={<TemplatesPage />} />
+          <Route path="notificaciones" element={<NotificationsPage />} />
+          <Route path="notificaciones/plantillas" element={<MessageTemplatesPage />} />
+          <Route path="notificaciones/plantillas/nueva" element={<TemplateEditorPage />} />
+          <Route path="notificaciones/plantillas/:templateId" element={<TemplateEditorPage />} />
           <Route path="reportes" element={<ReportsPage />} />
           <Route path="usuarios" element={<UsersManagementPage />} />
           <Route path="planes" element={<PlansPage />} />
