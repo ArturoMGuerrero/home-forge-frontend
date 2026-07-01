@@ -11,7 +11,7 @@ const navigation: Array<{ label: string; to: string; icon: IconName; end?: boole
   { label: 'Dashboard', to: '/app', icon: 'dashboard', end: true },
   { label: 'Prospectos', to: '/app/prospectos', icon: 'leads' },
   { label: 'Propiedades', to: '/app/propiedades', icon: 'properties' },
-  { label: 'Agenda', to: '/app/agenda', icon: 'calendar' },
+  { label: 'Calendario', to: '/app/calendario', icon: 'calendar' },
   { label: 'Documentos', to: '/app/documentos', icon: 'document' },
   { label: 'Notificaciones', to: '/app/notificaciones', icon: 'document' },
   { label: 'Reportes', to: '/app/reportes', icon: 'reports' },
