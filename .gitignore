@@ -1,11 +1,14 @@
 # Dependencies
 node_modules/
 package-lock.json
+yarn.lock
+pnpm-lock.yaml
 
 # Build output
 dist/
 dist-ssr/
 *.local
+build/
 
 # Environment variables
 .env
@@ -23,6 +26,7 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 frontend.log
+logs/
 
 # Editor directories and files
 .vscode/*
@@ -36,6 +40,7 @@ frontend.log
 *.sw?
 *.swp
 *.swo
+*.code-workspace
 
 # Test coverage
 coverage/
@@ -45,10 +50,12 @@ coverage/
 .temp/
 .cache/
 .parcel-cache/
+.eslintcache
 
 # OS files
 Thumbs.db
 Desktop.ini
+*.DS_Store
 
 # Archivos temporales de desarrollo
 *.tmp
@@ -60,9 +67,21 @@ Desktop.ini
 *.v2.tsx
 *.improved.tsx
 *_backup.*
+*_old.*
 
 # Documentación temporal
 TODO.md
 NOTAS.md
 BORRADOR.md
 *_TEMP.md
+
+# TypeScript
+*.tsbuildinfo
+
+# Storybook
+storybook-static/
+
+# Misc
+.vercel
+.netlify
+.firebase

@@ -1,6 +1,18 @@
 # HomeForge - Frontend
 
-Aplicación web para HomeForge, un CRM para constructoras, desarrolladores inmobiliarios y equipos comerciales de vivienda.
+Aplicación web para HomeForge, una plataforma CRM completa para inmobiliarias, constructoras, desarrolladores y equipos comerciales de vivienda.
+
+## 🎯 Características Principales
+
+- **CRM Visual**: Pipeline Kanban drag & drop, scoring de leads, timeline de actividades
+- **Gestión de Propiedades**: Catálogo completo con imágenes, mapas, filtros avanzados
+- **Automatización**: Tareas automáticas, asignación inteligente, seguimiento
+- **Documentos**: Generación de contratos, plantillas personalizables, firma electrónica
+- **Notificaciones**: Sistema completo multicanal con plantillas y programación
+- **Calendario**: Vista mensual, gestión de citas, disponibilidad de agentes
+- **Dashboard**: Métricas en tiempo real, gráficos interactivos
+- **Multi-idioma**: Soporte para Español e Inglés
+- **Responsive**: Optimizado para desktop y móvil
 
 ## 🚀 Tecnologías
 
