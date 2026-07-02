@@ -296,10 +296,22 @@ export function NewPropertyPage() {
   return (
     <>
       <header className="mb-8">
-        <Link className="text-sm font-semibold text-indigo-600" to="/app/propiedades">&lt;- Volver a propiedades</Link>
-        <p className="mb-1 mt-5 text-[11px] font-bold uppercase tracking-[0.16em] text-indigo-600">Inventario</p>
-        <h1 className="text-3xl font-bold">{editing ? 'Editar propiedad' : 'Agregar propiedad'}</h1>
-        <p className="mt-2 text-sm text-slate-500">{editing ? 'Actualiza la información, publicación y galería del inmueble.' : 'Registra la información comercial, ubicación y características del inmueble.'}</p>
+        <div className="flex items-center gap-6 mb-6">
+          <Link
+            to="/app/propiedades"
+            className="inline-flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 rounded-lg text-slate-700 hover:bg-slate-50 hover:border-slate-300 transition font-medium"
+          >
+            <svg className="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+            </svg>
+            Volver
+          </Link>
+          <div>
+            <p className="mb-1 text-[11px] font-bold uppercase tracking-[0.16em] text-indigo-600">Inventario</p>
+            <h1 className="text-3xl font-bold">{editing ? 'Editar propiedad' : 'Agregar propiedad'}</h1>
+            <p className="mt-2 text-sm text-slate-500">{editing ? 'Actualiza la información, publicación y galería del inmueble.' : 'Registra la información comercial, ubicación y características del inmueble.'}</p>
+          </div>
+        </div>
       </header>
 
       <form className="grid gap-6 xl:grid-cols-[1fr_320px]" onSubmit={submit}>

@@ -5,6 +5,7 @@ import { listProperties, ApiProperty } from '../shared/propertyApi';
 import { listLeads, LeadItem } from '../shared/leads';
 import { exportToExcel } from '../shared/excelExport';
 import toast from 'react-hot-toast';
+import { Button, Select, Spinner } from '../shared/ui';
 
 const money = new Intl.NumberFormat('es-MX', {
   style: 'currency',
@@ -133,7 +134,11 @@ export function ReportsPage() {
   }
 
   if (loading) {
-    return <div className="rounded-3xl border border-slate-200 bg-white p-12 text-center text-sm text-slate-500 shadow-sm">Generando reportes...</div>;
+    return (
+      <div className="flex items-center justify-center h-64">
+        <Spinner size="lg" />
+      </div>
+    );
   }
 
   if (!metrics) {
@@ -150,16 +155,15 @@ export function ReportsPage() {
 
       {/* Selector de rango */}
       <section className="mb-6 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-        <label className="block text-sm font-semibold text-slate-700">Período del reporte</label>
-        <select
-          className="mt-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 focus:border-indigo-500 focus:outline-none"
+        <Select
+          label="Período del reporte"
           value={dateRange}
           onChange={e => setDateRange(e.target.value as DateRange)}
         >
           {(Object.keys(dateRangeLabels) as DateRange[]).filter(key => key !== 'custom').map(key => (
             <option key={key} value={key}>{dateRangeLabels[key]}</option>
           ))}
-        </select>
+        </Select>
         <p className="mt-2 text-xs text-slate-500">
           Del {new Date(metrics.startDate).toLocaleDateString('es-MX')} al {new Date(metrics.endDate).toLocaleDateString('es-MX')}
         </p>
@@ -282,13 +286,18 @@ function ReportCard({ icon, title, description, stats, onExport }: ReportCardPro
         ))}
       </div>
 
-      <button
-        className="w-full rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-indigo-700"
+      <Button
         onClick={onExport}
-        type="button"
+        variant="primary"
+        fullWidth
+        icon={
+          <svg className="size-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+          </svg>
+        }
       >
-        📥 Exportar a Excel
-      </button>
+        Exportar a Excel
+      </Button>
     </article>
   );
 }

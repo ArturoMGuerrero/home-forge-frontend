@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { listAppointments, Appointment, AppointmentStatus, appointmentTypeLabels, appointmentStatusLabels } from '../shared/appointments';
 import NewAppointmentModal from '../components/NewAppointmentModal';
+import { Button } from '../shared/ui';
 
 const DAYS = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
 const MONTHS = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
@@ -102,112 +103,189 @@ export default function CalendarPage() {
   const days = getDaysInMonth();
 
   return (
-    <div className="p-6">
-      <div className="mb-6 flex justify-between items-center">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">Calendario de Citas</h1>
-          <p className="text-gray-600 mt-1">Gestiona tus citas y eventos</p>
-        </div>
-        <div className="flex gap-2">
-          <button
-            onClick={() => navigate('/app/calendario/disponibilidad')}
-            className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
-          >
-            Mi Disponibilidad
-          </button>
-          <button
-            onClick={() => setShowNewModal(true)}
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-          >
-            + Nueva Cita
-          </button>
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-slate-100 to-gray-100 p-6">
+      {/* Header */}
+      <div className="mb-8">
+        <div className="flex justify-between items-start">
+          <div>
+            <h1 className="text-4xl font-bold bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent">
+              Calendario de Citas
+            </h1>
+            <p className="text-slate-600 mt-2 text-lg">Gestiona tus citas y eventos del día a día</p>
+          </div>
+          <div className="flex gap-3">
+            <Button
+              onClick={() => navigate('/app/calendario/disponibilidad')}
+              variant="secondary"
+              icon={
+                <svg className="size-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              }
+            >
+              Mi Disponibilidad
+            </Button>
+            <Button
+              onClick={() => setShowNewModal(true)}
+              variant="primary"
+              icon={
+                <svg className="size-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                </svg>
+              }
+            >
+              Nueva Cita
+            </Button>
+          </div>
         </div>
       </div>
 
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-        <div className="mb-6 flex justify-between items-center">
-          <div className="flex items-center gap-4">
-            <button onClick={goToPreviousMonth} className="px-3 py-1 border rounded hover:bg-gray-50">
-              ←
-            </button>
-            <h2 className="text-xl font-semibold">
-              {MONTHS[currentDate.getMonth()]} {currentDate.getFullYear()}
-            </h2>
-            <button onClick={goToNextMonth} className="px-3 py-1 border rounded hover:bg-gray-50">
-              →
-            </button>
-            <button onClick={goToToday} className="px-3 py-1 border rounded hover:bg-gray-50 text-sm">
-              Hoy
-            </button>
-          </div>
+      {/* Calendar Card */}
+      <div className="bg-white rounded-2xl shadow-xl border border-slate-200 overflow-hidden">
+        {/* Calendar Controls */}
+        <div className="bg-gradient-to-r from-slate-700 to-slate-800 p-6">
+          <div className="flex justify-between items-center">
+            <div className="flex items-center gap-3">
+              <Button
+                onClick={goToPreviousMonth}
+                variant="secondary"
+                size="sm"
+                className="!bg-white/20 !border-white/30 !text-white hover:!bg-white/30"
+                icon={
+                  <svg className="size-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                  </svg>
+                }
+              />
+              <h2 className="text-2xl font-bold text-white min-w-[250px] text-center">
+                {MONTHS[currentDate.getMonth()]} {currentDate.getFullYear()}
+              </h2>
+              <Button
+                onClick={goToNextMonth}
+                variant="secondary"
+                size="sm"
+                className="!bg-white/20 !border-white/30 !text-white hover:!bg-white/30"
+                icon={
+                  <svg className="size-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                  </svg>
+                }
+              />
+              <Button
+                onClick={goToToday}
+                variant="secondary"
+                size="sm"
+                className="!bg-white !text-slate-700 hover:!bg-white/90 !font-semibold"
+              >
+                Hoy
+              </Button>
+            </div>
 
-          <div className="flex gap-2">
-            <button
-              onClick={() => setViewMode('month')}
-              className={`px-3 py-1 rounded ${viewMode === 'month' ? 'bg-blue-600 text-white' : 'border hover:bg-gray-50'}`}
-            >
-              Mes
-            </button>
-            <button
-              onClick={() => setViewMode('week')}
-              className={`px-3 py-1 rounded ${viewMode === 'week' ? 'bg-blue-600 text-white' : 'border hover:bg-gray-50'}`}
-            >
-              Semana
-            </button>
-            <button
-              onClick={() => setViewMode('day')}
-              className={`px-3 py-1 rounded ${viewMode === 'day' ? 'bg-blue-600 text-white' : 'border hover:bg-gray-50'}`}
-            >
-              Día
-            </button>
+            <div className="flex gap-1 bg-slate-800/50 backdrop-blur-sm rounded-xl p-1.5 border border-white/10">
+              <button
+                onClick={() => setViewMode('month')}
+                className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 ${
+                  viewMode === 'month'
+                    ? 'bg-white text-slate-800 shadow-lg'
+                    : 'text-white/70 hover:text-white hover:bg-white/10'
+                }`}
+              >
+                Mes
+              </button>
+              <button
+                onClick={() => setViewMode('week')}
+                className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 ${
+                  viewMode === 'week'
+                    ? 'bg-white text-slate-800 shadow-lg'
+                    : 'text-white/70 hover:text-white hover:bg-white/10'
+                }`}
+              >
+                Semana
+              </button>
+              <button
+                onClick={() => setViewMode('day')}
+                className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 ${
+                  viewMode === 'day'
+                    ? 'bg-white text-slate-800 shadow-lg'
+                    : 'text-white/70 hover:text-white hover:bg-white/10'
+                }`}
+              >
+                Día
+              </button>
+            </div>
           </div>
         </div>
 
+        {/* Calendar Grid */}
         {viewMode === 'month' && (
-          <div>
-            <div className="grid grid-cols-7 gap-2 mb-2">
+          <div className="p-6">
+            {/* Day Headers */}
+            <div className="grid grid-cols-7 gap-3 mb-4">
               {DAYS.map(day => (
-                <div key={day} className="text-center font-semibold text-gray-700 py-2">
+                <div key={day} className="text-center font-bold text-slate-700 py-3 text-sm uppercase tracking-wider">
                   {day}
                 </div>
               ))}
             </div>
 
-            <div className="grid grid-cols-7 gap-2">
+            {/* Calendar Days */}
+            <div className="grid grid-cols-7 gap-3">
               {days.map((date, index) => {
                 const dayAppointments = getAppointmentsForDay(date);
+                const today = isToday(date);
                 return (
                   <div
                     key={index}
                     onClick={() => handleDayClick(date)}
-                    className={`min-h-[120px] border rounded-lg p-2 cursor-pointer transition-colors ${
-                      date ? 'bg-white hover:bg-blue-50' : 'bg-gray-50'
-                    } ${isToday(date) ? 'ring-2 ring-blue-500' : ''}`}
+                    className={`
+                      min-h-[130px] rounded-xl p-3 transition-all duration-200 relative overflow-hidden
+                      ${date ? 'bg-white border-2 cursor-pointer shadow-sm hover:shadow-lg hover:scale-[1.02]' : 'bg-slate-50/50 border-2 border-transparent'}
+                      ${today ? 'border-blue-500 bg-gradient-to-br from-blue-50 to-sky-50 ring-2 ring-blue-200' : 'border-slate-200 hover:border-blue-400'}
+                    `}
                   >
                     {date && (
                       <>
-                        <div className={`text-sm font-semibold mb-1 ${isToday(date) ? 'text-blue-600' : 'text-gray-700'}`}>
+                        {/* Day Number */}
+                        <div className={`
+                          flex items-center justify-center w-8 h-8 rounded-full mb-2 font-bold text-sm
+                          ${today
+                            ? 'bg-gradient-to-r from-blue-600 to-sky-600 text-white shadow-md'
+                            : 'text-slate-700'
+                          }
+                        `}>
                           {date.getDate()}
                         </div>
-                        <div className="space-y-1">
-                          {dayAppointments.slice(0, 3).map(apt => (
+
+                        {/* Appointments */}
+                        <div className="space-y-1.5">
+                          {dayAppointments.slice(0, 2).map(apt => (
                             <div
                               key={apt.id}
-                              className={`text-xs p-1 rounded border ${getStatusColor(apt.status)}`}
+                              className={`
+                                text-xs p-2 rounded-lg border-l-4 shadow-sm hover:shadow-md transition-all
+                                ${getStatusColor(apt.status)}
+                              `}
                               title={`${new Date(apt.startTime).toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' })} - ${apt.title}`}
                             >
-                              <div className="font-semibold truncate">
+                              <div className="font-bold text-xs mb-0.5">
                                 {new Date(apt.startTime).toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' })}
                               </div>
-                              <div className="truncate">{apt.title}</div>
+                              <div className="truncate font-medium">{apt.title}</div>
                             </div>
                           ))}
-                          {dayAppointments.length > 3 && (
-                            <div className="text-xs text-gray-500 text-center">
-                              +{dayAppointments.length - 3} más
+                          {dayAppointments.length > 2 && (
+                            <div className="text-xs text-blue-600 font-semibold text-center bg-blue-50 rounded-lg py-1">
+                              +{dayAppointments.length - 2} más
                             </div>
                           )}
                         </div>
+
+                        {/* Indicator for days with events */}
+                        {dayAppointments.length > 0 && (
+                          <div className="absolute top-2 right-2">
+                            <div className="size-2 rounded-full bg-blue-500 animate-pulse" />
+                          </div>
+                        )}
                       </>
                     )}
                   </div>
@@ -218,14 +296,30 @@ export default function CalendarPage() {
         )}
 
         {viewMode === 'week' && (
-          <div className="text-center text-gray-500 py-12">
-            Vista semanal - próximamente
+          <div className="flex flex-col items-center justify-center py-20">
+            <div className="bg-gradient-to-br from-blue-100 to-sky-100 rounded-full p-8 mb-6">
+              <svg className="size-16 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+            </div>
+            <h3 className="text-2xl font-bold text-slate-800 mb-2">Vista Semanal</h3>
+            <p className="text-slate-500 text-center max-w-md">
+              La vista semanal estará disponible próximamente para visualizar tus citas en formato de semana.
+            </p>
           </div>
         )}
 
         {viewMode === 'day' && (
-          <div className="text-center text-gray-500 py-12">
-            Vista diaria - próximamente
+          <div className="flex flex-col items-center justify-center py-20">
+            <div className="bg-gradient-to-br from-slate-100 to-gray-100 rounded-full p-8 mb-6">
+              <svg className="size-16 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
+            <h3 className="text-2xl font-bold text-slate-800 mb-2">Vista Diaria</h3>
+            <p className="text-slate-500 text-center max-w-md">
+              La vista diaria estará disponible próximamente para ver todas tus citas del día en detalle.
+            </p>
           </div>
         )}
       </div>

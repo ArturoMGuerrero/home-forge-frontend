@@ -9,6 +9,7 @@ import {
 } from '../shared/documents';
 import { PageHeader } from '../shared/ui/PageHeader';
 import { Tabs, Tab } from '../shared/ui/Tabs';
+import { Button, Spinner } from '../shared/ui';
 
 const STATUS_FILTERS: (DocumentStatus | 'ALL')[] = ['ALL', 'DRAFT', 'PENDING_SIGNATURE', 'SIGNED', 'COMPLETED'];
 
@@ -61,7 +62,7 @@ export default function ContractsPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="animate-pulse text-slate-500">Cargando contratos...</div>
+        <Spinner size="lg" />
       </div>
     );
   }
@@ -74,18 +75,25 @@ export default function ContractsPage() {
         badge={{ value: documents.length, label: 'documentos' }}
         actions={
           <div className="flex gap-2">
-            <Link
+            <Button
+              as={Link}
               to="/app/contratos/plantillas"
-              className="px-4 py-2 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors text-sm font-medium"
+              variant="secondary"
             >
               📝 Plantillas
-            </Link>
-            <Link
+            </Button>
+            <Button
+              as={Link}
               to="/app/contratos/nuevo"
-              className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors text-sm font-medium"
+              variant="primary"
+              icon={
+                <svg className="size-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                </svg>
+              }
             >
-              + Nuevo Contrato
-            </Link>
+              Nuevo Contrato
+            </Button>
           </div>
         }
       >

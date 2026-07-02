@@ -10,6 +10,7 @@ import { ExportButton } from '../shared/ExportButton';
 import { exportToExcel, formatDate } from '../shared/excelExport';
 import { SubscriptionRestrictions } from '../shared/subscriptionRestrictions';
 import { PageHeader } from '../shared/ui/PageHeader';
+import { Button } from '../shared/ui';
 
 function sizeLabel(size?: number) {
   if (!size) return '-';
@@ -105,15 +106,17 @@ export function DocumentsPage() {
         actions={
           <div className="flex gap-3">
             {documents.length > 0 && <ExportButton onExport={handleExport} variant="secondary" />}
-            <button
-              className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-indigo-900/20 transition hover:shadow-xl hover:shadow-indigo-900/30"
+            <Button
+              variant="primary"
               onClick={() => setUploadModalOpen(true)}
+              icon={
+                <svg className="size-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                </svg>
+              }
             >
-              <svg className="size-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-              </svg>
               Subir documento
-            </button>
+            </Button>
           </div>
         }
       />

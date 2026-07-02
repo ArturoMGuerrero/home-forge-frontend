@@ -1,7 +1,10 @@
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { listAvailability, createAvailability, deleteAvailability, AgentAvailability, dayLabels } from '../shared/agentAvailability';
+import { Modal, Button, Select, Input } from '../shared/ui';
 
 export default function AgentAvailabilityPage() {
+  const navigate = useNavigate();
   const [availabilities, setAvailabilities] = useState<AgentAvailability[]>([]);
   const [showAddForm, setShowAddForm] = useState(false);
   const userId = localStorage.getItem('userId') || '';
@@ -62,17 +65,40 @@ export default function AgentAvailabilityPage() {
 
   return (
     <div className="p-6">
-      <div className="mb-6 flex justify-between items-center">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">Mi Disponibilidad</h1>
-          <p className="text-gray-600 mt-1">Configura tu horario disponible</p>
+      <div className="mb-6 flex items-center justify-between">
+        <div className="flex items-center gap-6">
+          {/* Botón de volver */}
+          <Button
+            onClick={() => navigate(-1)}
+            variant="tertiary"
+            icon={
+              <svg className="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+              </svg>
+            }
+          >
+            Volver
+          </Button>
+
+          {/* Título */}
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900">Mi Disponibilidad</h1>
+            <p className="text-gray-600 mt-1">Configura tu horario disponible</p>
+          </div>
         </div>
-        <button
+
+        {/* Botón agregar */}
+        <Button
           onClick={() => setShowAddForm(true)}
-          className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+          variant="primary"
+          icon={
+            <svg className="size-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+            </svg>
+          }
         >
-          + Agregar Horario
-        </button>
+          Agregar Horario
+        </Button>
       </div>
 
       <div className="grid gap-4">
@@ -93,12 +119,13 @@ export default function AgentAvailabilityPage() {
                         {avail.isAvailable ? 'Disponible' : 'No disponible'}
                       </span>
                     </div>
-                    <button
+                    <Button
                       onClick={() => handleDelete(avail.id)}
-                      className="text-red-600 hover:text-red-700 text-sm"
+                      variant="danger-ghost"
+                      size="sm"
                     >
                       Eliminar
-                    </button>
+                    </Button>
                   </div>
                 ))}
               </div>
@@ -109,71 +136,57 @@ export default function AgentAvailabilityPage() {
         ))}
       </div>
 
-      {showAddForm && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" onClick={() => setShowAddForm(false)}>
-          <div className="bg-white rounded-lg shadow-xl max-w-md w-full" onClick={e => e.stopPropagation()}>
-            <div className="border-b border-gray-200 px-6 py-4 flex justify-between items-center">
-              <h2 className="text-xl font-bold text-gray-900">Agregar Horario</h2>
-              <button onClick={() => setShowAddForm(false)} className="text-gray-400 hover:text-gray-600 text-2xl">&times;</button>
-            </div>
+      <Modal
+        isOpen={showAddForm}
+        onClose={() => setShowAddForm(false)}
+        title="Agregar Horario"
+      >
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <Select
+            label="Día de la Semana"
+            value={formData.dayOfWeek}
+            onChange={e => setFormData({ ...formData, dayOfWeek: Number(e.target.value) })}
+          >
+            {Object.entries(dayLabels).map(([value, label]) => (
+              <option key={value} value={value}>{label}</option>
+            ))}
+          </Select>
 
-            <form onSubmit={handleSubmit} className="p-6 space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Día de la Semana</label>
-                <select
-                  value={formData.dayOfWeek}
-                  onChange={e => setFormData({ ...formData, dayOfWeek: Number(e.target.value) })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                >
-                  {Object.entries(dayLabels).map(([value, label]) => (
-                    <option key={value} value={value}>{label}</option>
-                  ))}
-                </select>
-              </div>
+          <div className="grid grid-cols-2 gap-4">
+            <Input
+              type="time"
+              label="Hora Inicio"
+              required
+              value={formData.startTime}
+              onChange={e => setFormData({ ...formData, startTime: e.target.value })}
+            />
 
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Hora Inicio</label>
-                  <input
-                    type="time"
-                    required
-                    value={formData.startTime}
-                    onChange={e => setFormData({ ...formData, startTime: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Hora Fin</label>
-                  <input
-                    type="time"
-                    required
-                    value={formData.endTime}
-                    onChange={e => setFormData({ ...formData, endTime: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                  />
-                </div>
-              </div>
-
-              <div className="flex justify-end gap-3 pt-4">
-                <button
-                  type="button"
-                  onClick={() => setShowAddForm(false)}
-                  className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
-                >
-                  Cancelar
-                </button>
-                <button
-                  type="submit"
-                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-                >
-                  Guardar
-                </button>
-              </div>
-            </form>
+            <Input
+              type="time"
+              label="Hora Fin"
+              required
+              value={formData.endTime}
+              onChange={e => setFormData({ ...formData, endTime: e.target.value })}
+            />
           </div>
-        </div>
-      )}
+
+          <div className="flex justify-end gap-3 pt-4">
+            <Button
+              type="button"
+              onClick={() => setShowAddForm(false)}
+              variant="tertiary"
+            >
+              Cancelar
+            </Button>
+            <Button
+              type="submit"
+              variant="primary"
+            >
+              Guardar
+            </Button>
+          </div>
+        </form>
+      </Modal>
     </div>
   );
 }

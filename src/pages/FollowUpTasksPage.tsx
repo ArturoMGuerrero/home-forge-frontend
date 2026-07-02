@@ -9,6 +9,7 @@ import {
   taskPriorityLabels,
   FollowUpTaskStatus
 } from '../shared/followUpTasks';
+import { Button, Select, Spinner, Badge } from '../shared/ui';
 
 export default function FollowUpTasksPage() {
   const [tasks, setTasks] = useState<FollowUpTask[]>([]);
@@ -77,7 +78,7 @@ export default function FollowUpTasksPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="text-gray-500">Cargando tareas...</div>
+        <Spinner size="lg" />
       </div>
     );
   }
@@ -92,33 +93,24 @@ export default function FollowUpTasksPage() {
       </div>
 
       <div className="flex gap-2 mb-6">
-        <button
+        <Button
           onClick={() => setFilter('ALL')}
-          className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-            filter === 'ALL'
-              ? 'bg-indigo-600 text-white'
-              : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-          }`}
+          variant={filter === 'ALL' ? 'primary' : 'secondary'}
+          size="sm"
         >
           Todas ({tasks.length})
-        </button>
-        <button
+        </Button>
+        <Button
           onClick={() => setFilter('PENDING')}
-          className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-            filter === 'PENDING'
-              ? 'bg-indigo-600 text-white'
-              : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-          }`}
+          variant={filter === 'PENDING' ? 'primary' : 'secondary'}
+          size="sm"
         >
           Pendientes ({tasks.filter(t => t.status === 'PENDING').length})
-        </button>
-        <button
+        </Button>
+        <Button
           onClick={() => setFilter('OVERDUE')}
-          className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-            filter === 'OVERDUE'
-              ? 'bg-indigo-600 text-white'
-              : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-          }`}
+          variant={filter === 'OVERDUE' ? 'primary' : 'secondary'}
+          size="sm"
         >
           Vencidas (
           {
@@ -129,17 +121,14 @@ export default function FollowUpTasksPage() {
             ).length
           }
           )
-        </button>
-        <button
+        </Button>
+        <Button
           onClick={() => setFilter('COMPLETED')}
-          className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-            filter === 'COMPLETED'
-              ? 'bg-indigo-600 text-white'
-              : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-          }`}
+          variant={filter === 'COMPLETED' ? 'primary' : 'secondary'}
+          size="sm"
         >
           Completadas ({tasks.filter(t => t.status === 'COMPLETED').length})
-        </button>
+        </Button>
       </div>
 
       {filteredTasks.length === 0 ? (
@@ -203,24 +192,25 @@ export default function FollowUpTasksPage() {
                   </div>
 
                   <div className="flex items-center gap-2 ml-4">
-                    <select
+                    <Select
                       value={task.status}
                       onChange={e =>
                         handleStatusChange(task.id, e.target.value as FollowUpTaskStatus)
                       }
-                      className="text-sm border border-gray-300 rounded px-2 py-1"
+                      size="sm"
                     >
                       <option value="PENDING">Pendiente</option>
                       <option value="IN_PROGRESS">En progreso</option>
                       <option value="COMPLETED">Completada</option>
                       <option value="CANCELLED">Cancelada</option>
-                    </select>
-                    <button
+                    </Select>
+                    <Button
                       onClick={() => handleDelete(task.id)}
-                      className="text-red-600 hover:text-red-800 text-sm"
+                      variant="danger-ghost"
+                      size="sm"
                     >
                       Eliminar
-                    </button>
+                    </Button>
                   </div>
                 </div>
               </div>

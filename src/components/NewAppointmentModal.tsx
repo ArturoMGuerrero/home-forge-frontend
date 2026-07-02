@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { createAppointment, AppointmentType, LocationType, appointmentTypeLabels, locationTypeLabels } from '../shared/appointments';
+import { Modal } from '../shared/ui/Modal';
 
 interface NewAppointmentModalProps {
   defaultDate?: Date;
@@ -58,14 +59,14 @@ export default function NewAppointmentModal({ defaultDate, onClose, onSuccess }:
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" onClick={onClose}>
-      <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
-        <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex justify-between items-center">
-          <h2 className="text-xl font-bold text-gray-900">Nueva Cita</h2>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-600 text-2xl">&times;</button>
-        </div>
-
-        <form onSubmit={handleSubmit} className="p-6 space-y-4">
+    <Modal
+      isOpen={true}
+      onClose={onClose}
+      title="Nueva Cita"
+      subtitle="Agrega una cita a tu agenda"
+      maxWidth="2xl"
+    >
+      <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Título *</label>
             <input
@@ -195,23 +196,22 @@ export default function NewAppointmentModal({ defaultDate, onClose, onSuccess }:
             />
           </div>
 
-          <div className="flex justify-end gap-3 pt-4">
+          <div className="flex justify-end gap-3 pt-6 border-t border-slate-200">
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
+              className="px-6 py-2.5 border border-slate-200 rounded-xl text-sm font-semibold text-slate-700 hover:bg-slate-50 transition"
             >
               Cancelar
             </button>
             <button
               type="submit"
-              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+              className="px-6 py-2.5 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-xl text-sm font-semibold shadow-lg hover:shadow-xl transition"
             >
               Crear Cita
             </button>
           </div>
         </form>
-      </div>
-    </div>
+    </Modal>
   );
 }

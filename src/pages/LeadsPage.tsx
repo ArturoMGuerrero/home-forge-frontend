@@ -10,6 +10,7 @@ import { CreateLeadModal } from '../modules/leads/CreateLeadModal';
 import { UpgradeModal } from '../shared/UpgradeModal';
 import { SubscriptionRestrictions } from '../shared/subscriptionRestrictions';
 import { exportToExcel, formatDate } from '../shared/excelExport';
+import { Button } from '../shared/ui';
 
 const priorityLabels: Record<string, string> = {
   HIGH: 'Alta',
@@ -109,30 +110,24 @@ export function LeadsPage() {
         title="Prospectos"
         subtitle="Consulta y registra personas interesadas en tus propiedades"
         actions={
-          <div className="flex gap-2">
+          <div className="flex gap-3">
             <ExportButton onExport={handleExport} variant="secondary" />
-            <button
-              className={`shrink-0 rounded-xl px-3.5 py-2.5 text-sm font-semibold shadow-sm transition focus:outline-none focus:ring-2 focus:ring-offset-2 ${
-                restrictions.canCreate
-                  ? 'bg-indigo-600 text-white hover:bg-indigo-700 focus:ring-indigo-500'
-                  : 'bg-slate-200 text-slate-500 cursor-not-allowed'
-              }`}
+            <Button
+              variant="primary"
               onClick={handleCreateLead}
-              type="button"
+              disabled={!restrictions.canCreate}
             >
               {restrictions.canCreate ? `+ ${t('newLead')}` : `🔒 ${t('newLead')}`}
-            </button>
-            <Link
-              to="/app/prospectos/tareas"
-              className="px-4 py-2 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors text-sm font-medium"
-            >
-              Ver Tareas
+            </Button>
+            <Link to="/app/prospectos/tareas">
+              <Button variant="tertiary">
+                Ver Tareas
+              </Button>
             </Link>
-            <Link
-              to="/app/prospectos/pipeline"
-              className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors text-sm font-medium"
-            >
-              Ver Pipeline
+            <Link to="/app/prospectos/pipeline">
+              <Button variant="primary">
+                Ver Pipeline
+              </Button>
             </Link>
           </div>
         }

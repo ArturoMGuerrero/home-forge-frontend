@@ -1,9 +1,11 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import toast from 'react-hot-toast';
 import {
   Notification,
   NotificationStatus,
   listNotifications,
+  deleteNotification,
   notificationTypeLabels,
   notificationStatusLabels,
   notificationPriorityLabels
@@ -11,6 +13,8 @@ import {
 import { PageHeader } from '../shared/ui/PageHeader';
 import { Tabs, Tab } from '../shared/ui/Tabs';
 import { NewNotificationModal } from '../components/NewNotificationModal';
+import { ConfirmModal } from '../shared/ConfirmModal';
+import { Button, Spinner } from '../shared/ui';
 
 const STATUS_FILTERS: (NotificationStatus | 'ALL')[] = [
   'ALL',
@@ -33,6 +37,8 @@ export default function NotificationsPage() {
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<NotificationStatus | 'ALL'>('ALL');
   const [showNewModal, setShowNewModal] = useState(false);
+  const [notificationToDelete, setNotificationToDelete] = useState<string | null>(null);
+  const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
     loadNotifications();
@@ -96,10 +102,27 @@ export default function NotificationsPage() {
     }
   }
 
+  async function handleDeleteNotification() {
+    if (!notificationToDelete) return;
+
+    setDeleting(true);
+    try {
+      await deleteNotification(notificationToDelete);
+      setNotifications(prev => prev.filter(n => n.id !== notificationToDelete));
+      toast.success('Notificación eliminada');
+      setNotificationToDelete(null);
+    } catch (error) {
+      console.error('Error deleting notification:', error);
+      toast.error('Error al eliminar la notificación');
+    } finally {
+      setDeleting(false);
+    }
+  }
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="animate-pulse text-slate-500">Cargando notificaciones...</div>
+        <Spinner size="lg" />
       </div>
     );
   }
@@ -111,19 +134,30 @@ export default function NotificationsPage() {
         subtitle="Gestiona emails, WhatsApp, notificaciones push y SMS"
         badge={{ value: notifications.length, label: 'notificaciones' }}
         actions={
-          <div className="flex gap-2">
-            <Link
+          <div className="flex gap-3">
+            <Button
+              as={Link}
               to="/app/notificaciones/plantillas"
-              className="px-4 py-2 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors text-sm font-medium"
+              variant="secondary"
+              icon={
+                <svg className="size-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+              }
             >
-              📝 Plantillas
-            </Link>
-            <button
+              Plantillas
+            </Button>
+            <Button
+              variant="primary"
               onClick={() => setShowNewModal(true)}
-              className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors text-sm font-medium"
+              icon={
+                <svg className="size-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                </svg>
+              }
             >
-              + Nueva Notificación
-            </button>
+              Nueva Notificación
+            </Button>
           </div>
         }
       >
@@ -199,6 +233,20 @@ export default function NotificationsPage() {
 
                         <p className="text-sm text-slate-600 line-clamp-2">{notification.content}</p>
                       </div>
+
+                      {/* Botón de eliminar */}
+                      <Button
+                        onClick={() => setNotificationToDelete(notification.id)}
+                        variant="danger-ghost"
+                        size="sm"
+                        icon={
+                          <svg className="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                          </svg>
+                        }
+                      >
+                        Eliminar
+                      </Button>
                     </div>
 
                     {notification.sentAt && (
@@ -238,6 +286,18 @@ export default function NotificationsPage() {
         isOpen={showNewModal}
         onClose={() => setShowNewModal(false)}
         onSuccess={() => loadNotifications()}
+      />
+
+      <ConfirmModal
+        isOpen={notificationToDelete !== null}
+        onClose={() => setNotificationToDelete(null)}
+        onConfirm={handleDeleteNotification}
+        title="¿Eliminar notificación?"
+        message="Esta acción no se puede deshacer. La notificación será eliminada permanentemente."
+        confirmLabel="Eliminar"
+        cancelLabel="Cancelar"
+        loading={deleting}
+        danger={true}
       />
     </div>
   );

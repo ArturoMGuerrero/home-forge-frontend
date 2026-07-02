@@ -7,6 +7,8 @@ import { exportToExcel, formatCurrency } from '../shared/excelExport';
 import { UpgradeModal } from '../shared/UpgradeModal';
 import { SubscriptionRestrictions } from '../shared/subscriptionRestrictions';
 import { PageHeader } from '../shared/ui/PageHeader';
+import { QuickPropertyModal } from '../components/QuickPropertyModal';
+import { Button } from '../shared/ui';
 
 export function PropertiesPage() {
   const context = useOutletContext<{ restrictions: SubscriptionRestrictions }>();
@@ -19,6 +21,7 @@ export function PropertiesPage() {
   const [propertyTypeFilter, setPropertyTypeFilter] = useState<string>('ALL');
   const [sortBy, setSortBy] = useState<'recent' | 'price-asc' | 'price-desc' | 'alpha'>('recent');
   const [upgradeModalOpen, setUpgradeModalOpen] = useState(false);
+  const [quickModalOpen, setQuickModalOpen] = useState(false);
 
   useEffect(() => {
     listProperties()
@@ -98,6 +101,20 @@ export function PropertiesPage() {
     }
   }
 
+  function handleQuickCreate() {
+    if (!restrictions.canCreate) {
+      setUpgradeModalOpen(true);
+    } else {
+      setQuickModalOpen(true);
+    }
+  }
+
+  function handlePropertyCreated() {
+    listProperties()
+      .then(setProperties)
+      .catch(() => toast.error('Error al recargar propiedades'));
+  }
+
   return (
     <>
       <PageHeader
@@ -108,17 +125,39 @@ export function PropertiesPage() {
           <div className="flex gap-3">
             <ExportButton onExport={handleExport} variant="secondary" />
             {restrictions.canCreate ? (
-              <Link className="shrink-0 rounded-xl bg-indigo-600 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-indigo-700" to="/app/propiedades/nueva">
-                + Agregar propiedad
-              </Link>
+              <>
+                <Button
+                  onClick={handleQuickCreate}
+                  variant="secondary"
+                  icon={
+                    <svg className="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                    </svg>
+                  }
+                >
+                  Crear rápida
+                </Button>
+                <Link to="/app/propiedades/nueva">
+                  <Button
+                    variant="primary"
+                    icon={
+                      <svg className="size-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                      </svg>
+                    }
+                  >
+                    Crear completa
+                  </Button>
+                </Link>
+              </>
             ) : (
-              <button
-                className="shrink-0 rounded-xl bg-slate-200 px-3.5 py-2.5 text-sm font-semibold text-slate-500 cursor-not-allowed"
+              <Button
                 onClick={handleCreateProperty}
-                type="button"
+                variant="tertiary"
+                disabled
               >
                 🔒 Agregar propiedad
-              </button>
+              </Button>
             )}
           </div>
         }
@@ -362,6 +401,12 @@ export function PropertiesPage() {
           </Link>
         ))}
       </div>
+      <QuickPropertyModal
+        isOpen={quickModalOpen}
+        onClose={() => setQuickModalOpen(false)}
+        onSuccess={handlePropertyCreated}
+      />
+
       <UpgradeModal
         feature="crear nuevas propiedades"
         isOpen={upgradeModalOpen}

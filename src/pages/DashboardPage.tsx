@@ -5,6 +5,7 @@ import { getSession } from '../shared/auth';
 import { getDashboardMetrics, DashboardMetrics } from '../shared/dashboardApi';
 import { TrendAreaChart } from '../components/Charts';
 import { LeadItem, listLeads } from '../shared/leads';
+import { Button } from '../shared/ui';
 
 const money = new Intl.NumberFormat('es-MX', {
   style: 'currency',
@@ -80,17 +81,15 @@ export function DashboardPage() {
           </p>
         </div>
         <div className="flex flex-wrap gap-3">
-          <Link
-            className="rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 hover:border-indigo-300 hover:bg-indigo-50"
-            to="/app/reportes"
-          >
-            📊 Ver reportes
+          <Link to="/app/reportes">
+            <Button variant="secondary" size="md">
+              📊 Ver reportes
+            </Button>
           </Link>
-          <Link
-            className="rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-700"
-            to="/app/propiedades/nueva"
-          >
-            + Nueva propiedad
+          <Link to="/app/propiedades/nueva">
+            <Button variant="primary" size="md">
+              + Nueva propiedad
+            </Button>
           </Link>
         </div>
       </header>
@@ -200,11 +199,10 @@ export function DashboardPage() {
             ))}
           </div>
 
-          <Link
-            to="/app/prospectos"
-            className="mt-4 block rounded-xl bg-rose-600 px-4 py-2.5 text-center text-sm font-semibold text-white hover:bg-rose-700"
-          >
-            Ver todos los seguimientos
+          <Link to="/app/prospectos" className="mt-4 block">
+            <Button variant="danger" fullWidth>
+              Ver todos los seguimientos
+            </Button>
           </Link>
         </section>
       )}
@@ -220,17 +218,15 @@ export function DashboardPage() {
             No tienes seguimientos vencidos. Excelente trabajo manteniendo tu pipeline organizado.
           </p>
           <div className="mt-4 flex justify-center gap-3">
-            <Link
-              to="/app/prospectos"
-              className="rounded-xl border border-emerald-600 bg-white px-4 py-2 text-sm font-semibold text-emerald-700 hover:bg-emerald-50"
-            >
-              Ver leads
+            <Link to="/app/prospectos">
+              <Button variant="success">
+                Ver leads
+              </Button>
             </Link>
-            <Link
-              to="/app/agenda"
-              className="rounded-xl bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700"
-            >
-              Ver agenda
+            <Link to="/app/agenda">
+              <Button variant="success">
+                Ver agenda
+              </Button>
             </Link>
           </div>
         </section>

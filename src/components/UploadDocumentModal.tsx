@@ -5,6 +5,7 @@ import { ApiProperty } from '../shared/propertyApi';
 import { uploadDocument, StoredDocument } from '../shared/operationsApi';
 import { SubscriptionRestrictions } from '../shared/subscriptionRestrictions';
 import { UpgradeModal } from '../shared/UpgradeModal';
+import { Modal } from '../shared/ui/Modal';
 
 interface Props {
   isOpen: boolean;
@@ -27,8 +28,6 @@ export function UploadDocumentModal({ isOpen, onClose, onDocumentUploaded, leads
   const [isDragging, setIsDragging] = useState(false);
   const [upgradeModalOpen, setUpgradeModalOpen] = useState(false);
   const formRef = useRef<HTMLFormElement>(null);
-
-  if (!isOpen) return null;
 
   async function submit(event: FormEvent) {
     event.preventDefault();
@@ -139,27 +138,14 @@ export function UploadDocumentModal({ isOpen, onClose, onDocumentUploaded, leads
 
   return (
     <>
-      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4" onClick={handleClose}>
-        <div className="max-h-[90vh] w-full max-w-3xl overflow-y-auto rounded-2xl bg-white shadow-2xl" onClick={e => e.stopPropagation()}>
-          {/* Header */}
-          <div className="sticky top-0 z-10 flex items-center justify-between border-b border-slate-200 bg-white px-6 py-4">
-            <div>
-              <h2 className="text-xl font-bold text-slate-900">Subir documento</h2>
-              <p className="mt-0.5 text-sm text-slate-500">Máximo 8 MB por archivo</p>
-            </div>
-            <button
-              className="rounded-lg p-2 text-slate-400 transition hover:bg-slate-100 hover:text-slate-600"
-              onClick={handleClose}
-              type="button"
-            >
-              <svg className="size-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
-          </div>
-
-          {/* Body */}
-          <form ref={formRef} className="p-6" onSubmit={submit}>
+      <Modal
+        isOpen={isOpen}
+        onClose={handleClose}
+        title="Subir documento"
+        subtitle="Máximo 8 MB por archivo"
+        maxWidth="3xl"
+      >
+        <form ref={formRef} onSubmit={submit}>
             {/* Área de carga */}
             <div className="mb-5">
               <label
@@ -293,8 +279,7 @@ export function UploadDocumentModal({ isOpen, onClose, onDocumentUploaded, leads
               </button>
             </div>
           </form>
-        </div>
-      </div>
+      </Modal>
 
       <UpgradeModal
         feature="subir nuevos documentos"

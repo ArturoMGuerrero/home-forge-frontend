@@ -7,6 +7,7 @@ import {
   toggleTemplateActive
 } from '../shared/documents';
 import { PageHeader } from '../shared/ui/PageHeader';
+import { Button, Spinner, Checkbox } from '../shared/ui';
 
 export default function TemplatesPage() {
   const [templates, setTemplates] = useState<DocumentTemplate[]>([]);
@@ -45,7 +46,7 @@ export default function TemplatesPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="animate-pulse text-slate-500">Cargando plantillas...</div>
+        <Spinner size="lg" />
       </div>
     );
   }
@@ -58,23 +59,28 @@ export default function TemplatesPage() {
         backLink={{ to: '/app/contratos', label: 'Volver a Contratos' }}
         badge={{ value: templates.filter(t => t.active).length, label: 'activas' }}
         actions={
-          <Link
+          <Button
+            as={Link}
             to="/app/contratos/plantillas/nueva"
-            className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors text-sm font-medium"
+            variant="primary"
+            icon={
+              <svg className="size-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+              </svg>
+            }
           >
-            + Nueva Plantilla
-          </Link>
+            Nueva Plantilla
+          </Button>
         }
       />
 
       <div className="p-4 lg:p-6">
         <div className="mb-4 flex items-center gap-2">
-          <button
-            onClick={() => setShowInactive(!showInactive)}
-            className="text-sm text-slate-600 hover:text-slate-900"
-          >
-            {showInactive ? '✓' : '○'} Mostrar inactivas
-          </button>
+          <Checkbox
+            checked={showInactive}
+            onChange={(e) => setShowInactive(e.target.checked)}
+            label="Mostrar inactivas"
+          />
         </div>
 
         {filteredTemplates.length === 0 ? (
@@ -119,18 +125,21 @@ export default function TemplatesPage() {
                 </div>
 
                 <div className="flex items-center gap-2 mt-4">
-                  <Link
+                  <Button
+                    as={Link}
                     to={`/app/contratos/plantillas/${template.id}`}
-                    className="px-3 py-1.5 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors text-sm font-medium"
+                    variant="primary"
+                    size="sm"
                   >
                     Ver/Editar
-                  </Link>
-                  <button
+                  </Button>
+                  <Button
                     onClick={() => handleToggleActive(template.id)}
-                    className="px-3 py-1.5 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors text-sm font-medium"
+                    variant="secondary"
+                    size="sm"
                   >
                     {template.active ? 'Desactivar' : 'Activar'}
-                  </button>
+                  </Button>
                   <span className="ml-auto text-xs text-slate-500">
                     v{template.version}
                   </span>

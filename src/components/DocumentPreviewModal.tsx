@@ -1,5 +1,5 @@
-import { useEffect, useRef } from 'react';
 import { StoredDocument, documentDownloadUrl, documentViewUrl } from '../shared/operationsApi';
+import { Modal } from '../shared/ui/Modal';
 
 type Props = {
   document: StoredDocument;
@@ -7,25 +7,6 @@ type Props = {
 };
 
 export function DocumentPreviewModal({ document: doc, onClose }: Props) {
-  const modalRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    function handleEscape(e: KeyboardEvent) {
-      if (e.key === 'Escape') onClose();
-    }
-    window.document.addEventListener('keydown', handleEscape);
-    return () => window.document.removeEventListener('keydown', handleEscape);
-  }, [onClose]);
-
-  useEffect(() => {
-    function handleClickOutside(e: MouseEvent) {
-      if (modalRef.current && !modalRef.current.contains(e.target as Node)) {
-        onClose();
-      }
-    }
-    window.document.addEventListener('mousedown', handleClickOutside);
-    return () => window.document.removeEventListener('mousedown', handleClickOutside);
-  }, [onClose]);
 
   const downloadUrl = documentDownloadUrl(doc.id);
   const viewUrl = documentViewUrl(doc.id);
@@ -33,42 +14,23 @@ export function DocumentPreviewModal({ document: doc, onClose }: Props) {
   const isImage = doc.contentType?.startsWith('image/') || /\.(jpg|jpeg|png)$/i.test(doc.fileName);
   const isWordDoc = doc.contentType?.includes('word') || /\.(doc|docx)$/i.test(doc.fileName);
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-      <div ref={modalRef} className="relative w-full max-w-5xl max-h-[90vh] bg-white rounded-2xl shadow-2xl flex flex-col">
-        {/* Header */}
-        <div className="flex items-center justify-between border-b border-slate-200 px-6 py-4">
-          <div className="flex-1 min-w-0 mr-4">
-            <h2 className="text-lg font-bold text-slate-900 truncate">{doc.fileName}</h2>
-            <div className="flex items-center gap-3 mt-1 text-xs text-slate-500">
-              <span>{doc.documentType}</span>
-              <span>•</span>
-              <span>{new Date(doc.createdAt).toLocaleDateString('es-MX')}</span>
-              {doc.leadName && (
-                <>
-                  <span>•</span>
-                  <span>{doc.leadName}</span>
-                </>
-              )}
-              {doc.propertyTitle && (
-                <>
-                  <span>•</span>
-                  <span>{doc.propertyTitle}</span>
-                </>
-              )}
-            </div>
-          </div>
-          <button
-            onClick={onClose}
-            className="flex-shrink-0 rounded-lg p-2 text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition"
-            aria-label="Cerrar"
-          >
-            <svg className="size-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          </button>
-        </div>
+  const subtitle = [
+    doc.documentType,
+    new Date(doc.createdAt).toLocaleDateString('es-MX'),
+    doc.leadName,
+    doc.propertyTitle
+  ].filter(Boolean).join(' • ');
 
+  return (
+    <Modal
+      isOpen={true}
+      onClose={onClose}
+      title={doc.fileName}
+      subtitle={subtitle}
+      maxWidth="5xl"
+      noPadding={true}
+    >
+      <div className="flex flex-col">
         {/* Content */}
         <div className="flex-1 overflow-auto">
           {isPdf && (
@@ -138,6 +100,6 @@ export function DocumentPreviewModal({ document: doc, onClose }: Props) {
           </div>
         )}
       </div>
-    </div>
+    </Modal>
   );
 }
