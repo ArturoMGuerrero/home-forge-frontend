@@ -10,7 +10,7 @@ export function getCompanyId(): string {
 export type NotificationType = 'EMAIL' | 'WHATSAPP' | 'PUSH' | 'SMS';
 export type NotificationStatus = 'PENDING' | 'SENT' | 'DELIVERED' | 'READ' | 'FAILED' | 'CANCELLED';
 export type NotificationPriority = 'LOW' | 'MEDIUM' | 'HIGH' | 'URGENT';
-export type RecipientType = 'LEAD' | 'USER' | 'CUSTOM';
+export type RecipientType = 'LEAD' | 'PROPERTY_OWNER' | 'USER' | 'CUSTOM';
 export type MessageTemplateCategory =
   | 'LEAD_FOLLOWUP'
   | 'APPOINTMENT'
@@ -18,7 +18,10 @@ export type MessageTemplateCategory =
   | 'PAYMENT'
   | 'GENERAL'
   | 'TASK_REMINDER'
-  | 'PROPERTY_ALERT';
+  | 'PROPERTY_ALERT'
+  | 'OWNER_COMMUNICATION'
+  | 'OWNER_FOLLOWUP'
+  | 'PROPERTY_INQUIRY';
 
 export type Notification = {
   id: string;
@@ -185,6 +188,21 @@ export function deleteMessageTemplate(templateId: string): Promise<void> {
   return deleteVoid(`/message-templates/${templateId}?companyId=${getCompanyId()}`);
 }
 
+// Property Owners API
+export type PropertyOwner = {
+  propertyId: string;
+  propertyCode: string;
+  propertyTitle: string;
+  ownerName: string;
+  ownerEmail: string;
+  ownerPhone: string;
+  ownerPhoneSecondary: string;
+};
+
+export function listPropertyOwners(): Promise<PropertyOwner[]> {
+  return getJson<PropertyOwner[]>(`/properties/owners?companyId=${getCompanyId()}`);
+}
+
 // Labels en español
 export const notificationTypeLabels: Record<NotificationType, string> = {
   EMAIL: 'Email',
@@ -209,6 +227,13 @@ export const notificationPriorityLabels: Record<NotificationPriority, string> = 
   URGENT: 'Urgente'
 };
 
+export const recipientTypeLabels: Record<RecipientType, string> = {
+  LEAD: 'Prospecto',
+  PROPERTY_OWNER: 'Dueño de Propiedad',
+  USER: 'Usuario',
+  CUSTOM: 'Personalizado'
+};
+
 export const templateCategoryLabels: Record<MessageTemplateCategory, string> = {
   LEAD_FOLLOWUP: 'Seguimiento de Prospecto',
   APPOINTMENT: 'Citas',
@@ -216,5 +241,8 @@ export const templateCategoryLabels: Record<MessageTemplateCategory, string> = {
   PAYMENT: 'Pagos',
   GENERAL: 'General',
   TASK_REMINDER: 'Recordatorio de Tareas',
-  PROPERTY_ALERT: 'Alerta de Propiedades'
+  PROPERTY_ALERT: 'Alerta de Propiedades',
+  OWNER_COMMUNICATION: 'Comunicación con Dueño',
+  OWNER_FOLLOWUP: 'Seguimiento a Dueño',
+  PROPERTY_INQUIRY: 'Consulta de Propiedad'
 };

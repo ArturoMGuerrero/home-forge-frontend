@@ -302,7 +302,7 @@ export function PropertiesPage() {
       <div className="grid gap-4 p-4 lg:grid-cols-2 xl:grid-cols-3 lg:p-6">
         {filteredProperties.map(property => (
           <article
-            className="group flex flex-col overflow-hidden rounded-2xl border border-slate-700/50 bg-slate-800/50 backdrop-blur-sm transition hover:border-indigo-500/50 hover:shadow-xl hover:shadow-indigo-500/10"
+            className="group flex flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition-all hover:border-indigo-400 hover:shadow-xl hover:shadow-indigo-500/10"
             key={property.id}
           >
             {/* Header con imagen y badges */}
@@ -320,35 +320,35 @@ export function PropertiesPage() {
                   )}
                 </div>
               ) : (
-                <div className="grid size-20 shrink-0 place-items-center rounded-xl bg-indigo-600 text-lg font-bold text-white">
+                <div className="grid size-20 shrink-0 place-items-center rounded-xl bg-indigo-50 text-indigo-600">
                   <svg className="size-10" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
                   </svg>
                 </div>
               )}
               <div className="min-w-0 flex-1">
-                <h2 className="truncate font-bold text-white mb-1.5">{property.title}</h2>
+                <h2 className="truncate font-bold text-slate-900 group-hover:text-indigo-600 transition mb-1.5">{property.title}</h2>
                 <div className="flex flex-wrap gap-1.5 mb-2">
-                  <span className={`inline-flex items-center rounded-md px-2 py-0.5 text-xs font-semibold uppercase ${property.listingType === 'RENT' ? 'bg-violet-600/20 text-violet-300' : 'bg-cyan-600/20 text-cyan-300'}`}>
+                  <span className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-bold ${property.listingType === 'RENT' ? 'bg-violet-100 border border-violet-200 text-violet-700' : 'bg-cyan-100 border border-cyan-200 text-cyan-700'}`}>
                     {listingLabel(property.listingType)}
                   </span>
-                  <span className={`inline-flex items-center rounded-md px-2 py-0.5 text-xs font-semibold uppercase ${
-                    property.status === 'AVAILABLE' ? 'bg-emerald-600/20 text-emerald-300' :
-                    property.status === 'RESERVED' ? 'bg-amber-600/20 text-amber-300' :
-                    property.status === 'SOLD' ? 'bg-blue-600/20 text-blue-300' :
-                    property.status === 'RENTED' ? 'bg-purple-600/20 text-purple-300' :
-                    'bg-slate-600/20 text-slate-300'
+                  <span className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-bold ${
+                    property.status === 'AVAILABLE' ? 'bg-emerald-100 border border-emerald-200 text-emerald-700' :
+                    property.status === 'RESERVED' ? 'bg-amber-100 border border-amber-200 text-amber-700' :
+                    property.status === 'SOLD' ? 'bg-blue-100 border border-blue-200 text-blue-700' :
+                    property.status === 'RENTED' ? 'bg-purple-100 border border-purple-200 text-purple-700' :
+                    'bg-slate-100 border border-slate-200 text-slate-700'
                   }`}>
                     {propertyStatusLabel(property.status)}
                   </span>
                   {property.published && (
-                    <span className="inline-flex items-center rounded-md px-2 py-0.5 text-xs font-semibold uppercase bg-indigo-600/20 text-indigo-300">
+                    <span className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-bold bg-indigo-100 border border-indigo-200 text-indigo-700">
                       Publicada
                     </span>
                   )}
                 </div>
-                <p className="text-xs text-slate-400 flex items-center gap-1.5">
-                  <span className="font-mono bg-slate-700/50 px-1.5 py-0.5 rounded">{property.code}</span>
+                <p className="text-xs text-slate-500 flex items-center gap-1.5">
+                  <span className="font-mono bg-slate-100 px-1.5 py-0.5 rounded">{property.code}</span>
                   <span>·</span>
                   <span>{property.city}, {property.stateCode}</span>
                 </p>
@@ -356,11 +356,11 @@ export function PropertiesPage() {
             </div>
 
             <div className="px-5 pb-3">
-              <div className="text-2xl font-bold text-indigo-400">{formatApiPrice(property)}</div>
+              <div className="text-2xl font-bold text-indigo-600">{formatApiPrice(property)}</div>
             </div>
 
             {/* Features grid */}
-            <div className="grid grid-cols-5 gap-px bg-slate-900/50 text-center text-xs border-y border-slate-700/50">
+            <div className="grid grid-cols-5 gap-px bg-slate-100 text-center text-xs border-y border-slate-100">
               <Feature icon={
                 <svg className="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
@@ -391,8 +391,8 @@ export function PropertiesPage() {
             {/* Botones de acción */}
             <div className="flex flex-col gap-2.5 p-5 mt-auto">
               <Link to={`/app/propiedades/${property.id}/editar`}>
-                <button className="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-indigo-700">
-                  <svg className="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <button className="w-full inline-flex items-center justify-center gap-1.5 rounded-xl bg-indigo-600 px-3 py-2 text-xs font-semibold text-white shadow-sm shadow-indigo-600/30 transition-all hover:bg-indigo-700 hover:shadow-md hover:shadow-indigo-600/40">
+                  <svg className="size-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                   </svg>
@@ -421,12 +421,12 @@ export function PropertiesPage() {
 
 function Feature({ icon, value, label }: { icon: React.ReactNode; value?: number; label: string }) {
   return (
-    <div className="bg-slate-800/50 px-2 py-2.5">
-      <div className="flex items-center justify-center gap-1 mb-0.5 text-indigo-400">
+    <div className="bg-white px-2 py-2.5">
+      <div className="flex items-center justify-center gap-1 mb-0.5 text-indigo-600">
         {icon}
-        <strong className="text-base text-white">{value ?? '-'}</strong>
+        <strong className="text-base text-slate-800">{value ?? '-'}</strong>
       </div>
-      <span className="block text-[9px] text-slate-400 font-medium">{label}</span>
+      <span className="block text-[9px] text-slate-500 font-medium">{label}</span>
     </div>
   );
 }

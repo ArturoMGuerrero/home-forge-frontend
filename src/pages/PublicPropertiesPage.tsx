@@ -12,7 +12,7 @@ import {
 } from '../shared/propertyApi';
 
 const fallbackImage = 'https://images.unsplash.com/photo-1564013799919-ab600027ffc6?auto=format&fit=crop&w=1200&q=80';
-const selectClass = 'w-full rounded-xl border-2 border-slate-200 bg-white px-4 py-3.5 text-sm font-medium text-slate-700 outline-none transition-all focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100 hover:border-slate-300 shadow-sm';
+const selectClass = 'w-full rounded-xl border border-slate-600/50 bg-slate-700/50 px-4 py-3.5 text-sm font-medium text-white outline-none transition-all focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 hover:border-slate-500 backdrop-blur-sm';
 
 export function PublicPropertiesPage() {
   const [listings, setListings] = useState<PublicPropertyListing[]>([]);
@@ -126,18 +126,18 @@ export function PublicPropertiesPage() {
       </section>
 
       <main className="mx-auto max-w-7xl px-5 py-12">
-        <section className="mb-10 rounded-3xl border border-white/60 bg-white/90 backdrop-blur-xl p-6 sm:p-8 shadow-xl shadow-slate-200/50">
+        <section className="mb-10 rounded-3xl border border-slate-700/50 bg-slate-800/80 backdrop-blur-xl p-6 sm:p-8 shadow-xl shadow-black/20">
           <div className="mb-6 flex flex-wrap items-start justify-between gap-4">
             <div>
-              <div className="inline-flex items-center gap-2 rounded-full bg-indigo-100 px-3 py-1 mb-2">
-                <svg className="size-4 text-indigo-600" fill="currentColor" viewBox="0 0 20 20">
+              <div className="inline-flex items-center gap-2 rounded-full bg-indigo-600/20 border border-indigo-500/30 px-3 py-1 mb-2">
+                <svg className="size-4 text-indigo-400" fill="currentColor" viewBox="0 0 20 20">
                   <path fillRule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clipRule="evenodd" />
                 </svg>
-                <span className="text-xs font-bold uppercase tracking-wider text-indigo-600">Buscar por ubicación</span>
+                <span className="text-xs font-bold uppercase tracking-wider text-indigo-300">Buscar por ubicación</span>
               </div>
-              <h2 className="text-2xl font-bold text-slate-900">Encuentra propiedades cerca de ti</h2>
+              <h2 className="text-2xl font-bold text-white">Encuentra propiedades cerca de ti</h2>
             </div>
-            <button className="inline-flex items-center gap-2 rounded-xl bg-slate-100 px-4 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-200 transition-all" onClick={clearFilters} type="button">
+            <button className="inline-flex items-center gap-2 rounded-xl bg-slate-700/50 border border-slate-600/50 px-4 py-2.5 text-sm font-semibold text-slate-300 hover:bg-slate-600/50 hover:text-white transition-all" onClick={clearFilters} type="button">
               <svg className="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
               </svg>
@@ -145,9 +145,9 @@ export function PublicPropertiesPage() {
             </button>
           </div>
           <div className="grid gap-5 sm:grid-cols-3">
-            <label className="grid gap-2.5 text-sm font-bold text-slate-700">
+            <label className="grid gap-2.5 text-sm font-bold text-slate-300">
               <span className="flex items-center gap-2">
-                <svg className="size-4 text-indigo-600" fill="currentColor" viewBox="0 0 20 20">
+                <svg className="size-4 text-indigo-400" fill="currentColor" viewBox="0 0 20 20">
                   <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM4.332 8.027a6.012 6.012 0 011.912-2.706C6.512 5.73 6.974 6 7.5 6A1.5 1.5 0 019 7.5V8a2 2 0 004 0 2 2 0 011.523-1.943A5.977 5.977 0 0116 10c0 .34-.028.675-.083 1H15a2 2 0 00-2 2v2.197A5.973 5.973 0 0110 16v-2a2 2 0 00-2-2 2 2 0 01-2-2 2 2 0 00-1.668-1.973z" clipRule="evenodd" />
                 </svg>
                 País
@@ -157,13 +157,13 @@ export function PublicPropertiesPage() {
                 {countries.map(code => <option key={code} value={code}>{countryName(code)}</option>)}
               </select>
             </label>
-            <label className="grid gap-2 text-sm font-semibold text-slate-700">Estado
+            <label className="grid gap-2 text-sm font-semibold text-slate-300">Estado
               <select className={selectClass} onChange={event => selectState(event.target.value)} value={state}>
                 <option value="ALL">Todos los estados</option>
                 {states.map(value => <option key={value} value={value}>{value}</option>)}
               </select>
             </label>
-            <label className="grid gap-2 text-sm font-semibold text-slate-700">Ciudad
+            <label className="grid gap-2 text-sm font-semibold text-slate-300">Ciudad
               <select className={selectClass} onChange={event => setCity(event.target.value)} value={city}>
                 <option value="ALL">Todas las ciudades</option>
                 {cities.map(value => <option key={value} value={value}>{value}</option>)}
@@ -173,10 +173,10 @@ export function PublicPropertiesPage() {
         </section>
 
         <div className="mb-7 flex flex-wrap items-end justify-between gap-4">
-          <div><p className="mb-1 text-[11px] font-bold uppercase tracking-[0.16em] text-indigo-600">Inventario</p><h2 className="text-2xl font-bold">{visible.length} propiedades</h2></div>
-          <div className="flex rounded-xl border border-slate-200 bg-white p-1">
+          <div><p className="mb-1 text-[11px] font-bold uppercase tracking-[0.16em] text-indigo-400">Inventario</p><h2 className="text-2xl font-bold text-white">{visible.length} propiedades</h2></div>
+          <div className="flex rounded-xl border border-slate-700/50 bg-slate-800/50 p-1 backdrop-blur-sm">
             {([['ALL', 'Todas'], ['SALE', 'Venta'], ['RENT', 'Renta']] as const).map(([value, label]) => (
-              <button className={`rounded-lg px-4 py-2 text-sm font-semibold ${filter === value ? 'bg-indigo-600 text-white' : 'text-slate-600 hover:bg-slate-50'}`} key={value} onClick={() => setFilter(value)} type="button">{label}</button>
+              <button className={`rounded-lg px-4 py-2 text-sm font-semibold transition ${filter === value ? 'bg-indigo-600 text-white' : 'text-slate-300 hover:bg-slate-700/50 hover:text-white'}`} key={value} onClick={() => setFilter(value)} type="button">{label}</button>
             ))}
           </div>
         </div>
