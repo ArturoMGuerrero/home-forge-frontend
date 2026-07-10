@@ -61,27 +61,27 @@ export function Modal({
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       {/* Backdrop con blur */}
       <div
-        className="absolute inset-0 bg-slate-900/80 backdrop-blur-sm transition-opacity"
+        className="absolute inset-0 bg-slate-950/90 backdrop-blur-sm transition-opacity"
         onClick={onClose}
       />
 
       {/* Modal */}
       <div
-        className={`relative w-full ${maxWidthClasses[maxWidth]} overflow-hidden rounded-3xl bg-white shadow-2xl transition-all`}
+        className={`relative w-full ${maxWidthClasses[maxWidth]} overflow-hidden rounded-3xl bg-slate-800 border border-slate-700/50 shadow-2xl shadow-black/50 transition-all`}
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
         {(title || showCloseButton) && (
-          <div className="relative border-b border-slate-200 bg-gradient-to-br from-slate-50 to-white px-6 py-5">
+          <div className="relative border-b border-slate-700/50 bg-slate-800/50 px-6 py-5">
             {title && (
               <div className="pr-10">
-                <h2 className="text-xl font-bold text-slate-900">{title}</h2>
-                {subtitle && <p className="mt-1 text-sm text-slate-500">{subtitle}</p>}
+                <h2 className="text-xl font-bold text-white">{title}</h2>
+                {subtitle && <p className="mt-1 text-sm text-slate-400">{subtitle}</p>}
               </div>
             )}
             {showCloseButton && (
               <button
-                className="absolute right-4 top-4 flex size-10 items-center justify-center rounded-xl text-slate-400 transition hover:bg-slate-100 hover:text-slate-600"
+                className="absolute right-4 top-4 flex size-10 items-center justify-center rounded-xl text-slate-400 transition hover:bg-slate-700/50 hover:text-slate-200"
                 onClick={onClose}
                 type="button"
               >

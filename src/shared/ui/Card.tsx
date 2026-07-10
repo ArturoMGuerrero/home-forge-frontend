@@ -3,16 +3,18 @@ import { ReactNode, HTMLAttributes } from 'react';
 interface CardProps extends HTMLAttributes<HTMLDivElement> {
   interactive?: boolean;
   noPadding?: boolean;
+  truncate?: boolean;
   children: ReactNode;
 }
 
-export function Card({ interactive = false, noPadding = false, children, className = '', ...props }: CardProps) {
+export function Card({ interactive = false, noPadding = false, truncate = false, children, className = '', ...props }: CardProps) {
   return (
     <div
       className={`
         bg-white rounded-2xl border border-slate-200 shadow-sm
         ${interactive ? 'hover:shadow-lg hover:border-indigo-200 transition-all cursor-pointer' : ''}
         ${noPadding ? '' : 'p-6'}
+        ${truncate ? 'overflow-hidden' : ''}
         ${className}
       `}
       {...props}

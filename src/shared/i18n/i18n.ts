@@ -113,6 +113,59 @@ export const resources = {
         CANCELED: 'Canceled'
       },
       weekDays: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
+    },
+    accountSettings: {
+      title: 'Account Settings',
+      subtitle: 'Manage your account settings and preferences',
+      tabs: {
+        profile: 'Profile',
+        security: 'Security',
+        appearance: 'Appearance'
+      },
+      profile: {
+        title: 'Profile Information',
+        subtitle: 'Update your personal information and profile picture',
+        firstName: 'First Name',
+        lastName: 'Last Name',
+        email: 'Email Address',
+        changeAvatar: 'Change Avatar',
+        avatarHint: 'JPG, PNG or GIF. Max size 2MB.',
+        cancel: 'Cancel',
+        saveChanges: 'Save Changes'
+      },
+      security: {
+        title: 'Password Management',
+        subtitle: 'Keep your account secure by updating your password regularly. Use a combination of letters, numbers and symbols.',
+        features: {
+          minChars: 'Minimum 8 characters',
+          encryption: 'End-to-end encryption',
+          verification: 'Advanced security verification'
+        },
+        changePassword: 'Change password',
+        changePasswordSubtitle: 'Update your password to keep your account secure.',
+        currentPassword: 'Current password',
+        newPassword: 'New password',
+        confirmPassword: 'Confirm new password',
+        currentPasswordPlaceholder: 'Enter your current password',
+        newPasswordPlaceholder: 'Minimum 8 characters',
+        confirmPasswordPlaceholder: 'Repeat your new password',
+        cancel: 'Cancel',
+        updatePassword: 'Update password',
+        infoMessage: 'After changing your password, you will need to sign in again with your new credentials.',
+        passwordMismatch: 'Passwords do not match',
+        passwordTooShort: 'Password must be at least 8 characters',
+        passwordUpdated: 'Password updated successfully'
+      },
+      appearance: {
+        title: 'Theme Mode',
+        subtitle: 'Customize the look and feel of your interface',
+        themes: {
+          light: { name: 'Light', description: 'Bright & clear' },
+          dark: { name: 'Dark', description: 'Easy on eyes' },
+          obsidian: { name: 'Obsidian', description: 'Deep black' }
+        },
+        infoMessage: 'Your theme preference will be saved and applied across all pages. Changes take effect immediately.'
+      }
     }
   } },
   es: { translation: {
@@ -226,6 +279,59 @@ export const resources = {
         CANCELED: 'Cancelada'
       },
       weekDays: ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb']
+    },
+    accountSettings: {
+      title: 'Configuración de Cuenta',
+      subtitle: 'Gestiona la configuración y preferencias de tu cuenta',
+      tabs: {
+        profile: 'Perfil',
+        security: 'Seguridad',
+        appearance: 'Apariencia'
+      },
+      profile: {
+        title: 'Información de Perfil',
+        subtitle: 'Actualiza tu información personal y foto de perfil',
+        firstName: 'Nombre',
+        lastName: 'Apellido',
+        email: 'Correo Electrónico',
+        changeAvatar: 'Cambiar Avatar',
+        avatarHint: 'JPG, PNG o GIF. Tamaño máximo 2MB.',
+        cancel: 'Cancelar',
+        saveChanges: 'Guardar Cambios'
+      },
+      security: {
+        title: 'Gestión de Contraseña',
+        subtitle: 'Mantén tu cuenta segura actualizando tu contraseña regularmente. Usa una combinación de letras, números y símbolos.',
+        features: {
+          minChars: 'Mínimo 8 caracteres',
+          encryption: 'Encriptación de extremo a extremo',
+          verification: 'Verificación de seguridad avanzada'
+        },
+        changePassword: 'Cambiar contraseña',
+        changePasswordSubtitle: 'Actualiza tu contraseña para mantener tu cuenta segura.',
+        currentPassword: 'Contraseña actual',
+        newPassword: 'Nueva contraseña',
+        confirmPassword: 'Confirmar nueva contraseña',
+        currentPasswordPlaceholder: 'Ingresa tu contraseña actual',
+        newPasswordPlaceholder: 'Mínimo 8 caracteres',
+        confirmPasswordPlaceholder: 'Repite tu nueva contraseña',
+        cancel: 'Cancelar',
+        updatePassword: 'Actualizar contraseña',
+        infoMessage: 'Después de cambiar tu contraseña, deberás iniciar sesión nuevamente con tus nuevas credenciales.',
+        passwordMismatch: 'Las contraseñas no coinciden',
+        passwordTooShort: 'La contraseña debe tener al menos 8 caracteres',
+        passwordUpdated: 'Contraseña actualizada correctamente'
+      },
+      appearance: {
+        title: 'Modo de Tema',
+        subtitle: 'Personaliza el aspecto de tu interfaz',
+        themes: {
+          light: { name: 'Claro', description: 'Brillante y limpio' },
+          dark: { name: 'Oscuro', description: 'Suave para la vista' },
+          obsidian: { name: 'Obsidiana', description: 'Negro profundo' }
+        },
+        infoMessage: 'Tu preferencia de tema se guardará y aplicará en todas las páginas. Los cambios surten efecto inmediatamente.'
+      }
     }
   } }
 };

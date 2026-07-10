@@ -299,20 +299,19 @@ export function PropertiesPage() {
         </>
       )}
 
-      <div className="grid gap-5 p-4 lg:grid-cols-2 lg:p-6">
+      <div className="grid gap-4 p-4 lg:grid-cols-2 xl:grid-cols-3 lg:p-6">
         {filteredProperties.map(property => (
-          <Link
-            className="group block overflow-hidden rounded-2xl border border-slate-200 bg-white transition hover:border-indigo-300 hover:shadow-lg hover:shadow-indigo-500/10"
+          <article
+            className="group flex flex-col overflow-hidden rounded-2xl border border-slate-700/50 bg-slate-800/50 backdrop-blur-sm transition hover:border-indigo-500/50 hover:shadow-xl hover:shadow-indigo-500/10"
             key={property.id}
-            to={`/app/propiedades/${property.id}/editar`}
           >
             {/* Header con imagen y badges */}
-            <div className="flex gap-4 border-b border-slate-100 bg-gradient-to-br from-slate-50 to-white p-5">
+            <div className="flex gap-4 p-5">
               {propertyImages(property)[0] ? (
-                <div className="relative size-32 shrink-0">
-                  <img alt={property.title} className="size-32 rounded-2xl object-cover ring-4 ring-slate-100" src={propertyImages(property)[0]} />
+                <div className="relative size-20 shrink-0">
+                  <img alt={property.title} className="size-20 rounded-xl object-cover" src={propertyImages(property)[0]} />
                   {propertyImages(property).length > 1 && (
-                    <div className="absolute bottom-2 right-2 flex items-center gap-1 rounded-full bg-slate-950/90 px-2.5 py-1 text-[10px] font-bold text-white backdrop-blur-sm">
+                    <div className="absolute bottom-1.5 right-1.5 flex items-center gap-1 rounded-full bg-slate-950/90 px-2 py-0.5 text-[10px] font-bold text-white backdrop-blur-sm">
                       <svg className="size-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                       </svg>
@@ -321,47 +320,47 @@ export function PropertiesPage() {
                   )}
                 </div>
               ) : (
-                <div className="grid size-32 shrink-0 place-items-center rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 text-2xl font-bold text-white ring-4 ring-indigo-50 shadow-lg shadow-indigo-500/30">
-                  {property.propertyType.slice(0, 2)}
+                <div className="grid size-20 shrink-0 place-items-center rounded-xl bg-indigo-600 text-lg font-bold text-white">
+                  <svg className="size-10" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                  </svg>
                 </div>
               )}
               <div className="min-w-0 flex-1">
-                <div className="flex flex-wrap gap-2 mb-3">
-                  <span className={`inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs font-semibold ${property.listingType === 'RENT' ? 'bg-violet-100 text-violet-800' : 'bg-cyan-100 text-cyan-800'}`}>
-                    <span className="size-1.5 rounded-full bg-current opacity-75"></span>
+                <h2 className="truncate font-bold text-white mb-1.5">{property.title}</h2>
+                <div className="flex flex-wrap gap-1.5 mb-2">
+                  <span className={`inline-flex items-center rounded-md px-2 py-0.5 text-xs font-semibold uppercase ${property.listingType === 'RENT' ? 'bg-violet-600/20 text-violet-300' : 'bg-cyan-600/20 text-cyan-300'}`}>
                     {listingLabel(property.listingType)}
                   </span>
-                  <span className={`inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs font-semibold ${propertyStatusClass(property.status)}`}>
-                    <span className="size-1.5 rounded-full bg-current opacity-75"></span>
+                  <span className={`inline-flex items-center rounded-md px-2 py-0.5 text-xs font-semibold uppercase ${
+                    property.status === 'AVAILABLE' ? 'bg-emerald-600/20 text-emerald-300' :
+                    property.status === 'RESERVED' ? 'bg-amber-600/20 text-amber-300' :
+                    property.status === 'SOLD' ? 'bg-blue-600/20 text-blue-300' :
+                    property.status === 'RENTED' ? 'bg-purple-600/20 text-purple-300' :
+                    'bg-slate-600/20 text-slate-300'
+                  }`}>
                     {propertyStatusLabel(property.status)}
                   </span>
-                  <span className={`inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs font-semibold ${property.published ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'}`}>
-                    {property.published ? (
-                      <svg className="size-3" fill="currentColor" viewBox="0 0 20 20">
-                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                      </svg>
-                    ) : (
-                      <svg className="size-3" fill="currentColor" viewBox="0 0 20 20">
-                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
-                      </svg>
-                    )}
-                    {property.published ? 'Publicada' : 'Borrador'}
-                  </span>
+                  {property.published && (
+                    <span className="inline-flex items-center rounded-md px-2 py-0.5 text-xs font-semibold uppercase bg-indigo-600/20 text-indigo-300">
+                      Publicada
+                    </span>
+                  )}
                 </div>
-                <h2 className="truncate text-lg font-bold text-slate-900 group-hover:text-indigo-600 transition">{property.title}</h2>
-                <p className="mt-1 text-sm text-slate-500 flex items-center gap-2">
-                  <span className="font-mono text-xs bg-slate-100 px-2 py-0.5 rounded">{property.code}</span>
+                <p className="text-xs text-slate-400 flex items-center gap-1.5">
+                  <span className="font-mono bg-slate-700/50 px-1.5 py-0.5 rounded">{property.code}</span>
                   <span>·</span>
                   <span>{property.city}, {property.stateCode}</span>
                 </p>
-                <div className="mt-3 inline-flex items-baseline gap-2">
-                  <strong className="text-2xl font-bold text-indigo-600">{formatApiPrice(property)}</strong>
-                </div>
               </div>
             </div>
 
+            <div className="px-5 pb-3">
+              <div className="text-2xl font-bold text-indigo-400">{formatApiPrice(property)}</div>
+            </div>
+
             {/* Features grid */}
-            <div className="grid grid-cols-3 gap-px border-b border-slate-100 bg-slate-100 text-center text-xs lg:grid-cols-5">
+            <div className="grid grid-cols-5 gap-px bg-slate-900/50 text-center text-xs border-y border-slate-700/50">
               <Feature icon={
                 <svg className="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
@@ -389,16 +388,19 @@ export function PropertiesPage() {
               } value={property.constructionArea} label="Construcción m²" />
             </div>
 
-            {/* Footer con acción */}
-            <div className="bg-slate-50/50 px-5 py-3 text-center">
-              <span className="inline-flex items-center gap-2 text-sm font-semibold text-indigo-600 group-hover:text-indigo-700 transition">
-                Editar propiedad
-                <svg className="size-4 transition group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                </svg>
-              </span>
+            {/* Botones de acción */}
+            <div className="flex flex-col gap-2.5 p-5 mt-auto">
+              <Link to={`/app/propiedades/${property.id}/editar`}>
+                <button className="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-indigo-700">
+                  <svg className="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                  </svg>
+                  Editar propiedad
+                </button>
+              </Link>
             </div>
-          </Link>
+          </article>
         ))}
       </div>
       <QuickPropertyModal
@@ -419,12 +421,12 @@ export function PropertiesPage() {
 
 function Feature({ icon, value, label }: { icon: React.ReactNode; value?: number; label: string }) {
   return (
-    <div className="bg-white px-3 py-3 hover:bg-indigo-50 transition">
-      <div className="flex items-center justify-center gap-1.5 mb-1 text-indigo-600">
+    <div className="bg-slate-800/50 px-2 py-2.5">
+      <div className="flex items-center justify-center gap-1 mb-0.5 text-indigo-400">
         {icon}
-        <strong className="text-base text-slate-800">{value ?? '-'}</strong>
+        <strong className="text-base text-white">{value ?? '-'}</strong>
       </div>
-      <span className="block text-[10px] text-slate-500 font-medium">{label}</span>
+      <span className="block text-[9px] text-slate-400 font-medium">{label}</span>
     </div>
   );
 }

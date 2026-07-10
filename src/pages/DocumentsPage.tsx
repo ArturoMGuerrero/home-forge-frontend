@@ -236,15 +236,15 @@ export function DocumentsPage() {
           </div>
         )}
 
-        <div className="space-y-3">
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
         {filteredDocuments.map(item => (
-          <article className="group overflow-hidden rounded-2xl border border-slate-200 bg-white transition hover:border-indigo-300 hover:shadow-lg hover:shadow-indigo-500/10" key={item.id}>
+          <article className="group overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition-all hover:border-indigo-400 hover:shadow-xl hover:shadow-indigo-500/10 flex flex-col" key={item.id}>
             {/* Header */}
-            <div className="flex items-start gap-4 border-b border-slate-100 bg-gradient-to-br from-slate-50 to-white p-5">
+            <div className="flex items-start gap-4 p-5">
               {/* Icono del documento */}
-              <div className="flex size-14 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 text-white shadow-lg shadow-indigo-500/30 ring-4 ring-indigo-50">
-                <svg className="size-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              <div className="flex size-12 shrink-0 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600">
+                <svg className="size-6" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                 </svg>
               </div>
 
@@ -252,29 +252,26 @@ export function DocumentsPage() {
               <div className="min-w-0 flex-1">
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0 flex-1">
-                    <h3 className="truncate text-lg font-bold text-slate-900 group-hover:text-indigo-600 transition">
+                    <h3 className="truncate text-base font-bold text-slate-900 group-hover:text-indigo-600 transition">
                       {item.fileName}
                     </h3>
-                    <div className="mt-1.5 flex flex-wrap items-center gap-2">
-                      <span className="inline-flex items-center gap-1.5 rounded-lg bg-blue-100 px-2.5 py-1 text-xs font-semibold text-blue-800">
-                        <svg className="size-3" fill="currentColor" viewBox="0 0 20 20">
-                          <path fillRule="evenodd" d="M6 2a2 2 0 00-2 2v12a2 2 0 002 2h8a2 2 0 002-2V7.414A2 2 0 0015.414 6L12 2.586A2 2 0 0010.586 2H6zm5 6a1 1 0 10-2 0v3.586l-1.293-1.293a1 1 0 10-1.414 1.414l3 3a1 1 0 001.414 0l3-3a1 1 0 00-1.414-1.414L11 11.586V8z" clipRule="evenodd" />
-                        </svg>
+                    <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
+                      <span className="inline-flex items-center gap-1 rounded-full bg-indigo-100 border border-indigo-200 px-2.5 py-0.5 text-xs font-bold text-indigo-700">
                         {item.documentType}
                       </span>
-                      <span className={`inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs font-semibold ${
-                        item.status === 'APPROVED' ? 'bg-emerald-100 text-emerald-800' :
-                        item.status === 'REJECTED' ? 'bg-rose-100 text-rose-800' :
-                        item.status === 'VALIDATED' ? 'bg-cyan-100 text-cyan-800' :
-                        'bg-amber-100 text-amber-800'
+                      <span className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-bold ${
+                        item.status === 'APPROVED' ? 'bg-emerald-100 border border-emerald-200 text-emerald-700' :
+                        item.status === 'REJECTED' ? 'bg-rose-100 border border-rose-200 text-rose-700' :
+                        item.status === 'VALIDATED' ? 'bg-cyan-100 border border-cyan-200 text-cyan-700' :
+                        item.status === 'RECEIVED' ? 'bg-blue-100 border border-blue-200 text-blue-700' :
+                        'bg-amber-100 border border-amber-200 text-amber-700'
                       }`}>
-                        <span className="size-1.5 rounded-full bg-current opacity-75"></span>
                         {item.status === 'APPROVED' ? 'Aprobado' :
                          item.status === 'REJECTED' ? 'Rechazado' :
                          item.status === 'VALIDATED' ? 'Validado' :
                          item.status === 'RECEIVED' ? 'Recibido' : 'Pendiente'}
                       </span>
-                      <span className="text-xs text-slate-500">
+                      <span className="text-xs font-medium text-slate-500">
                         {new Date(item.createdAt).toLocaleDateString('es-MX', { day: 'numeric', month: 'short', year: 'numeric' })}
                       </span>
                     </div>
@@ -288,51 +285,51 @@ export function DocumentsPage() {
 
             {/* Relacionado con */}
             {(item.leadName || item.propertyTitle) && (
-              <div className="border-b border-slate-100 bg-slate-50/50 px-5 py-3">
-                <div className="flex items-center gap-2 text-sm">
-                  <svg className="size-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="border-t border-slate-100 bg-slate-50 px-5 py-2">
+                <div className="flex items-center gap-2 text-xs">
+                  <svg className="size-3.5 text-indigo-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
                   </svg>
-                  <span className="text-slate-600">Relacionado con:</span>
-                  <span className="font-semibold text-slate-900">{item.leadName || item.propertyTitle}</span>
+                  <span className="text-slate-600 font-medium">Relacionado con:</span>
+                  <span className="font-bold text-slate-900 truncate">{item.leadName || item.propertyTitle}</span>
                 </div>
               </div>
             )}
 
             {/* Notas */}
             {item.notes && (
-              <div className="border-b border-slate-100 bg-white px-5 py-3">
-                <p className="text-sm text-slate-600 line-clamp-2">{item.notes}</p>
+              <div className="border-t border-slate-100 bg-white px-5 py-2">
+                <p className="text-xs text-slate-600 line-clamp-1">{item.notes}</p>
               </div>
             )}
 
             {/* Acciones */}
-            <div className="flex flex-wrap gap-2 bg-slate-50/50 px-5 py-4">
+            <div className="flex flex-col gap-2 border-t border-slate-100 bg-white px-5 py-3 mt-auto">
               <button
-                className="inline-flex items-center gap-2 rounded-xl border border-indigo-200 bg-indigo-50 px-4 py-2 text-sm font-semibold text-indigo-700 transition hover:bg-indigo-100 hover:border-indigo-300"
+                className="inline-flex items-center justify-center gap-1.5 rounded-xl bg-indigo-600 px-3 py-2 text-xs font-semibold text-white shadow-sm shadow-indigo-600/30 transition-all hover:bg-indigo-700 hover:shadow-md hover:shadow-indigo-600/40"
                 onClick={() => setPreviewDocument(item)}
               >
-                <svg className="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                <svg className="size-3.5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                 </svg>
                 Vista previa
               </button>
               <a
-                className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 hover:border-slate-300"
+                className="inline-flex items-center justify-center gap-1.5 rounded-xl border-2 border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 transition-all hover:bg-slate-50 hover:border-slate-300"
                 href={documentDownloadUrl(item.id)}
               >
-                <svg className="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                <svg className="size-3.5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
                 </svg>
                 Descargar
               </a>
               <button
-                className="inline-flex items-center gap-2 rounded-xl border border-rose-200 bg-rose-50 px-4 py-2 text-sm font-semibold text-rose-700 transition hover:bg-rose-100 hover:border-rose-300"
+                className="inline-flex items-center justify-center gap-1.5 rounded-xl border-2 border-rose-200 bg-white px-3 py-2 text-xs font-semibold text-rose-600 transition-all hover:bg-rose-50 hover:border-rose-300"
                 onClick={() => remove(item.id)}
               >
-                <svg className="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                <svg className="size-3.5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                 </svg>
                 Eliminar
               </button>

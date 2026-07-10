@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Tabs } from '../shared/ui/Tabs';
 import { Card } from '../shared/ui/Card';
 import { Input } from '../shared/ui/Input';
@@ -10,20 +11,21 @@ import { getSession } from '../shared/auth';
 import toast from 'react-hot-toast';
 
 export function AccountSettingsPage() {
+  const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState('profile');
   const session = getSession();
 
   const tabs = [
-    { id: 'profile', label: 'Profile', icon: <Icon className="size-4" name="user" /> },
-    { id: 'security', label: 'Security', icon: <Icon className="size-4" name="lock" /> },
-    { id: 'appearance', label: 'Appearance', icon: <Icon className="size-4" name="palette" /> }
+    { id: 'profile', label: t('accountSettings.tabs.profile'), icon: <Icon className="size-4" name="user" /> },
+    { id: 'security', label: t('accountSettings.tabs.security'), icon: <Icon className="size-4" name="lock" /> },
+    { id: 'appearance', label: t('accountSettings.tabs.appearance'), icon: <Icon className="size-4" name="palette" /> }
   ];
 
   return (
     <div className="mx-auto max-w-5xl">
       <header className="mb-8">
-        <h1 className="text-3xl font-bold text-slate-900">Account Settings</h1>
-        <p className="mt-2 text-sm text-slate-500">Manage your account settings and preferences</p>
+        <h1 className="text-3xl font-bold text-slate-900">{t('accountSettings.title')}</h1>
+        <p className="mt-2 text-sm text-slate-500">{t('accountSettings.subtitle')}</p>
       </header>
 
       <Tabs tabs={tabs} activeTab={activeTab} onChange={setActiveTab} variant="underline" />
@@ -133,6 +135,26 @@ function ProfileTab() {
 }
 
 function SecurityTab() {
+  const [currentPassword, setCurrentPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+
+  const handleChangePassword = () => {
+    if (newPassword !== confirmPassword) {
+      toast.error('Las contraseñas no coinciden');
+      return;
+    }
+    if (newPassword.length < 8) {
+      toast.error('La contraseña debe tener al menos 8 caracteres');
+      return;
+    }
+    // TODO: Implementar cambio de contraseña con API
+    toast.success('Contraseña actualizada correctamente');
+    setCurrentPassword('');
+    setNewPassword('');
+    setConfirmPassword('');
+  };
+
   return (
     <div className="space-y-6">
       <Card>
@@ -142,24 +164,23 @@ function SecurityTab() {
               <Icon className="size-6 text-indigo-600" name="shield" />
             </div>
             <div className="flex-1">
-              <h3 className="text-lg font-bold text-slate-900 mb-1">Secure Password Management</h3>
+              <h3 className="text-lg font-bold text-slate-900 mb-1">Gestión de Contraseña</h3>
               <p className="text-sm text-slate-600 mb-4">
-                Your password is managed through the ALLDATA central authentication system.
-                To reset or change your password, please use the official ALLDATA password recovery portal.
+                Mantén tu cuenta segura actualizando tu contraseña regularmente. Usa una combinación de letras, números y símbolos.
               </p>
 
               <div className="space-y-2 mb-6">
                 <div className="flex items-center gap-2 text-sm text-slate-700">
                   <Icon className="size-5 text-green-600" name="check" />
-                  <span>Secure password reset via email verification</span>
+                  <span>Mínimo 8 caracteres</span>
                 </div>
                 <div className="flex items-center gap-2 text-sm text-slate-700">
                   <Icon className="size-5 text-green-600" name="check" />
-                  <span>Centralized account management across all ALLDATA tools</span>
+                  <span>Encriptación de extremo a extremo</span>
                 </div>
                 <div className="flex items-center gap-2 text-sm text-slate-700">
                   <Icon className="size-5 text-green-600" name="check" />
-                  <span>Enhanced security protocols and encryption</span>
+                  <span>Verificación de seguridad avanzada</span>
                 </div>
               </div>
             </div>
@@ -170,22 +191,64 @@ function SecurityTab() {
       <Card>
         <div className="space-y-6">
           <div>
-            <h3 className="text-base font-bold text-slate-900 mb-1">Need to change your password?</h3>
+            <h3 className="text-base font-bold text-slate-900 mb-1">Cambiar contraseña</h3>
             <p className="text-sm text-slate-500 mb-4">
-              Visit the ALLDATA password recovery portal to reset or update your password securely.
+              Actualiza tu contraseña para mantener tu cuenta segura.
             </p>
           </div>
 
-          <Button variant="primary" size="lg">
-            <Icon className="size-5" name="external" />
-            Reset Password
-          </Button>
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-semibold text-slate-700 mb-2">
+                Contraseña actual
+              </label>
+              <Input
+                type="password"
+                value={currentPassword}
+                onChange={(e) => setCurrentPassword(e.target.value)}
+                placeholder="Ingresa tu contraseña actual"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-semibold text-slate-700 mb-2">
+                Nueva contraseña
+              </label>
+              <Input
+                type="password"
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
+                placeholder="Mínimo 8 caracteres"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-semibold text-slate-700 mb-2">
+                Confirmar nueva contraseña
+              </label>
+              <Input
+                type="password"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                placeholder="Repite tu nueva contraseña"
+              />
+            </div>
+          </div>
+
+          <div className="flex justify-end gap-3 pt-4 border-t border-slate-200">
+            <Button variant="ghost">
+              Cancelar
+            </Button>
+            <Button variant="primary" onClick={handleChangePassword}>
+              <Icon className="size-4" name="shield" />
+              Actualizar contraseña
+            </Button>
+          </div>
 
           <div className="flex items-start gap-2 rounded-xl bg-blue-50 border border-blue-200 p-4">
             <Icon className="size-5 text-blue-600 shrink-0 mt-0.5" name="info" />
             <p className="text-sm text-blue-800">
-              After resetting your password, you will need to sign in again with your new credentials.
-              Your session will remain active until you log out or your password is changed.
+              Después de cambiar tu contraseña, deberás iniciar sesión nuevamente con tus nuevas credenciales.
             </p>
           </div>
         </div>

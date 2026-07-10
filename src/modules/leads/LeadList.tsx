@@ -291,13 +291,13 @@ export function LeadList({
       )}
 
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-        {leads.length === 0 && <p className="py-10 text-center text-sm text-slate-500 col-span-full">{t('noLeads')}</p>}
+        {leads.length === 0 && <p className="py-10 text-center text-sm text-slate-400 col-span-full">{t('noLeads')}</p>}
         {filteredLeads.length === 0 && leads.length > 0 && (
           <div className="py-12 text-center col-span-full">
-            <svg className="mx-auto mb-3 size-12 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="mx-auto mb-3 size-12 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
             </svg>
-            <p className="text-sm font-medium text-slate-600">No se encontraron prospectos</p>
+            <p className="text-sm font-medium text-slate-300">No se encontraron prospectos</p>
             <p className="mt-1 text-xs text-slate-500">Intenta ajustar los filtros de búsqueda</p>
           </div>
         )}
@@ -306,38 +306,46 @@ export function LeadList({
           const phone = formatPhone(lead.phoneE164);
 
           return (
-            <Link
-              className="group block overflow-hidden rounded-xl border border-slate-200 bg-white transition hover:border-blue-400 hover:shadow-lg"
+            <article
+              className="group flex flex-col overflow-hidden rounded-2xl border border-slate-700/50 bg-slate-800/50 backdrop-blur-sm transition hover:border-indigo-500/50 hover:shadow-xl hover:shadow-indigo-500/10"
               key={lead.id}
-              to={`/app/prospectos/${lead.id}`}
             >
               {/* Header compacto */}
-              <div className="flex items-start gap-3 p-4 border-b border-slate-100 bg-gradient-to-br from-slate-50/50 to-white">
+              <div className="flex items-start gap-3 p-5">
                 <div className="relative flex-shrink-0">
-                  <div className="grid size-12 place-items-center rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 text-sm font-bold text-white shadow-md">
+                  <div className="grid size-14 place-items-center rounded-xl bg-indigo-600 text-sm font-bold text-white">
                     {lead.firstName[0]}{lead.lastName[0]}
                   </div>
                   {lead.priority === 'HIGH' && (
-                    <div className="absolute -right-1 -top-1 flex size-4 items-center justify-center rounded-full bg-rose-500 ring-2 ring-white">
+                    <div className="absolute -right-1 -top-1 flex size-5 items-center justify-center rounded-full bg-rose-500 ring-2 ring-slate-800">
                       <span className="text-[10px]">⚡</span>
                     </div>
                   )}
                 </div>
 
                 <div className="min-w-0 flex-1">
-                  <h3 className="font-bold text-slate-900 group-hover:text-blue-600 transition truncate">
+                  <h3 className="font-bold text-white mb-1.5 truncate">
                     {lead.firstName} {lead.lastName}
                   </h3>
-                  <div className="flex items-center gap-1.5 mt-1">
-                    <span className={`inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-xs font-semibold ${statusClass[lead.status] ?? 'bg-slate-100 text-slate-700'}`}>
-                      <span className="size-1 rounded-full bg-current"></span>
+                  <div className="flex items-center gap-1.5">
+                    <span className={`inline-flex items-center rounded-md px-2 py-0.5 text-xs font-semibold uppercase ${
+                      lead.status === 'QUALIFIED' ? 'bg-violet-600/20 text-violet-300' :
+                      lead.status === 'CONTACTED' ? 'bg-amber-600/20 text-amber-300' :
+                      lead.status === 'NEW' ? 'bg-cyan-600/20 text-cyan-300' :
+                      lead.status === 'TOUR_SCHEDULED' ? 'bg-indigo-600/20 text-indigo-300' :
+                      lead.status === 'TOUR_COMPLETED' ? 'bg-emerald-600/20 text-emerald-300' :
+                      lead.status === 'OFFER_MADE' ? 'bg-purple-600/20 text-purple-300' :
+                      lead.status === 'UNDER_CONTRACT' ? 'bg-blue-600/20 text-blue-300' :
+                      lead.status === 'CLOSED' ? 'bg-green-600/20 text-green-300' :
+                      'bg-slate-600/20 text-slate-300'
+                    }`}>
                       {leadStatusLabels[lead.status]}
                     </span>
                     {lead.score !== undefined && lead.score > 0 && (
                       <span className={`text-xs font-bold px-1.5 py-0.5 rounded ${
-                        lead.score >= 70 ? 'text-emerald-600' :
-                        lead.score >= 40 ? 'text-amber-600' :
-                        'text-slate-400'
+                        lead.score >= 70 ? 'bg-emerald-600/20 text-emerald-300' :
+                        lead.score >= 40 ? 'bg-amber-600/20 text-amber-300' :
+                        'bg-slate-600/20 text-slate-400'
                       }`}>
                         {lead.score}
                       </span>
@@ -347,25 +355,25 @@ export function LeadList({
               </div>
 
               {/* Información compacta */}
-              <div className="p-4 space-y-2 text-sm">
+              <div className="px-5 pb-4 space-y-2.5 text-sm">
                 {phone && (
-                  <div className="flex items-center gap-2 text-slate-700">
-                    <svg className="size-4 text-blue-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <div className="flex items-center gap-2 text-slate-300">
+                    <svg className="size-4 text-indigo-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
                     </svg>
                     <span className="truncate font-medium">{phone}</span>
                   </div>
                 )}
                 {lead.email && (
-                  <div className="flex items-center gap-2 text-slate-700">
-                    <svg className="size-4 text-purple-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <div className="flex items-center gap-2 text-slate-300">
+                    <svg className="size-4 text-purple-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                     </svg>
-                    <span className="truncate font-medium">{lead.email}</span>
+                    <span className="truncate font-medium text-xs">{lead.email}</span>
                   </div>
                 )}
                 {budget && (
-                  <div className="flex items-center gap-2 text-emerald-700 font-bold">
+                  <div className="flex items-center gap-2 text-emerald-300 font-bold">
                     <svg className="size-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
@@ -373,7 +381,7 @@ export function LeadList({
                   </div>
                 )}
                 {lead.city && (
-                  <div className="flex items-center gap-2 text-slate-600">
+                  <div className="flex items-center gap-2 text-slate-400">
                     <svg className="size-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -385,18 +393,31 @@ export function LeadList({
 
               {/* Próximo seguimiento compacto */}
               {lead.nextFollowUpAt && (
-                <div className="flex items-center gap-2 bg-amber-50 px-4 py-2.5 border-t border-amber-100">
-                  <svg className="size-4 text-amber-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div className="flex items-center gap-2 bg-amber-600/10 px-5 py-2.5 border-t border-amber-600/20">
+                  <svg className="size-4 text-amber-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
                   <div className="min-w-0 flex-1">
-                    <p className="text-xs text-amber-600 font-medium truncate">
+                    <p className="text-xs text-amber-300 font-medium truncate">
                       {new Date(lead.nextFollowUpAt).toLocaleDateString('es-MX', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}
                     </p>
                   </div>
                 </div>
               )}
-            </Link>
+
+              {/* Botón de acción */}
+              <div className="p-5 pt-3 mt-auto">
+                <Link to={`/app/prospectos/${lead.id}`}>
+                  <button className="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-indigo-700">
+                    <svg className="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                    </svg>
+                    Ver detalles
+                  </button>
+                </Link>
+              </div>
+            </article>
           );
         })}
       </div>

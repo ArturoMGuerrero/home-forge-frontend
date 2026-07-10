@@ -165,7 +165,7 @@ export default function CalendarPage() {
   const days = getDaysInMonth();
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-slate-100 to-gray-100 p-6">
+    <div className="min-h-screen p-6 overflow-x-hidden">
       {/* Header */}
       <div className="mb-8">
         <div className="flex justify-between items-start">

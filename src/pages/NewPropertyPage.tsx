@@ -201,7 +201,12 @@ export function NewPropertyPage() {
         parkingSpaces: optionalNumber(form.parkingSpaces),
         description: form.description.trim() || undefined,
         imageUrl: normalizeImageUrl(form.imageUrl),
-        published: form.published
+        published: form.published,
+        ownerName: form.ownerName.trim() || undefined,
+        ownerEmail: form.ownerEmail.trim() || undefined,
+        ownerPhone: form.ownerPhone.trim() || undefined,
+        ownerPhoneSecondary: form.ownerPhoneSecondary.trim() || undefined,
+        ownerNotes: form.ownerNotes.trim() || undefined
       };
       const saved = propertyId
         ? await updateProperty(propertyId, payload)
