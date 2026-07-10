@@ -290,10 +290,10 @@ export function LeadList({
         </div>
       )}
 
-      <div className="space-y-3">
-        {leads.length === 0 && <p className="py-10 text-center text-sm text-slate-500">{t('noLeads')}</p>}
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+        {leads.length === 0 && <p className="py-10 text-center text-sm text-slate-500 col-span-full">{t('noLeads')}</p>}
         {filteredLeads.length === 0 && leads.length > 0 && (
-          <div className="py-12 text-center">
+          <div className="py-12 text-center col-span-full">
             <svg className="mx-auto mb-3 size-12 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
             </svg>
@@ -307,131 +307,90 @@ export function LeadList({
 
           return (
             <Link
-              className="group block overflow-hidden rounded-2xl border border-slate-200 bg-white transition hover:border-indigo-300 hover:shadow-lg hover:shadow-indigo-500/10"
+              className="group block overflow-hidden rounded-xl border border-slate-200 bg-white transition hover:border-blue-400 hover:shadow-lg"
               key={lead.id}
               to={`/app/prospectos/${lead.id}`}
             >
-              {/* Header con avatar y badges */}
-              <div className="flex items-start gap-4 border-b border-slate-100 bg-gradient-to-br from-slate-50 to-white p-5">
-                <div className="relative">
-                  <div className="grid size-14 shrink-0 place-items-center rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 text-lg font-bold text-white shadow-lg shadow-indigo-500/30 ring-4 ring-indigo-50">
+              {/* Header compacto */}
+              <div className="flex items-start gap-3 p-4 border-b border-slate-100 bg-gradient-to-br from-slate-50/50 to-white">
+                <div className="relative flex-shrink-0">
+                  <div className="grid size-12 place-items-center rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 text-sm font-bold text-white shadow-md">
                     {lead.firstName[0]}{lead.lastName[0]}
                   </div>
                   {lead.priority === 'HIGH' && (
-                    <div className="absolute -right-1 -top-1 flex size-5 items-center justify-center rounded-full bg-rose-500 ring-2 ring-white" title="Alta prioridad">
-                      <svg className="size-3 text-white" fill="currentColor" viewBox="0 0 20 20">
-                        <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
-                      </svg>
+                    <div className="absolute -right-1 -top-1 flex size-4 items-center justify-center rounded-full bg-rose-500 ring-2 ring-white">
+                      <span className="text-[10px]">⚡</span>
                     </div>
                   )}
                 </div>
 
                 <div className="min-w-0 flex-1">
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="min-w-0 flex-1">
-                      <h3 className="truncate text-lg font-bold text-slate-900 group-hover:text-indigo-600 transition">
-                        {lead.firstName} {lead.lastName}
-                      </h3>
-                      <div className="mt-1.5 flex items-center gap-2">
-                        <span className={`inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs font-semibold ${statusClass[lead.status] ?? 'bg-slate-100 text-slate-700'}`}>
-                          <span className="size-1.5 rounded-full bg-current opacity-75"></span>
-                          {leadStatusLabels[lead.status]}
-                        </span>
-                        {lead.priority !== 'MEDIUM' && (
-                          <span className={`inline-flex items-center gap-1 rounded-lg px-2 py-1 text-xs font-semibold ${priorityClass[lead.priority]}`}>
-                            {lead.priority === 'HIGH' ? '⚡' : '📋'} {priorityLabels[lead.priority]}
-                          </span>
-                        )}
-                      </div>
-                    </div>
+                  <h3 className="font-bold text-slate-900 group-hover:text-blue-600 transition truncate">
+                    {lead.firstName} {lead.lastName}
+                  </h3>
+                  <div className="flex items-center gap-1.5 mt-1">
+                    <span className={`inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-xs font-semibold ${statusClass[lead.status] ?? 'bg-slate-100 text-slate-700'}`}>
+                      <span className="size-1 rounded-full bg-current"></span>
+                      {leadStatusLabels[lead.status]}
+                    </span>
                     {lead.score !== undefined && lead.score > 0 && (
-                      <div className="flex flex-col items-center rounded-xl bg-white px-3 py-2 shadow-sm ring-1 ring-slate-200">
-                        <span className={`text-xl font-bold leading-none ${
-                          lead.score >= 70 ? 'text-emerald-600' :
-                          lead.score >= 40 ? 'text-amber-600' :
-                          'text-slate-400'
-                        }`}>
-                          {lead.score}
-                        </span>
-                        <span className="text-[10px] font-medium uppercase tracking-wide text-slate-500">Score</span>
-                      </div>
+                      <span className={`text-xs font-bold px-1.5 py-0.5 rounded ${
+                        lead.score >= 70 ? 'text-emerald-600' :
+                        lead.score >= 40 ? 'text-amber-600' :
+                        'text-slate-400'
+                      }`}>
+                        {lead.score}
+                      </span>
                     )}
                   </div>
                 </div>
               </div>
 
-              {/* Información de contacto */}
-              <div className="space-y-2 border-b border-slate-100 bg-white px-5 py-4">
+              {/* Información compacta */}
+              <div className="p-4 space-y-2 text-sm">
                 {phone && (
-                  <div className="flex items-center gap-2.5 text-sm">
-                    <div className="flex size-8 items-center justify-center rounded-lg bg-indigo-50 text-indigo-600">
-                      <svg className="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
-                      </svg>
-                    </div>
-                    <span className="font-medium text-slate-700">{phone}</span>
+                  <div className="flex items-center gap-2 text-slate-700">
+                    <svg className="size-4 text-blue-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                    </svg>
+                    <span className="truncate font-medium">{phone}</span>
                   </div>
                 )}
                 {lead.email && (
-                  <div className="flex items-center gap-2.5 text-sm">
-                    <div className="flex size-8 items-center justify-center rounded-lg bg-purple-50 text-purple-600">
-                      <svg className="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                      </svg>
-                    </div>
-                    <span className="truncate font-medium text-slate-700">{lead.email}</span>
+                  <div className="flex items-center gap-2 text-slate-700">
+                    <svg className="size-4 text-purple-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                    </svg>
+                    <span className="truncate font-medium">{lead.email}</span>
                   </div>
                 )}
-              </div>
-
-              {/* Detalles del prospecto */}
-              <div className="flex flex-wrap gap-2 bg-slate-50/50 px-5 py-4">
                 {budget && (
-                  <div className="inline-flex items-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2">
-                    <svg className="size-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <div className="flex items-center gap-2 text-emerald-700 font-bold">
+                    <svg className="size-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
-                    <span className="text-sm font-bold text-emerald-700">{budget}</span>
-                  </div>
-                )}
-                {lead.propertyType && (
-                  <div className="inline-flex items-center gap-2 rounded-xl border border-blue-200 bg-blue-50 px-3 py-2">
-                    <svg className="size-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-                    </svg>
-                    <span className="text-sm font-semibold text-blue-700">{lead.propertyType}</span>
-                  </div>
-                )}
-                {lead.bedroomsMin !== undefined && lead.bedroomsMin > 0 && (
-                  <div className="inline-flex items-center gap-2 rounded-xl border border-violet-200 bg-violet-50 px-3 py-2">
-                    <svg className="size-4 text-violet-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-                    </svg>
-                    <span className="text-sm font-semibold text-violet-700">{lead.bedroomsMin}+ recámaras</span>
+                    <span className="truncate">{budget}</span>
                   </div>
                 )}
                 {lead.city && (
-                  <div className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2">
-                    <svg className="size-4 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <div className="flex items-center gap-2 text-slate-600">
+                    <svg className="size-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                     </svg>
-                    <span className="text-sm font-semibold text-slate-700">{lead.city}</span>
+                    <span className="truncate">{lead.city}</span>
                   </div>
                 )}
               </div>
 
-              {/* Próximo seguimiento */}
+              {/* Próximo seguimiento compacto */}
               {lead.nextFollowUpAt && (
-                <div className="flex items-center gap-3 border-t border-amber-200 bg-gradient-to-r from-amber-50 to-orange-50 px-5 py-3">
-                  <div className="flex size-8 items-center justify-center rounded-lg bg-amber-100">
-                    <svg className="size-4 text-amber-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                  </div>
-                  <div className="flex-1">
-                    <p className="text-xs font-medium text-amber-600">Próximo seguimiento</p>
-                    <p className="text-sm font-bold text-amber-900">
+                <div className="flex items-center gap-2 bg-amber-50 px-4 py-2.5 border-t border-amber-100">
+                  <svg className="size-4 text-amber-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-xs text-amber-600 font-medium truncate">
                       {new Date(lead.nextFollowUpAt).toLocaleDateString('es-MX', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}
                     </p>
                   </div>

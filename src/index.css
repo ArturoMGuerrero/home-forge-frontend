@@ -1,1 +1,747 @@
 @import "tailwindcss";
+
+/* Light Theme (Default) */
+:root,
+:root.light {
+  --main-bg: 248 250 252;
+  --main-bg-gradient: linear-gradient(to bottom right, rgb(248 250 252), rgb(226 232 240));
+  --card-bg: 255 255 255;
+  --card-hover-bg: 255 255 255;
+  --modal-bg: 255 255 255;
+  --modal-header-bg: 248 250 252;
+  --input-bg: 255 255 255;
+  --text-primary: 15 23 42;
+  --text-secondary: 71 85 105;
+  --text-tertiary: 148 163 184;
+  --border-color: 226 232 240;
+  --border-hover: 203 213 225;
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+}
+
+/* Dark Theme - Tonos azulados profesionales */
+:root.dark {
+  --main-bg: 15 23 42;
+  --main-bg-gradient: linear-gradient(135deg, rgb(15 23 42) 0%, rgb(23 37 84) 100%);
+  --card-bg: 30 41 59;
+  --card-hover-bg: 41 50 65;
+  --modal-bg: 30 41 59;
+  --modal-header-bg: 22 30 46;
+  --input-bg: 22 30 46;
+  --text-primary: 248 250 252;
+  --text-secondary: 203 213 225;
+  --text-tertiary: 148 163 184;
+  --border-color: 51 65 85;
+  --border-hover: 99 102 241;
+  --shadow-sm: 0 1px 3px 0 rgb(0 0 0 / 0.3);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.4), 0 2px 4px -2px rgb(0 0 0 / 0.3);
+  --shadow-lg: 0 10px 25px -5px rgb(0 0 0 / 0.5), 0 8px 10px -6px rgb(99 102 241 / 0.1);
+}
+
+/* Obsidian Theme - Negro puro con acentos sutiles */
+:root.obsidian {
+  --main-bg: 10 10 15;
+  --main-bg-gradient: linear-gradient(135deg, rgb(10 10 15) 0%, rgb(20 20 30) 100%);
+  --card-bg: 24 24 32;
+  --card-hover-bg: 32 32 42;
+  --modal-bg: 24 24 32;
+  --modal-header-bg: 16 16 24;
+  --input-bg: 16 16 24;
+  --text-primary: 245 245 250;
+  --text-secondary: 212 212 225;
+  --text-tertiary: 156 163 175;
+  --border-color: 42 42 52;
+  --border-hover: 99 102 241;
+  --shadow-sm: 0 1px 3px 0 rgb(0 0 0 / 0.5);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.6), 0 2px 4px -2px rgb(0 0 0 / 0.5);
+  --shadow-lg: 0 12px 30px -8px rgb(0 0 0 / 0.8), 0 8px 12px -6px rgb(99 102 241 / 0.15);
+}
+
+/* Apply theme to main content area */
+.dark .bg-gradient-to-br.from-slate-50.to-slate-100,
+.obsidian .bg-gradient-to-br.from-slate-50.to-slate-100 {
+  background: var(--main-bg-gradient) !important;
+  min-height: 100vh;
+}
+
+/* Asegurar que body y html tengan el fondo apropiado */
+.dark body,
+.dark html,
+.obsidian body,
+.obsidian html {
+  background: var(--main-bg-gradient) !important;
+  min-height: 100vh;
+}
+
+/* Fondos específicos de páginas - asegurar que cubran todo */
+.dark .min-h-screen,
+.obsidian .min-h-screen {
+  min-height: 100vh !important;
+}
+
+/* Páginas públicas - también aplicar gradiente */
+.dark .bg-slate-50,
+.obsidian .bg-slate-50 {
+  background: var(--main-bg-gradient) !important;
+}
+
+/* Evitar fondos blancos en contenedores grandes */
+.dark .min-h-screen.bg-white,
+.obsidian .min-h-screen.bg-white {
+  background: var(--main-bg-gradient) !important;
+}
+
+/* Cards - con efecto de brillo sutil */
+.dark .bg-white,
+.obsidian .bg-white {
+  background-color: rgb(var(--card-bg)) !important;
+  box-shadow: var(--shadow-sm);
+  border: 1px solid rgb(var(--border-color)) !important;
+  transition: all 0.2s ease;
+}
+
+.dark .bg-white:hover,
+.obsidian .bg-white:hover {
+  background-color: rgb(var(--card-hover-bg)) !important;
+  border-color: rgb(var(--border-hover)) !important;
+  box-shadow: var(--shadow-md);
+}
+
+.dark .hover\:bg-white:hover,
+.obsidian .hover\:bg-white:hover {
+  background-color: rgb(var(--card-hover-bg)) !important;
+}
+
+/* Modal backgrounds - eliminar el blanco brillante del header */
+.dark .bg-gradient-to-br.from-slate-50.to-white,
+.obsidian .bg-gradient-to-br.from-slate-50.to-white {
+  background: rgb(var(--modal-header-bg)) !important;
+}
+
+/* Modals - fondo uniforme */
+.dark .rounded-3xl.bg-white,
+.dark .rounded-2xl.bg-white,
+.obsidian .rounded-3xl.bg-white,
+.obsidian .rounded-2xl.bg-white {
+  background-color: rgb(var(--modal-bg)) !important;
+}
+
+/* Cards dentro de grids - suavizar el contraste */
+.dark .bg-white.rounded-2xl,
+.dark .bg-white.rounded-xl,
+.obsidian .bg-white.rounded-2xl,
+.obsidian .bg-white.rounded-xl {
+  background-color: rgb(var(--card-bg)) !important;
+  border-color: rgb(var(--border-color)) !important;
+}
+
+/* Reducir opacidad de backdrop en modals */
+.dark .bg-slate-900\/80,
+.obsidian .bg-slate-900\/80 {
+  background-color: rgb(0 0 0 / 0.6) !important;
+}
+
+/* Secciones info en cards de documentos/prospectos */
+.dark .bg-slate-100.text-slate-600,
+.dark .bg-slate-100.text-slate-700,
+.dark .bg-gray-100.text-gray-600,
+.dark .bg-gray-100.text-gray-700,
+.obsidian .bg-slate-100.text-slate-600,
+.obsidian .bg-slate-100.text-slate-700,
+.obsidian .bg-gray-100.text-gray-600,
+.obsidian .bg-gray-100.text-gray-700 {
+  background-color: rgba(51, 65, 85, 0.3) !important;
+  color: rgb(203 213 225) !important;
+}
+
+/* Badges más pequeños y subtítulos */
+.dark .text-xs,
+.obsidian .text-xs {
+  opacity: 0.9;
+}
+
+/* Mejorar contraste en badges pequeños */
+.dark .bg-indigo-600,
+.obsidian .bg-indigo-600 {
+  background-color: rgb(79 70 229) !important;
+}
+
+.dark .bg-indigo-700,
+.obsidian .bg-indigo-700 {
+  background-color: rgb(99 102 241) !important;
+}
+
+/* Subscription Banner - mantener colores vibrantes */
+.dark .bg-gradient-to-r.from-amber-600.to-orange-600,
+.obsidian .bg-gradient-to-r.from-amber-600.to-orange-600 {
+  background-image: linear-gradient(to right, rgb(217, 119, 6), rgb(234, 88, 12)) !important;
+}
+
+.dark .bg-gradient-to-r.from-rose-600.to-pink-600,
+.obsidian .bg-gradient-to-r.from-rose-600.to-pink-600 {
+  background-image: linear-gradient(to right, rgb(225, 29, 72), rgb(219, 39, 119)) !important;
+}
+
+.dark .bg-gradient-to-r.from-slate-800.to-slate-900,
+.obsidian .bg-gradient-to-r.from-slate-800.to-slate-900 {
+  background-image: linear-gradient(to right, rgb(30, 41, 59), rgb(15, 23, 42)) !important;
+}
+
+/* Dashboard - fondos de loading y error */
+.dark .bg-rose-50,
+.obsidian .bg-rose-50 {
+  background-color: rgba(225, 29, 72, 0.1) !important;
+}
+
+.dark .text-rose-700,
+.obsidian .text-rose-700 {
+  color: rgb(248 113 113) !important;
+}
+
+.dark .text-rose-900,
+.obsidian .text-rose-900 {
+  color: rgb(254 202 202) !important;
+}
+
+.dark .text-rose-600,
+.obsidian .text-rose-600 {
+  color: rgb(251 113 133) !important;
+}
+
+.dark .border-rose-200,
+.obsidian .border-rose-200 {
+  border-color: rgba(225, 29, 72, 0.3) !important;
+}
+
+/* Dashboard - sección de alertas urgentes */
+.dark .bg-gradient-to-br.from-rose-50.to-orange-50,
+.obsidian .bg-gradient-to-br.from-rose-50.to-orange-50 {
+  background: linear-gradient(135deg, rgba(225, 29, 72, 0.15) 0%, rgba(234, 88, 12, 0.15) 100%) !important;
+  border-color: rgba(225, 29, 72, 0.3) !important;
+}
+
+/* KPI Cards - fondos de iconos */
+.dark .bg-indigo-600,
+.dark .bg-cyan-600,
+.dark .bg-violet-600,
+.dark .bg-rose-600,
+.dark .bg-emerald-600,
+.obsidian .bg-indigo-600,
+.obsidian .bg-cyan-600,
+.obsidian .bg-violet-600,
+.obsidian .bg-rose-600,
+.obsidian .bg-emerald-600 {
+  opacity: 1 !important;
+}
+
+/* Dashboard - backgrounds de avatares */
+.dark .bg-rose-100,
+.obsidian .bg-rose-100 {
+  background-color: rgba(239, 68, 68, 0.2) !important;
+}
+
+.dark .text-rose-700.font-bold,
+.obsidian .text-rose-700.font-bold {
+  color: rgb(248 113 113) !important;
+}
+
+/* Dashboard - textos de colores en secciones urgentes */
+.dark .text-indigo-600,
+.obsidian .text-indigo-600 {
+  color: rgb(129 140 248) !important;
+}
+
+.dark .text-indigo-700,
+.obsidian .text-indigo-700 {
+  color: rgb(165 180 252) !important;
+}
+
+.dark .hover\:text-indigo-700:hover,
+.obsidian .hover\:text-indigo-700:hover {
+  color: rgb(199 210 254) !important;
+}
+
+/* Dashboard - Quick Access Cards */
+.dark .bg-indigo-50,
+.obsidian .bg-indigo-50 {
+  background-color: rgba(99, 102, 241, 0.15) !important;
+}
+
+.dark .bg-cyan-50,
+.obsidian .bg-cyan-50 {
+  background-color: rgba(6, 182, 212, 0.15) !important;
+}
+
+.dark .bg-violet-50,
+.obsidian .bg-violet-50 {
+  background-color: rgba(139, 92, 246, 0.15) !important;
+}
+
+.dark .bg-emerald-50,
+.obsidian .bg-emerald-50 {
+  background-color: rgba(16, 185, 129, 0.15) !important;
+}
+
+.dark .hover\:bg-indigo-100:hover,
+.obsidian .hover\:bg-indigo-100:hover {
+  background-color: rgba(99, 102, 241, 0.25) !important;
+}
+
+.dark .hover\:bg-cyan-100:hover,
+.obsidian .hover\:bg-cyan-100:hover {
+  background-color: rgba(6, 182, 212, 0.25) !important;
+}
+
+.dark .hover\:bg-violet-100:hover,
+.obsidian .hover\:bg-violet-100:hover {
+  background-color: rgba(139, 92, 246, 0.25) !important;
+}
+
+.dark .border-indigo-200,
+.obsidian .border-indigo-200 {
+  border-color: rgba(99, 102, 241, 0.3) !important;
+}
+
+.dark .border-cyan-200,
+.obsidian .border-cyan-200 {
+  border-color: rgba(6, 182, 212, 0.3) !important;
+}
+
+.dark .border-violet-200,
+.obsidian .border-violet-200 {
+  border-color: rgba(139, 92, 246, 0.3) !important;
+}
+
+.dark .border-emerald-200,
+.obsidian .border-emerald-200 {
+  border-color: rgba(16, 185, 129, 0.3) !important;
+}
+
+.dark .text-cyan-600,
+.obsidian .text-cyan-600 {
+  color: rgb(34 211 238) !important;
+}
+
+.dark .text-violet-600,
+.obsidian .text-violet-600 {
+  color: rgb(167 139 250) !important;
+}
+
+.dark .text-emerald-600,
+.obsidian .text-emerald-600 {
+  color: rgb(52 211 153) !important;
+}
+
+.dark .text-emerald-700,
+.obsidian .text-emerald-700 {
+  color: rgb(110 231 183) !important;
+}
+
+.dark .text-emerald-900,
+.obsidian .text-emerald-900 {
+  color: rgb(209 250 229) !important;
+}
+
+/* Dashboard - sección "Todo al día" */
+.dark .bg-gradient-to-br.from-emerald-50.to-cyan-50,
+.obsidian .bg-gradient-to-br.from-emerald-50.to-cyan-50 {
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.15) 0%, rgba(6, 182, 212, 0.15) 100%) !important;
+}
+
+/* Backgrounds - sistema de capas */
+.dark .bg-slate-50,
+.obsidian .bg-slate-50 {
+  background-color: rgba(51, 65, 85, 0.25) !important;
+}
+
+.dark .bg-slate-100,
+.obsidian .bg-slate-100 {
+  background-color: rgba(51, 65, 85, 0.35) !important;
+}
+
+.dark .bg-slate-200,
+.obsidian .bg-slate-200 {
+  background-color: rgba(71, 85, 105, 0.4) !important;
+}
+
+.dark .bg-slate-300,
+.obsidian .bg-slate-300 {
+  background-color: rgba(100, 116, 139, 0.45) !important;
+}
+
+.dark .hover\:bg-slate-50:hover,
+.dark .hover\:bg-slate-100:hover,
+.obsidian .hover\:bg-slate-50:hover,
+.obsidian .hover\:bg-slate-100:hover {
+  background-color: rgb(var(--card-hover-bg)) !important;
+}
+
+/* Fondo para secciones de filtros y búsqueda */
+.dark .bg-slate-50.rounded-xl,
+.dark .bg-slate-100.rounded-xl,
+.dark .bg-slate-50.rounded-2xl,
+.dark .bg-slate-100.rounded-2xl,
+.obsidian .bg-slate-50.rounded-xl,
+.obsidian .bg-slate-100.rounded-xl,
+.obsidian .bg-slate-50.rounded-2xl,
+.obsidian .bg-slate-100.rounded-2xl {
+  background-color: rgb(var(--input-bg)) !important;
+}
+
+/* Text colors - mejorados para legibilidad */
+.dark .text-slate-900,
+.dark .text-slate-950,
+.obsidian .text-slate-900,
+.obsidian .text-slate-950 {
+  color: rgb(var(--text-primary)) !important;
+}
+
+.dark .text-slate-600,
+.dark .text-slate-700,
+.dark .text-slate-800,
+.obsidian .text-slate-600,
+.obsidian .text-slate-700,
+.obsidian .text-slate-800 {
+  color: rgb(var(--text-secondary)) !important;
+}
+
+.dark .text-slate-400,
+.dark .text-slate-500,
+.obsidian .text-slate-400,
+.obsidian .text-slate-500 {
+  color: rgb(var(--text-tertiary)) !important;
+}
+
+/* White text mantenerlo blanco */
+.dark .text-white,
+.obsidian .text-white {
+  color: rgb(255 255 255) !important;
+}
+
+/* Textos de encabezado más brillantes */
+.dark h1,
+.dark h2,
+.dark h3,
+.dark h4,
+.dark h5,
+.dark h6,
+.obsidian h1,
+.obsidian h2,
+.obsidian h3,
+.obsidian h4,
+.obsidian h5,
+.obsidian h6 {
+  color: rgb(var(--text-primary)) !important;
+}
+
+/* Mejorar opacidad de iconos y textos en secciones grises */
+.dark .text-slate-300,
+.obsidian .text-slate-300 {
+  color: rgb(203 213 225) !important;
+}
+
+.dark .text-slate-200,
+.obsidian .text-slate-200 {
+  color: rgb(226 232 240) !important;
+}
+
+/* Links en áreas grises más visibles */
+.dark a,
+.obsidian a {
+  color: rgb(147 197 253) !important;
+}
+
+.dark a:hover,
+.obsidian a:hover {
+  color: rgb(191 219 254) !important;
+}
+
+/* Borders */
+.dark .border-slate-200,
+.obsidian .border-slate-200 {
+  border-color: rgb(var(--border-color)) !important;
+}
+
+.dark .border-slate-300,
+.obsidian .border-slate-300 {
+  border-color: rgb(var(--border-hover)) !important;
+}
+
+.dark .divide-slate-200 > :not([hidden]) ~ :not([hidden]),
+.obsidian .divide-slate-200 > :not([hidden]) ~ :not([hidden]) {
+  border-color: rgb(var(--border-color)) !important;
+}
+
+/* Hover states */
+.dark .hover\:border-slate-300:hover,
+.obsidian .hover\:border-slate-300:hover {
+  border-color: rgb(var(--border-hover)) !important;
+}
+
+/* Shadows */
+.dark .shadow-sm,
+.obsidian .shadow-sm {
+  box-shadow: var(--shadow-sm) !important;
+}
+
+.dark .shadow-md,
+.obsidian .shadow-md {
+  box-shadow: var(--shadow-md) !important;
+}
+
+.dark .shadow-lg,
+.obsidian .shadow-lg {
+  box-shadow: var(--shadow-lg) !important;
+}
+
+/* Inputs - estilo premium */
+.dark input,
+.dark textarea,
+.dark select,
+.obsidian input,
+.obsidian textarea,
+.obsidian select {
+  background-color: rgb(var(--input-bg)) !important;
+  color: rgb(var(--text-primary)) !important;
+  border-color: rgb(var(--border-color)) !important;
+  transition: all 0.2s ease;
+}
+
+.dark input::placeholder,
+.dark textarea::placeholder,
+.obsidian input::placeholder,
+.obsidian textarea::placeholder {
+  color: rgb(var(--text-tertiary)) !important;
+  opacity: 0.6;
+}
+
+.dark input:focus,
+.dark textarea:focus,
+.dark select:focus,
+.obsidian input:focus,
+.obsidian textarea:focus,
+.obsidian select:focus {
+  border-color: rgb(99 102 241) !important;
+  background-color: rgb(var(--card-bg)) !important;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1) !important;
+  outline: none !important;
+}
+
+/* Search inputs con icono */
+.dark input[type="search"],
+.obsidian input[type="search"] {
+  background-color: rgb(var(--input-bg)) !important;
+  border-color: rgb(var(--border-color)) !important;
+}
+
+.dark input[type="search"]:focus,
+.obsidian input[type="search"]:focus {
+  border-color: rgb(99 102 241) !important;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1), 0 1px 3px 0 rgb(0 0 0 / 0.3) !important;
+}
+
+/* Additional gray backgrounds - mejorados para documentos */
+.dark .bg-gray-50,
+.dark .bg-gray-100,
+.obsidian .bg-gray-50,
+.obsidian .bg-gray-100 {
+  background-color: rgba(51, 65, 85, 0.3) !important;
+}
+
+.dark .bg-gray-200,
+.obsidian .bg-gray-200 {
+  background-color: rgba(71, 85, 105, 0.3) !important;
+}
+
+.dark .bg-gray-300,
+.obsidian .bg-gray-300 {
+  background-color: rgba(100, 116, 139, 0.4) !important;
+}
+
+.dark .bg-gray-700,
+.dark .bg-gray-800,
+.dark .bg-gray-900,
+.obsidian .bg-gray-700,
+.obsidian .bg-gray-800,
+.obsidian .bg-gray-900 {
+  background-color: rgb(var(--card-bg)) !important;
+}
+
+/* Text colors - gray variants */
+.dark .text-gray-600,
+.dark .text-gray-700,
+.dark .text-gray-800,
+.obsidian .text-gray-600,
+.obsidian .text-gray-700,
+.obsidian .text-gray-800 {
+  color: rgb(var(--text-secondary)) !important;
+}
+
+.dark .text-gray-400,
+.dark .text-gray-500,
+.obsidian .text-gray-400,
+.obsidian .text-gray-500 {
+  color: rgb(var(--text-tertiary)) !important;
+}
+
+/* Calendar specific - day cells */
+.dark .bg-slate-700,
+.dark .bg-slate-800,
+.dark .bg-slate-900,
+.obsidian .bg-slate-700,
+.obsidian .bg-slate-800,
+.obsidian .bg-slate-900 {
+  background-color: rgb(var(--card-bg)) !important;
+}
+
+/* Prevent very dark gradients from being too dark */
+.dark .bg-gradient-to-br.from-slate-50.via-slate-100.to-gray-100,
+.obsidian .bg-gradient-to-br.from-slate-50.via-slate-100.to-gray-100 {
+  background: var(--main-bg-gradient) !important;
+}
+
+/* Status badges - colores vibrantes pero elegantes */
+.dark .bg-blue-100,
+.obsidian .bg-blue-100 {
+  background-color: rgba(59, 130, 246, 0.15) !important;
+  border: 1px solid rgba(59, 130, 246, 0.3) !important;
+}
+
+.dark .text-blue-800,
+.obsidian .text-blue-800 {
+  color: rgb(96 165 250) !important;
+}
+
+.dark .bg-green-100,
+.obsidian .bg-green-100 {
+  background-color: rgba(34, 197, 94, 0.15) !important;
+  border: 1px solid rgba(34, 197, 94, 0.3) !important;
+}
+
+.dark .text-green-800,
+.obsidian .text-green-800 {
+  color: rgb(74 222 128) !important;
+}
+
+.dark .bg-red-100,
+.obsidian .bg-red-100 {
+  background-color: rgba(239, 68, 68, 0.15) !important;
+  border: 1px solid rgba(239, 68, 68, 0.3) !important;
+}
+
+.dark .text-red-800,
+.obsidian .text-red-800 {
+  color: rgb(248 113 113) !important;
+}
+
+.dark .bg-orange-100,
+.obsidian .bg-orange-100 {
+  background-color: rgba(251, 146, 60, 0.15) !important;
+  border: 1px solid rgba(251, 146, 60, 0.3) !important;
+}
+
+.dark .text-orange-800,
+.obsidian .text-orange-800 {
+  color: rgb(251 146 60) !important;
+}
+
+.dark .bg-purple-100,
+.obsidian .bg-purple-100 {
+  background-color: rgba(168, 85, 247, 0.15) !important;
+  border: 1px solid rgba(168, 85, 247, 0.3) !important;
+}
+
+.dark .text-purple-800,
+.obsidian .text-purple-800 {
+  color: rgb(192 132 252) !important;
+}
+
+.dark .bg-amber-100,
+.obsidian .bg-amber-100 {
+  background-color: rgba(245, 158, 11, 0.15) !important;
+  border: 1px solid rgba(245, 158, 11, 0.3) !important;
+}
+
+.dark .text-amber-800,
+.obsidian .text-amber-800 {
+  color: rgb(250 204 21) !important;
+}
+
+.dark .bg-teal-100,
+.obsidian .bg-teal-100 {
+  background-color: rgba(20, 184, 166, 0.15) !important;
+  border: 1px solid rgba(20, 184, 166, 0.3) !important;
+}
+
+.dark .text-teal-800,
+.obsidian .text-teal-800 {
+  color: rgb(45 212 191) !important;
+}
+
+/* Badges con estilo indigo para propiedades */
+.dark .bg-indigo-100,
+.obsidian .bg-indigo-100 {
+  background-color: rgba(99, 102, 241, 0.15) !important;
+  border: 1px solid rgba(99, 102, 241, 0.3) !important;
+}
+
+.dark .text-indigo-800,
+.obsidian .text-indigo-800 {
+  color: rgb(129 140 248) !important;
+}
+
+/* Hover states for backgrounds */
+.dark .hover\:bg-gray-50:hover,
+.dark .hover\:bg-gray-100:hover,
+.obsidian .hover\:bg-gray-50:hover,
+.obsidian .hover\:bg-gray-100:hover {
+  background-color: rgb(var(--card-bg)) !important;
+}
+
+/* Text gradients - make them work in dark mode */
+.dark .bg-gradient-to-r.from-slate-800.to-slate-600,
+.obsidian .bg-gradient-to-r.from-slate-800.to-slate-600 {
+  background-image: linear-gradient(to right, rgb(248 250 252), rgb(203 213 225)) !important;
+}
+
+.dark .from-slate-800,
+.obsidian .from-slate-800 {
+  --tw-gradient-from: rgb(248 250 252) !important;
+}
+
+.dark .to-slate-600,
+.obsidian .to-slate-600 {
+  --tw-gradient-to: rgb(203 213 225) !important;
+}
+
+/* Borders for cards in colored sections */
+.dark .border-blue-300,
+.obsidian .border-blue-300 {
+  border-color: rgb(59 130 246) !important;
+}
+
+.dark .border-green-300,
+.obsidian .border-green-300 {
+  border-color: rgb(34 197 94) !important;
+}
+
+.dark .border-red-300,
+.obsidian .border-red-300 {
+  border-color: rgb(239 68 68) !important;
+}
+
+.dark .border-orange-300,
+.obsidian .border-orange-300 {
+  border-color: rgb(251 146 60) !important;
+}
+
+.dark .border-purple-300,
+.obsidian .border-purple-300 {
+  border-color: rgb(168 85 247) !important;
+}
+
+.dark .border-gray-300,
+.obsidian .border-gray-300 {
+  border-color: rgb(var(--border-hover)) !important;
+}

@@ -17,10 +17,32 @@ interface Props {
 }
 
 const inputClass = 'w-full rounded-xl border border-slate-200 bg-white px-3.5 py-3 text-sm outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100';
-const initialForm = { title: '', appointmentType: 'TOUR' as Appointment['appointmentType'], status: 'SCHEDULED' as Appointment['status'], startsAt: '', endsAt: '', leadId: '', propertyId: '', location: '', notes: '' };
+const initialForm = {
+  title: '',
+  appointmentType: 'TOUR' as Appointment['appointmentType'],
+  status: 'SCHEDULED' as Appointment['status'],
+  date: '',
+  startTime: '09:00',
+  endTime: '10:00',
+  leadId: '',
+  propertyId: '',
+  location: '',
+  notes: ''
+};
+
+// Generate time slots in 30-minute intervals
+const generateTimeSlots = () => {
+  const slots: string[] = [];
+  for (let hour = 0; hour < 24; hour++) {
+    slots.push(`${String(hour).padStart(2, '0')}:00`);
+    slots.push(`${String(hour).padStart(2, '0')}:30`);
+  }
+  return slots;
+};
 
 export function AppointmentModal({ isOpen, onClose, onAppointmentCreated, leads, properties, restrictions }: Props) {
   const { t } = useTranslation();
+  const timeSlots = generateTimeSlots();
   const [form, setForm] = useState(initialForm);
   const [saving, setSaving] = useState(false);
   const [upgradeModalOpen, setUpgradeModalOpen] = useState(false);
@@ -55,12 +77,15 @@ export function AppointmentModal({ isOpen, onClose, onAppointmentCreated, leads,
     }
     setSaving(true);
     try {
+      const startDateTime = new Date(`${form.date}T${form.startTime}`);
+      const endDateTime = new Date(`${form.date}T${form.endTime}`);
+
       const created = await createAppointment({
         title: form.title.trim(),
         appointmentType: form.appointmentType,
         status: form.status,
-        startsAt: new Date(form.startsAt).toISOString(),
-        endsAt: form.endsAt ? new Date(form.endsAt).toISOString() : undefined,
+        startsAt: startDateTime.toISOString(),
+        endsAt: endDateTime.toISOString(),
         leadId: form.leadId || undefined,
         propertyId: form.propertyId || undefined,
         location: form.location.trim() || undefined,
@@ -136,14 +161,43 @@ export function AppointmentModal({ isOpen, onClose, onAppointmentCreated, leads,
                 </label>
               </div>
 
+              <label className="text-sm font-semibold">
+                Fecha
+                <input
+                  className={inputClass}
+                  onChange={e => setForm({ ...form, date: e.target.value })}
+                  required
+                  type="date"
+                  value={form.date}
+                />
+              </label>
+
               <div className="grid grid-cols-2 gap-3">
                 <label className="text-sm font-semibold">
-                  Inicio
-                  <input className={inputClass} onChange={e => setForm({ ...form, startsAt: e.target.value })} required type="datetime-local" value={form.startsAt} />
+                  Hora de Inicio
+                  <select
+                    className={inputClass}
+                    onChange={e => setForm({ ...form, startTime: e.target.value })}
+                    required
+                    value={form.startTime}
+                  >
+                    {timeSlots.map(slot => (
+                      <option key={slot} value={slot}>{slot}</option>
+                    ))}
+                  </select>
                 </label>
                 <label className="text-sm font-semibold">
-                  Fin (opcional)
-                  <input className={inputClass} onChange={e => setForm({ ...form, endsAt: e.target.value })} type="datetime-local" value={form.endsAt} />
+                  Hora de Fin
+                  <select
+                    className={inputClass}
+                    onChange={e => setForm({ ...form, endTime: e.target.value })}
+                    required
+                    value={form.endTime}
+                  >
+                    {timeSlots.map(slot => (
+                      <option key={slot} value={slot}>{slot}</option>
+                    ))}
+                  </select>
                 </label>
               </div>
 

@@ -1,6 +1,7 @@
 import './shared/i18n/i18n';
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
+import { ThemeProvider } from './shared/contexts/ThemeContext';
 import { PrivateLayout } from './layout/PrivateLayout';
 import { DashboardPage } from './pages/DashboardPage';
 import { LeadsPage } from './pages/LeadsPage';
@@ -36,6 +37,7 @@ import { ForgotPasswordPage } from './pages/ForgotPasswordPage';
 import { PaymentSuccessPage } from './pages/PaymentSuccessPage';
 import { PaymentFailurePage } from './pages/PaymentFailurePage';
 import { PaymentPendingPage } from './pages/PaymentPendingPage';
+import { AccountSettingsPage } from './pages/AccountSettingsPage';
 
 function ProtectedApp() {
   return isAuthenticated() ? <PrivateLayout /> : <Navigate to="/login" replace />;
@@ -43,32 +45,33 @@ function ProtectedApp() {
 
 export default function App() {
   return (
-    <BrowserRouter>
-      <Toaster
-        position="top-right"
-        toastOptions={{
-          duration: 4000,
-          style: {
-            background: '#363636',
-            color: '#fff',
-          },
-          success: {
-            duration: 3000,
-            iconTheme: {
-              primary: '#10b981',
-              secondary: '#fff',
+    <ThemeProvider>
+      <BrowserRouter>
+        <Toaster
+          position="top-right"
+          toastOptions={{
+            duration: 4000,
+            style: {
+              background: '#363636',
+              color: '#fff',
             },
-          },
-          error: {
-            duration: 5000,
-            iconTheme: {
-              primary: '#ef4444',
-              secondary: '#fff',
+            success: {
+              duration: 3000,
+              iconTheme: {
+                primary: '#10b981',
+                secondary: '#fff',
+              },
             },
-          },
-        }}
-      />
-      <Routes>
+            error: {
+              duration: 5000,
+              iconTheme: {
+                primary: '#ef4444',
+                secondary: '#fff',
+              },
+            },
+          }}
+        />
+        <Routes>
         <Route path="/" element={<Navigate to="/propiedades" replace />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/registro" element={<RegisterPage />} />
@@ -99,6 +102,7 @@ export default function App() {
           <Route path="reportes" element={<ReportsPage />} />
           <Route path="usuarios" element={<UsersManagementPage />} />
           <Route path="planes" element={<PlansPage />} />
+          <Route path="cuenta" element={<AccountSettingsPage />} />
           <Route path="configuracion" element={<SettingsPage />} />
           <Route path="configuracion/empresa" element={<CompanyProfileSettingsPage />} />
           <Route path="configuracion/catalogos/:catalogName" element={<CatalogPage />} />
@@ -106,5 +110,6 @@ export default function App() {
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </BrowserRouter>
+    </ThemeProvider>
   );
 }

@@ -7,7 +7,7 @@ import { SubscriptionBadge } from '../shared/SubscriptionBadge';
 import { SubscriptionBanner } from '../shared/SubscriptionBanner';
 import { useSubscriptionRestrictions } from '../shared/useSubscriptionRestrictions';
 
-const navigation: Array<{ label: string; to: string; icon: IconName; end?: boolean }> = [
+const navigation: Array<{ label: string; to: string; icon: IconName; end?: boolean; adminOnly?: boolean }> = [
   { label: 'Dashboard', to: '/app', icon: 'dashboard', end: true },
   { label: 'Prospectos', to: '/app/prospectos', icon: 'leads' },
   { label: 'Propiedades', to: '/app/propiedades', icon: 'properties' },
@@ -15,6 +15,7 @@ const navigation: Array<{ label: string; to: string; icon: IconName; end?: boole
   { label: 'Documentos', to: '/app/documentos', icon: 'document' },
   { label: 'Notificaciones', to: '/app/notificaciones', icon: 'document' },
   { label: 'Reportes', to: '/app/reportes', icon: 'reports' },
+  { label: 'Usuarios', to: '/app/usuarios', icon: 'users', adminOnly: true },
   { label: 'Configuración', to: '/app/configuracion', icon: 'settings' }
 ];
 
@@ -70,22 +71,24 @@ export function PrivateLayout() {
         </div>
 
         <nav className={`${menuOpen ? 'grid' : 'hidden'} mt-5 grid-cols-2 gap-1.5 border-t border-white/5 pt-5 lg:mt-8 lg:grid lg:grid-cols-1 lg:border-0 lg:pt-0`}>
-          {navigation.filter(item => item.to !== '/app/usuarios' || session?.role === 'ADMIN').map(item => (
-            <NavLink
-              className={({ isActive }) => `flex min-w-0 items-center gap-3 rounded-xl px-3.5 py-2.5 text-sm font-medium transition-all lg:gap-3 ${
-                isActive
-                  ? 'bg-gradient-to-r from-indigo-500 to-purple-600 text-white shadow-lg shadow-indigo-900/40'
-                  : 'text-slate-300 hover:bg-white/5 hover:text-white'
-              }`}
-              end={item.end}
-              key={item.to}
-              onClick={() => setMenuOpen(false)}
-              to={item.to}
-            >
-              <Icon className="size-5 shrink-0" name={item.icon} />
-              <span className="truncate">{item.label}</span>
-            </NavLink>
-          ))}
+          {navigation
+            .filter(item => !item.adminOnly || session?.role === 'ADMIN')
+            .map(item => (
+              <NavLink
+                className={({ isActive }) => `flex min-w-0 items-center gap-3 rounded-xl px-3.5 py-2.5 text-sm font-medium transition-all lg:gap-3 ${
+                  isActive
+                    ? 'bg-gradient-to-r from-indigo-500 to-purple-600 text-white shadow-lg shadow-indigo-900/40'
+                    : 'text-slate-300 hover:bg-white/5 hover:text-white'
+                }`}
+                end={item.end}
+                key={item.to}
+                onClick={() => setMenuOpen(false)}
+                to={item.to}
+              >
+                <Icon className="size-5 shrink-0" name={item.icon} />
+                <span className="truncate">{item.label}</span>
+              </NavLink>
+            ))}
           <NavLink
             className="flex min-w-0 items-center gap-3 rounded-xl px-3.5 py-2.5 text-sm font-medium text-slate-300 hover:bg-white/5 hover:text-white transition-all lg:gap-3"
             onClick={() => setMenuOpen(false)}
@@ -175,14 +178,24 @@ export function PrivateLayout() {
               </div>
             )}
 
-            <button className="mt-3 w-full rounded-lg bg-white/5 px-3 py-1.5 text-xs font-medium text-slate-300 hover:bg-white/10 hover:text-white transition-all" onClick={signOut} type="button">
-              Cerrar sesión
-            </button>
+            <div className="mt-3 space-y-1.5">
+              <NavLink
+                className="flex items-center gap-2 w-full rounded-lg bg-white/5 px-3 py-2 text-xs font-medium text-slate-300 hover:bg-white/10 hover:text-white transition-all"
+                to="/app/cuenta"
+              >
+                <Icon className="size-3.5" name="user" />
+                Mi cuenta
+              </NavLink>
+              <button className="flex items-center gap-2 w-full rounded-lg bg-white/5 px-3 py-2 text-xs font-medium text-slate-300 hover:bg-white/10 hover:text-white transition-all" onClick={signOut} type="button">
+                <Icon className="size-3.5" name="arrow" />
+                Cerrar sesión
+              </button>
+            </div>
           </div>
         </div>
       </aside>
 
-      <div className="flex min-h-screen flex-col">
+      <div className="flex min-h-screen flex-col bg-gradient-to-br from-slate-50 to-slate-100">
         <SubscriptionBanner restrictions={restrictions} />
         <main className="mx-auto w-full max-w-[1480px] flex-1 px-4 py-7 sm:px-7 lg:px-10 lg:py-10">
           <Outlet context={{ restrictions }} />

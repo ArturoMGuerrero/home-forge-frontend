@@ -54,7 +54,12 @@ const initialForm = {
   parkingSpaces: '',
   description: '',
   imageUrl: '',
-  published: true
+  published: true,
+  ownerName: '',
+  ownerEmail: '',
+  ownerPhone: '',
+  ownerPhoneSecondary: '',
+  ownerNotes: ''
 };
 
 export function NewPropertyPage() {
@@ -118,7 +123,12 @@ export function NewPropertyPage() {
           parkingSpaces: property.parkingSpaces === undefined ? '' : String(property.parkingSpaces),
           description: property.description ?? '',
           imageUrl: property.imageUrl ?? '',
-          published: property.published
+          published: property.published,
+          ownerName: property.ownerName ?? '',
+          ownerEmail: property.ownerEmail ?? '',
+          ownerPhone: property.ownerPhone ?? '',
+          ownerPhoneSecondary: property.ownerPhoneSecondary ?? '',
+          ownerNotes: property.ownerNotes ?? ''
         });
         setExistingImages(property.images ?? []);
       })
@@ -549,6 +559,67 @@ export function NewPropertyPage() {
                 </div>
               )}
             </div>
+          </section>
+
+          {/* Owner Contact Information */}
+          <section className="grid gap-5 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
+            <p className="text-xs font-bold uppercase tracking-wider text-indigo-600">Información de Contacto del Propietario</p>
+            <label className={labelClass}>Nombre del Propietario
+              <input
+                className={inputClass}
+                maxLength={150}
+                placeholder="Juan Pérez"
+                type="text"
+                value={form.ownerName}
+                onChange={event => update('ownerName', event.target.value)}
+              />
+            </label>
+
+            <div className="grid gap-5 sm:grid-cols-2">
+              <label className={labelClass}>Email
+                <input
+                  className={inputClass}
+                  maxLength={100}
+                  placeholder="propietario@ejemplo.com"
+                  type="email"
+                  value={form.ownerEmail}
+                  onChange={event => update('ownerEmail', event.target.value)}
+                />
+              </label>
+              <label className={labelClass}>Teléfono Principal
+                <input
+                  className={inputClass}
+                  maxLength={20}
+                  placeholder="+52 614 123 4567"
+                  type="tel"
+                  value={form.ownerPhone}
+                  onChange={event => update('ownerPhone', event.target.value)}
+                />
+              </label>
+            </div>
+
+            <label className={labelClass}>Teléfono Secundario (Opcional)
+              <input
+                className={inputClass}
+                maxLength={20}
+                placeholder="+52 614 987 6543"
+                type="tel"
+                value={form.ownerPhoneSecondary}
+                onChange={event => update('ownerPhoneSecondary', event.target.value)}
+              />
+              <span className="text-xs font-normal text-slate-500">Teléfono alternativo de contacto</span>
+            </label>
+
+            <label className={labelClass}>Notas sobre el Propietario
+              <textarea
+                className={`${inputClass} min-h-24 resize-y`}
+                maxLength={5000}
+                placeholder="Información adicional sobre el propietario, horarios de contacto, preferencias, etc."
+                value={form.ownerNotes}
+                onChange={event => update('ownerNotes', event.target.value)}
+              />
+              <span className="text-xs font-normal text-slate-500">Información interna que te ayudará a contactar al propietario</span>
+            </label>
           </section>
         </div>
 

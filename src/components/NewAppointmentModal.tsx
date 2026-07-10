@@ -12,12 +12,25 @@ export default function NewAppointmentModal({ defaultDate, onClose, onSuccess }:
   const companyId = localStorage.getItem('companyId') || '';
   const userId = localStorage.getItem('userId') || '';
 
+  // Generate time slots in 30-minute intervals
+  const generateTimeSlots = () => {
+    const slots: string[] = [];
+    for (let hour = 0; hour < 24; hour++) {
+      slots.push(`${String(hour).padStart(2, '0')}:00`);
+      slots.push(`${String(hour).padStart(2, '0')}:30`);
+    }
+    return slots;
+  };
+
+  const timeSlots = generateTimeSlots();
+
   const [formData, setFormData] = useState({
     title: '',
     description: '',
     appointmentType: AppointmentType.MEETING,
-    startTime: '',
-    endTime: '',
+    date: '',
+    startTime: '09:00',
+    endTime: '10:00',
     locationType: LocationType.IN_PERSON,
     locationAddress: '',
     virtualMeetingUrl: '',
@@ -32,10 +45,19 @@ export default function NewAppointmentModal({ defaultDate, onClose, onSuccess }:
       const day = String(defaultDate.getDate()).padStart(2, '0');
       const dateStr = `${year}-${month}-${day}`;
 
+      const hour = defaultDate.getHours();
+      const minutes = defaultDate.getMinutes();
+      // Round to nearest 30 minutes
+      const roundedMinutes = minutes < 30 ? '00' : '30';
+      const startTime = `${String(hour).padStart(2, '0')}:${roundedMinutes}`;
+      const endHour = minutes < 30 ? hour : hour + 1;
+      const endTime = `${String(endHour).padStart(2, '0')}:${minutes < 30 ? '30' : '00'}`;
+
       setFormData(prev => ({
         ...prev,
-        startTime: `${dateStr}T09:00`,
-        endTime: `${dateStr}T10:00`
+        date: dateStr,
+        startTime,
+        endTime
       }));
     }
   }, [defaultDate]);
@@ -43,11 +65,21 @@ export default function NewAppointmentModal({ defaultDate, onClose, onSuccess }:
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
+      const startDateTime = new Date(`${formData.date}T${formData.startTime}`);
+      const endDateTime = new Date(`${formData.date}T${formData.endTime}`);
+
       await createAppointment({
         companyId,
-        ...formData,
-        startTime: new Date(formData.startTime).toISOString(),
-        endTime: new Date(formData.endTime).toISOString(),
+        title: formData.title,
+        description: formData.description,
+        appointmentType: formData.appointmentType,
+        startTime: startDateTime.toISOString(),
+        endTime: endDateTime.toISOString(),
+        locationType: formData.locationType,
+        locationAddress: formData.locationAddress,
+        virtualMeetingUrl: formData.virtualMeetingUrl,
+        reminderMinutes: formData.reminderMinutes,
+        notes: formData.notes,
         createdByUserId: userId,
         googleCalendarSyncEnabled: false
       });
@@ -120,27 +152,44 @@ export default function NewAppointmentModal({ defaultDate, onClose, onSuccess }:
             </div>
           </div>
 
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Fecha *</label>
+            <input
+              type="date"
+              required
+              value={formData.date}
+              onChange={e => setFormData({ ...formData, date: e.target.value })}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Inicio *</label>
-              <input
-                type="datetime-local"
+              <label className="block text-sm font-medium text-gray-700 mb-1">Hora de Inicio *</label>
+              <select
                 required
                 value={formData.startTime}
                 onChange={e => setFormData({ ...formData, startTime: e.target.value })}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-              />
+              >
+                {timeSlots.map(slot => (
+                  <option key={slot} value={slot}>{slot}</option>
+                ))}
+              </select>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Fin *</label>
-              <input
-                type="datetime-local"
+              <label className="block text-sm font-medium text-gray-700 mb-1">Hora de Fin *</label>
+              <select
                 required
                 value={formData.endTime}
                 onChange={e => setFormData({ ...formData, endTime: e.target.value })}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-              />
+              >
+                {timeSlots.map(slot => (
+                  <option key={slot} value={slot}>{slot}</option>
+                ))}
+              </select>
             </div>
           </div>
 

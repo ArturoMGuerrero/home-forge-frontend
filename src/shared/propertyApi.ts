@@ -31,6 +31,11 @@ export type ApiProperty = {
     sortOrder: number;
   }>;
   published: boolean;
+  ownerName?: string;
+  ownerEmail?: string;
+  ownerPhone?: string;
+  ownerPhoneSecondary?: string;
+  ownerNotes?: string;
 };
 
 export type CreateApiProperty = Omit<ApiProperty, 'id' | 'companyId' | 'images'>;
