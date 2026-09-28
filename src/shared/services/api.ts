@@ -5,6 +5,11 @@ function getApiBase(): string {
     return import.meta.env.VITE_API_BASE;
   }
 
+  // En pruebas/SSR no existe window; usar un origen local estable.
+  if (typeof window === 'undefined') {
+    return 'http://localhost:8080/api';
+  }
+
   // Detectar automáticamente basado en el hostname actual
   const hostname = window.location.hostname;
   const port = '8080';
@@ -25,6 +30,7 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
     const body = await res.json().catch(() => null) as { error?: string } | null;
     throw new Error(body?.error ?? `API error ${res.status}`);
   }
+  if (res.status === 204) return undefined as T;
   return res.json();
 }
 

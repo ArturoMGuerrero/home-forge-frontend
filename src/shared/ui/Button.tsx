@@ -1,6 +1,6 @@
 import { ButtonHTMLAttributes, ReactNode, ElementType } from 'react';
 
-type ButtonVariant = 'primary' | 'secondary' | 'tertiary' | 'danger' | 'success' | 'danger-ghost' | 'outline';
+type ButtonVariant = 'primary' | 'secondary' | 'tertiary' | 'ghost' | 'danger' | 'success' | 'danger-ghost';
 type ButtonSize = 'sm' | 'md' | 'lg';
 
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
@@ -15,34 +15,20 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   href?: string;
 }
 
-// Usar exactamente los mismos estilos que buttonStyles de src/shared/styles/buttons.ts
 const variantStyles: Record<ButtonVariant, string> = {
-  // Idéntico a buttonStyles.primary
   primary: 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-lg hover:shadow-xl',
-
-  // Idéntico a buttonStyles.secondary
   secondary: 'bg-white border-2 border-indigo-600 text-indigo-600 hover:bg-indigo-50',
-
-  // Idéntico a buttonStyles.tertiary
   tertiary: 'bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 hover:border-slate-300',
-
-  // Idéntico a buttonStyles.danger
+  ghost: 'text-slate-700 hover:bg-slate-100',
   danger: 'bg-white border border-rose-200 text-rose-600 hover:bg-rose-50 hover:border-rose-300',
-
-  // Variante danger-ghost (solo texto rojo)
-  'danger-ghost': 'text-red-600 hover:text-red-700 hover:bg-red-50',
-
-  // Variante outline
-  outline: 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50',
-
-  // Variante adicional success (verde sólido)
+  'danger-ghost': 'text-rose-600 hover:text-rose-700 hover:bg-rose-50',
   success: 'bg-emerald-600 text-white hover:bg-emerald-700',
 };
 
 const sizeStyles: Record<ButtonSize, string> = {
-  sm: 'px-3 py-1.5 text-sm',        // Idéntico a buttonStyles.small
-  md: 'px-4 py-2.5',                // Tamaño por defecto (sin text-sm para que sea heredado)
-  lg: 'px-6 py-3 text-base',        // Idéntico a buttonStyles.large
+  sm: 'min-h-9 px-3 py-1.5 text-sm',
+  md: 'px-4 py-2.5',
+  lg: 'px-6 py-3 text-base',
 };
 
 export function Button({
@@ -63,7 +49,8 @@ export function Button({
   const Component = as || 'button';
 
   const buttonClasses = `
-    inline-flex items-center justify-center gap-2 rounded-xl font-semibold transition-all
+    inline-flex min-h-10 max-w-full items-center justify-center gap-2 rounded-xl font-semibold transition-colors transition-shadow
+    focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 focus-visible:ring-offset-[rgb(var(--main-bg))]
     disabled:opacity-50 disabled:cursor-not-allowed
     ${variantStyles[variant]}
     ${sizeStyles[size]}
@@ -90,6 +77,7 @@ export function Button({
         className={buttonClasses}
         disabled={disabled || loading}
         {...props}
+        type={props.type ?? 'button'}
       >
         {content}
       </button>

@@ -10,11 +10,16 @@ interface ThemeContextType {
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 const THEME_STORAGE_KEY = 'homeforge_theme';
+const themeModes: ThemeMode[] = ['light', 'dark', 'obsidian'];
+
+function isThemeMode(value: string | null): value is ThemeMode {
+  return value !== null && themeModes.includes(value as ThemeMode);
+}
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
   const [theme, setThemeState] = useState<ThemeMode>(() => {
     const saved = localStorage.getItem(THEME_STORAGE_KEY);
-    return (saved as ThemeMode) || 'light';
+    return isThemeMode(saved) ? saved : 'light';
   });
 
   useEffect(() => {

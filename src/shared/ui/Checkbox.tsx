@@ -1,4 +1,4 @@
-import { InputHTMLAttributes, forwardRef } from 'react';
+import { InputHTMLAttributes, forwardRef, useId } from 'react';
 
 interface CheckboxProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 'type'> {
   label?: string;
@@ -8,10 +8,17 @@ interface CheckboxProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 'typ
 
 export const Checkbox = forwardRef<HTMLInputElement, CheckboxProps>(
   ({ label, description, error, className = '', ...props }, ref) => {
+    const generatedId = useId();
+    const checkboxId = props.id ?? generatedId;
+    const messageId = `${checkboxId}-message`;
+
     return (
       <div className="flex items-start gap-3">
         <div className="flex items-center h-5">
           <input
+            aria-describedby={description || error ? messageId : undefined}
+            aria-invalid={Boolean(error)}
+            id={checkboxId}
             ref={ref}
             type="checkbox"
             className={`
@@ -30,29 +37,24 @@ export const Checkbox = forwardRef<HTMLInputElement, CheckboxProps>(
           <div className="flex-1">
             {label && (
               <label
+                htmlFor={checkboxId}
                 className={`
                   block text-sm font-semibold cursor-pointer
                   ${error ? 'text-rose-600' : 'text-slate-700'}
                   ${props.disabled ? 'opacity-50' : ''}
                 `}
-                onClick={(e) => {
-                  if (!props.disabled) {
-                    const input = (e.currentTarget.previousElementSibling?.firstChild as HTMLInputElement);
-                    input?.click();
-                  }
-                }}
               >
                 {label}
                 {props.required && <span className="text-rose-500 ml-1">*</span>}
               </label>
             )}
             {description && (
-              <p className={`mt-0.5 text-xs ${error ? 'text-rose-600' : 'text-slate-500'}`}>
+              <p className={`mt-0.5 text-xs ${error ? 'text-rose-600' : 'text-slate-500'}`} id={!error ? messageId : undefined}>
                 {description}
               </p>
             )}
             {error && (
-              <p className="mt-1 text-xs text-rose-600 flex items-center gap-1">
+              <p className="mt-1 text-xs text-rose-600 flex items-center gap-1" id={messageId} role="alert">
                 <svg className="size-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>

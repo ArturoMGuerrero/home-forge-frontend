@@ -1,4 +1,4 @@
-import { ReactNode, useEffect } from 'react';
+import { ReactNode, useEffect, useId, useRef } from 'react';
 
 interface ModalProps {
   isOpen: boolean;
@@ -21,6 +21,10 @@ export function Modal({
   showCloseButton = true,
   noPadding = false,
 }: ModalProps) {
+  const dialogRef = useRef<HTMLDivElement>(null);
+  const titleId = useId();
+  const subtitleId = useId();
+
   // Cerrar con ESC
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
@@ -31,6 +35,40 @@ export function Modal({
     window.addEventListener('keydown', handleEscape);
     return () => window.removeEventListener('keydown', handleEscape);
   }, [isOpen, onClose]);
+
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const previouslyFocused = document.activeElement as HTMLElement | null;
+    const dialog = dialogRef.current;
+    const focusableSelector = 'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])';
+    const focusable = dialog?.querySelectorAll<HTMLElement>(focusableSelector);
+    (focusable?.[0] ?? dialog)?.focus();
+
+    const keepFocusInside = (event: KeyboardEvent) => {
+      if (event.key !== 'Tab' || !dialog) return;
+      const elements = Array.from(dialog.querySelectorAll<HTMLElement>(focusableSelector));
+      if (!elements.length) {
+        event.preventDefault();
+        return;
+      }
+      const first = elements[0];
+      const last = elements[elements.length - 1];
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
+    };
+
+    document.addEventListener('keydown', keepFocusInside);
+    return () => {
+      document.removeEventListener('keydown', keepFocusInside);
+      previouslyFocused?.focus();
+    };
+  }, [isOpen]);
 
   // Prevenir scroll del body cuando el modal está abierto
   useEffect(() => {
@@ -58,30 +96,37 @@ export function Modal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      {/* Backdrop con blur */}
+    <div className="fixed inset-0 z-50 flex items-end justify-center p-0 sm:items-center sm:p-6">
       <div
-        className="absolute inset-0 bg-slate-950/90 backdrop-blur-sm transition-opacity"
+        aria-hidden="true"
+        className="app-modal-backdrop absolute inset-0 transition-opacity"
         onClick={onClose}
       />
 
       {/* Modal */}
       <div
-        className={`relative w-full ${maxWidthClasses[maxWidth]} overflow-hidden rounded-3xl bg-slate-800 border border-slate-700/50 shadow-2xl shadow-black/50 transition-all`}
+        aria-describedby={subtitle ? subtitleId : undefined}
+        aria-labelledby={title ? titleId : undefined}
+        aria-modal="true"
+        className={`app-modal relative max-h-[100dvh] w-full ${maxWidthClasses[maxWidth]} overflow-hidden rounded-t-3xl border transition-all sm:max-h-[calc(100dvh-3rem)] sm:rounded-3xl`}
         onClick={(e) => e.stopPropagation()}
+        ref={dialogRef}
+        role="dialog"
+        tabIndex={-1}
       >
         {/* Header */}
         {(title || showCloseButton) && (
-          <div className="relative border-b border-slate-700/50 bg-slate-800/50 px-6 py-5">
+          <div className="app-modal-header relative border-b px-4 py-4 sm:px-6 sm:py-5">
             {title && (
               <div className="pr-10">
-                <h2 className="text-xl font-bold text-white">{title}</h2>
-                {subtitle && <p className="mt-1 text-sm text-slate-400">{subtitle}</p>}
+                <h2 className="text-xl font-bold" id={titleId}>{title}</h2>
+                {subtitle && <p className="app-modal-muted mt-1 text-sm" id={subtitleId}>{subtitle}</p>}
               </div>
             )}
             {showCloseButton && (
               <button
-                className="absolute right-4 top-4 flex size-10 items-center justify-center rounded-xl text-slate-400 transition hover:bg-slate-700/50 hover:text-slate-200"
+                aria-label="Cerrar ventana"
+                className="app-modal-close absolute right-4 top-4 flex size-10 items-center justify-center rounded-xl transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
                 onClick={onClose}
                 type="button"
               >
@@ -94,7 +139,7 @@ export function Modal({
         )}
 
         {/* Content */}
-        <div className={`max-h-[calc(100vh-200px)] overflow-y-auto ${noPadding ? '' : 'p-6'}`}>
+        <div className={`app-modal-body max-h-[calc(100dvh-5rem)] overscroll-contain overflow-y-auto sm:max-h-[calc(100dvh-11rem)] ${noPadding ? '' : 'p-4 sm:p-6'}`}>
           {children}
         </div>
       </div>

@@ -6,6 +6,22 @@ html {
   overflow-x: hidden;
 }
 
+/* Respeta las preferencias de movimiento del sistema operativo. */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
 /* Scrollbar personalizado */
 ::-webkit-scrollbar {
   width: 10px;
@@ -46,12 +62,15 @@ html {
 /* Light Theme (Default) */
 :root,
 :root.light {
+  color-scheme: light;
   --main-bg: 248 250 252;
   --main-bg-gradient: linear-gradient(to bottom right, rgb(248 250 252), rgb(226 232 240));
   --card-bg: 255 255 255;
   --card-hover-bg: 255 255 255;
   --modal-bg: 255 255 255;
   --modal-header-bg: 248 250 252;
+  --modal-overlay: rgb(15 23 42 / 0.38);
+  --modal-shadow: 0 28px 80px -24px rgb(15 23 42 / 0.38);
   --input-bg: 255 255 255;
   --text-primary: 15 23 42;
   --text-secondary: 71 85 105;
@@ -65,13 +84,16 @@ html {
 
 /* Dark Theme - Tonos azulados profesionales */
 :root.dark {
+  color-scheme: dark;
   --main-bg: 15 23 42;
   --main-bg-gradient: linear-gradient(135deg, rgb(15 23 42) 0%, rgb(23 37 84) 100%);
   --card-bg: 30 41 59;
   --card-hover-bg: 41 50 65;
   --modal-bg: 30 41 59;
-  --modal-header-bg: 22 30 46;
-  --input-bg: 22 30 46;
+  --modal-header-bg: 35 47 66;
+  --modal-overlay: rgb(2 6 23 / 0.58);
+  --modal-shadow: 0 32px 90px -22px rgb(0 0 0 / 0.68), 0 0 0 1px rgb(129 140 248 / 0.08);
+  --input-bg: 20 29 45;
   --text-primary: 248 250 252;
   --text-secondary: 203 213 225;
   --text-tertiary: 148 163 184;
@@ -84,13 +106,16 @@ html {
 
 /* Obsidian Theme - Negro puro con acentos sutiles */
 :root.obsidian {
+  color-scheme: dark;
   --main-bg: 10 10 15;
   --main-bg-gradient: linear-gradient(135deg, rgb(10 10 15) 0%, rgb(20 20 30) 100%);
   --card-bg: 24 24 32;
   --card-hover-bg: 32 32 42;
-  --modal-bg: 24 24 32;
-  --modal-header-bg: 16 16 24;
-  --input-bg: 16 16 24;
+  --modal-bg: 27 28 38;
+  --modal-header-bg: 32 33 45;
+  --modal-overlay: rgb(0 0 8 / 0.64);
+  --modal-shadow: 0 32px 100px -18px rgb(0 0 0 / 0.82), 0 0 0 1px rgb(139 92 246 / 0.1);
+  --input-bg: 18 19 27;
   --text-primary: 245 245 250;
   --text-secondary: 212 212 225;
   --text-tertiary: 156 163 175;
@@ -99,6 +124,71 @@ html {
   --shadow-sm: 0 1px 3px 0 rgb(0 0 0 / 0.5);
   --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.6), 0 2px 4px -2px rgb(0 0 0 / 0.5);
   --shadow-lg: 0 12px 30px -8px rgb(0 0 0 / 0.8), 0 8px 12px -6px rgb(99 102 241 / 0.15);
+}
+
+body {
+  background: var(--main-bg-gradient);
+  color: rgb(var(--text-primary));
+  min-width: 320px;
+  transition: background-color 180ms ease, color 180ms ease;
+}
+
+/* Base responsive: los medios nunca deben ampliar su contenedor. */
+img,
+video,
+canvas,
+svg {
+  max-width: 100%;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+/* Evita el zoom automático de formularios en iOS sin agrandar la UI de escritorio. */
+@media (max-width: 639px) {
+  input,
+  select,
+  textarea {
+    font-size: 16px;
+  }
+}
+
+/* Superficies semánticas de modal: evitan depender de overrides de utilidades. */
+.app-modal-backdrop {
+  background: var(--modal-overlay);
+  backdrop-filter: blur(3px);
+}
+
+.app-modal {
+  background-color: rgb(var(--modal-bg));
+  border-color: rgb(var(--border-color));
+  box-shadow: var(--modal-shadow);
+  color: rgb(var(--text-primary));
+}
+
+.app-modal-header {
+  background-color: rgb(var(--modal-header-bg));
+  border-color: rgb(var(--border-color));
+}
+
+.app-modal-muted,
+.app-modal-close {
+  color: rgb(var(--text-tertiary));
+}
+
+.app-modal-close:hover {
+  background-color: rgb(var(--card-hover-bg));
+  color: rgb(var(--text-primary));
+}
+
+.app-modal-body {
+  background-color: rgb(var(--modal-bg));
+  scrollbar-width: thin;
+  scrollbar-color: rgb(var(--border-hover)) transparent;
 }
 
 /* Apply theme to main content area */

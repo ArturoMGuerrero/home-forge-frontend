@@ -10,10 +10,12 @@ export { Radio, RadioGroup } from './Radio';
 // Layout y contenedores
 export { Card, CardWithHeader } from './Card';
 export { Modal } from './Modal';
+export { PageHeader } from './PageHeader';
 
 // Feedback y estados
 export { Badge, CounterBadge } from './Badge';
 export { Alert } from './Alert';
+export { InfoBanner } from './InfoBanner';
 export { Spinner, LoadingOverlay, LoadingState } from './Spinner';
 export { EmptyState } from './EmptyState';
 export { Tooltip } from './Tooltip';

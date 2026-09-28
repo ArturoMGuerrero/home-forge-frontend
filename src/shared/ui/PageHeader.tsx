@@ -18,10 +18,10 @@ interface PageHeaderProps {
 
 export function PageHeader({ title, subtitle, backLink, badge, actions, children }: PageHeaderProps) {
   return (
-    <div className="border-b border-slate-200 bg-white shadow-sm sticky top-0 z-10">
-      <div className="px-4 lg:px-6 py-4">
+    <div className="sticky top-0 z-10 border-b border-[rgb(var(--border-color))] bg-[rgb(var(--card-bg))]/95 shadow-sm backdrop-blur">
+      <div className="px-4 py-4 lg:px-6">
         {/* Top bar */}
-        <div className="flex flex-wrap items-center justify-between gap-4 mb-4">
+        <div className="mb-4 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-center gap-3 min-w-0 flex-1">
             {backLink && (
               <>
@@ -32,7 +32,7 @@ export function PageHeader({ title, subtitle, backLink, badge, actions, children
                   <svg className="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
                   </svg>
-                  {backLink.label || 'Volver'}
+                  <span className="hidden sm:inline">{backLink.label || 'Volver'}</span>
                 </Link>
                 <div className="h-6 w-px bg-slate-200 shrink-0" />
               </>
@@ -43,9 +43,9 @@ export function PageHeader({ title, subtitle, backLink, badge, actions, children
             </div>
           </div>
 
-          <div className="flex items-center gap-3 shrink-0">
+          <div className="flex min-w-0 flex-wrap items-center gap-2 sm:shrink-0 sm:justify-end sm:gap-3">
             {badge && (
-              <div className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-2">
+              <div className="rounded-xl border border-[rgb(var(--border-color))] bg-[rgb(var(--input-bg))] px-3 py-2 sm:px-4">
                 <span className="text-lg font-bold text-slate-900">{badge.value}</span>
                 <span className="text-xs text-slate-500 ml-1.5">{badge.label}</span>
               </div>

@@ -16,19 +16,19 @@ Aplicación web para HomeForge, una plataforma CRM completa para inmobiliarias, 
 
 ## 🚀 Tecnologías
 
-- **Framework**: React 18
+- **Framework**: React
 - **Lenguaje**: TypeScript
 - **Build**: Vite
 - **Routing**: React Router
-- **HTTP Client**: Axios
+- **HTTP Client**: Fetch API
 - **Internacionalización**: i18next
 - **Testing**: Vitest
-- **Styling**: CSS Modules
+- **Styling**: Tailwind CSS 4
+- **Package manager**: Bun
 
 ## 📋 Requisitos
 
-- Node.js 20 o superior ([Descargar Node.js](https://nodejs.org/))
-- npm (incluido con Node.js)
+- Bun 1.3.13 o superior ([Instalar Bun](https://bun.sh/docs/installation))
 - Backend de HomeForge corriendo en http://localhost:8080
 
 ## 🔧 Configuración Inicial
@@ -43,7 +43,7 @@ cd HomeForge-frontend
 ### 2. Instalar dependencias
 
 ```bash
-npm install
+bun install --frozen-lockfile
 ```
 
 ### 3. Configurar variables de entorno
@@ -58,7 +58,7 @@ Edita `.env` según tus necesidades:
 
 ```bash
 # URL del backend API
-VITE_API_URL=http://localhost:8080
+VITE_API_BASE=http://localhost:8080/api
 ```
 
 ## 🚀 Iniciar el Proyecto
@@ -66,7 +66,7 @@ VITE_API_URL=http://localhost:8080
 ### Modo Desarrollo
 
 ```bash
-npm run dev
+bun run dev
 ```
 
 La aplicación estará disponible en: **http://localhost:5174**
@@ -74,7 +74,7 @@ La aplicación estará disponible en: **http://localhost:5174**
 ### Build para Producción
 
 ```bash
-npm run build
+bun run build
 ```
 
 Los archivos compilados estarán en: `dist/`
@@ -82,14 +82,14 @@ Los archivos compilados estarán en: `dist/`
 ### Preview del Build
 
 ```bash
-npm run preview
+bun run preview
 ```
 
 ## 📡 Conexión con el Backend
 
-El frontend se conecta al backend mediante Axios.
+El frontend se conecta al backend mediante la Fetch API.
 
-**URL configurada**: Se lee de la variable de entorno `VITE_API_URL` (default: http://localhost:8080)
+**URL configurada**: se lee de `VITE_API_BASE`; si no se define, se detecta el host actual y se usa el puerto 8080.
 
 ### Endpoints utilizados:
 
@@ -104,13 +104,7 @@ El frontend se conecta al backend mediante Axios.
 
 ```bash
 # Ejecutar tests
-npm test
-
-# Tests con UI
-npm run test:ui
-
-# Cobertura
-npm run test:coverage
+bun run test --run
 ```
 
 ## 📁 Estructura del Proyecto
@@ -149,26 +143,19 @@ HomeForge-frontend/
 │   │   ├── ReportsPage.tsx
 │   │   ├── SettingsPage.tsx
 │   │   └── UsersPage.tsx
-│   ├── shared/          # Componentes y utilidades compartidas
-│   │   ├── ConfirmModal.tsx
-│   │   ├── SubscriptionBadge.tsx
-│   │   ├── SubscriptionBanner.tsx
-│   │   ├── UpgradeModal.tsx
-│   │   ├── dashboardApi.ts
-│   │   ├── leads.ts
-│   │   ├── operationsApi.ts
-│   │   ├── paymentApi.ts
-│   │   ├── subscriptionApi.ts
-│   │   ├── subscriptionRestrictions.ts
-│   │   ├── useSubscriptionRestrictions.ts
-│   │   └── services/
-│   │       └── api.ts   # Cliente HTTP (Axios)
-│   ├── contexts/        # React Contexts
-│   ├── hooks/           # Custom Hooks
-│   ├── types/           # TypeScript Types
-│   ├── i18n/            # Traducciones (ES/EN)
-│   ├── utils/           # Utilidades
-│   ├── App.tsx          # Componente principal
+│   ├── app/             # Providers, protección y rutas
+│   ├── layout/          # Layout privado
+│   ├── modules/         # Dominios funcionales
+│   │   ├── auth/
+│   │   ├── properties/
+│   │   ├── leads/
+│   │   ├── appointments/
+│   │   ├── documents/
+│   │   ├── notifications/
+│   │   ├── users/
+│   │   ├── reports/
+│   │   └── settings/
+│   ├── shared/          # UI, servicios y utilidades transversales
 │   └── main.tsx         # Punto de entrada
 ├── .env.example         # Variables de entorno de ejemplo
 ├── index.html
@@ -185,7 +172,7 @@ El proyecto soporta múltiples idiomas:
 - **Español** (es)
 - **Inglés** (en)
 
-Los archivos de traducción están en: `src/i18n/locales/`
+La configuración de traducciones está en `src/shared/i18n/`.
 
 ### Cambiar idioma
 
@@ -193,41 +180,29 @@ El idioma se puede cambiar desde la interfaz de usuario o configurando el locale
 
 ## 🎨 Estilos
 
-El proyecto usa **CSS Modules** para estilos con scope local.
-
-Cada componente tiene su propio archivo de estilos:
-```
-Component.tsx
-Component.module.css
-```
+El proyecto usa **Tailwind CSS 4** y tokens CSS semánticos para los temas light, dark y obsidian.
 
 ## 🛠️ Comandos Útiles
 
 ```bash
 # Instalar dependencias
-npm install
+bun install --frozen-lockfile
 
 # Modo desarrollo
-npm run dev
+bun run dev
 
 # Build
-npm run build
+bun run build
 
 # Preview
-npm run preview
+bun run preview
 
 # Tests
-npm test
-
-# Linter
-npm run lint
-
-# Formatear código
-npm run format
+bun run test --run
 
 # Limpiar node_modules y reinstalar
-rm -rf node_modules package-lock.json
-npm install
+rm -rf node_modules
+bun install --frozen-lockfile
 ```
 
 ## 🔧 Configuración Avanzada
@@ -249,7 +224,7 @@ export default defineConfig({
 Edita `.env`:
 
 ```bash
-VITE_API_URL=http://api.midominio.com
+VITE_API_BASE=http://api.midominio.com/api
 ```
 
 ### Proxy API (desarrollo)
@@ -299,15 +274,15 @@ El frontend incluye:
 ### Vercel / Netlify
 
 1. Conecta tu repositorio
-2. Configura la variable de entorno: `VITE_API_URL`
-3. Build command: `npm run build`
+2. Configura la variable de entorno: `VITE_API_BASE`
+3. Build command: `bun run build`
 4. Output directory: `dist`
 
 ### Manual
 
 ```bash
 # Build
-npm run build
+bun run build
 
 # Subir carpeta dist/ a tu servidor
 scp -r dist/* usuario@servidor:/ruta/
@@ -401,10 +376,10 @@ Este frontend está diseñado para trabajar con el backend de HomeForge:
 
 ```bash
 # .env
-VITE_API_URL=http://localhost:8080
+VITE_API_BASE=http://localhost:8080/api
 
 # .env.production (para producción)
-VITE_API_URL=https://api.midominio.com
+VITE_API_BASE=https://api.midominio.com/api
 ```
 
 Las variables **DEBEN** empezar con `VITE_` para ser expuestas al frontend.
@@ -435,16 +410,16 @@ El proyecto usa `console.log` para debugging. En producción, estos se eliminan 
 ### "Cannot connect to backend"
 
 1. Verifica que el backend esté corriendo: http://localhost:8080/actuator/health
-2. Revisa la variable `VITE_API_URL` en `.env`
+2. Revisa la variable `VITE_API_BASE` en `.env`
 3. Verifica CORS en el backend
 
-### "npm install" falla
+### `bun install` falla
 
 ```bash
-# Limpiar caché
-npm cache clean --force
-rm -rf node_modules package-lock.json
-npm install
+# Limpiar caché y reinstalar
+bun pm cache rm
+rm -rf node_modules
+bun install --frozen-lockfile
 ```
 
 ### Puerto ya en uso
@@ -452,14 +427,14 @@ npm install
 Cambia el puerto en `vite.config.ts` o usa:
 
 ```bash
-npm run dev -- --port 5175
+bun run dev -- --port 5175
 ```
 
 ### TypeScript errors
 
 ```bash
 # Verificar tipos
-npx tsc --noEmit
+bunx tsc --noEmit
 ```
 
 ## 📝 Licencia

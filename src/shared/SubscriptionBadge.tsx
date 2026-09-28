@@ -1,11 +1,11 @@
 import { useEffect, useState } from 'react';
-import { getSession } from './auth';
+import { getSession } from '../modules/auth';
 import {
   formatSubscriptionStatus,
   getPaymentStatus,
   getSubscriptionStatusColor,
   PaymentStatusResponse
-} from './paymentApi';
+} from '../modules/settings';
 
 export function SubscriptionBadge() {
   const [status, setStatus] = useState<PaymentStatusResponse | null>(null);

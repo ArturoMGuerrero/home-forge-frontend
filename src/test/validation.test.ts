@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { formatMoneyInput, normalizeMoneyInput } from '../shared/MoneyInput';
-import { buildDashboardMetrics } from '../shared/dashboardMetrics';
+import { buildDashboardMetrics } from '../modules/reports';
 import { isValidPhone } from '../shared/validation/validation';
 describe('phone validation', () => {
   it('accepts E.164 phones', () => expect(isValidPhone('+19155551234')).toBe(true));

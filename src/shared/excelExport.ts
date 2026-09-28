@@ -10,8 +10,19 @@ export function exportToExcel<T>(
   data: T[],
   columns: ExportColumn<T>[],
   fileName: string,
+  sheetName?: string
+): void;
+export function exportToExcel<T extends Record<string, unknown>>(data: T[], fileName: string): void;
+export function exportToExcel<T>(
+  data: T[],
+  columnsOrFileName: ExportColumn<T>[] | string,
+  fileName?: string,
   sheetName: string = 'Datos'
 ) {
+  const columns: ExportColumn<T>[] = typeof columnsOrFileName === 'string'
+    ? Object.keys((data[0] ?? {}) as object).map(key => ({ header: key, key: key as keyof T }))
+    : columnsOrFileName;
+  const resolvedFileName = typeof columnsOrFileName === 'string' ? columnsOrFileName.replace(/\.xlsx$/i, '') : (fileName ?? 'exportacion');
   // Crear las filas con headers
   const headers = columns.map(col => col.header);
 
@@ -43,7 +54,7 @@ export function exportToExcel<T>(
 
   // Generar el archivo
   const timestamp = new Date().toISOString().slice(0, 10);
-  const fullFileName = `${fileName}-${timestamp}.xlsx`;
+  const fullFileName = `${resolvedFileName}-${timestamp}.xlsx`;
 
   // Descargar
   XLSX.writeFile(workbook, fullFileName);

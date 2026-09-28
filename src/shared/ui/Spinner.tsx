@@ -37,8 +37,8 @@ interface LoadingOverlayProps {
 
 export function LoadingOverlay({ message = 'Cargando...' }: LoadingOverlayProps) {
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-white/80 backdrop-blur-sm">
-      <div className="flex flex-col items-center gap-4">
+    <div className="app-modal-backdrop fixed inset-0 z-50 flex items-center justify-center p-4">
+      <div className="app-modal flex flex-col items-center gap-4 rounded-2xl border px-8 py-7">
         <Spinner size="xl" className="text-indigo-600" />
         <p className="text-sm font-medium text-slate-600">{message}</p>
       </div>

@@ -25,28 +25,28 @@ export function Tabs({ tabs, activeTab, onChange, variant = 'default', size = 'm
 
   const variantClasses = {
     default: {
-      container: 'border-b border-slate-200 overflow-x-auto',
+      container: 'border-b border-slate-200 overflow-x-auto overscroll-x-contain [scrollbar-width:thin]',
       wrapper: 'flex gap-1',
       tab: 'border-b-2 border-transparent hover:border-slate-300',
       active: 'border-indigo-600 text-indigo-600 font-semibold',
       inactive: 'text-slate-600 hover:text-slate-900'
     },
     pills: {
-      container: 'bg-slate-100 rounded-xl p-1 overflow-x-auto',
+      container: 'bg-slate-100 rounded-xl p-1 overflow-x-auto overscroll-x-contain [scrollbar-width:thin]',
       wrapper: 'flex gap-1',
       tab: 'rounded-lg transition-all',
       active: 'bg-white shadow-sm text-slate-900 font-semibold',
       inactive: 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
     },
     underline: {
-      container: 'border-b border-slate-200 overflow-x-auto',
+      container: 'border-b border-slate-200 overflow-x-auto overscroll-x-contain [scrollbar-width:thin]',
       wrapper: 'flex gap-6',
       tab: 'border-b-2 border-transparent pb-3 transition-colors',
       active: 'border-indigo-600 text-indigo-600 font-semibold',
       inactive: 'text-slate-500 hover:text-slate-700 hover:border-slate-300'
     },
     cards: {
-      container: 'overflow-x-auto pb-1',
+      container: 'overflow-x-auto overscroll-x-contain pb-1 [scrollbar-width:thin]',
       wrapper: 'flex gap-2',
       tab: 'rounded-xl border-2 transition-all shadow-sm',
       active: 'border-indigo-500 bg-indigo-50 text-indigo-700 font-semibold shadow-md',

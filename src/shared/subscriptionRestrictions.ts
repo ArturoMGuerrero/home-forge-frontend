@@ -1,4 +1,4 @@
-import { PaymentStatusResponse, SubscriptionStatus } from './paymentApi';
+import { PaymentStatusResponse, SubscriptionStatus } from '../modules/settings';
 
 export type SubscriptionRestrictionLevel = 'NONE' | 'WARNING' | 'LIMITED' | 'BLOCKED';
 

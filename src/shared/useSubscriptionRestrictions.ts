@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
-import { getSession } from './auth';
-import { getPaymentStatus, PaymentStatusResponse } from './paymentApi';
+import { getSession } from '../modules/auth';
+import { getPaymentStatus, PaymentStatusResponse } from '../modules/settings';
 import { getSubscriptionRestrictions, SubscriptionRestrictions } from './subscriptionRestrictions';
 
 export function useSubscriptionRestrictions() {

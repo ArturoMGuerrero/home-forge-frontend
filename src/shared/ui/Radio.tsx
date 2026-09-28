@@ -1,4 +1,4 @@
-import { InputHTMLAttributes, forwardRef } from 'react';
+import { InputHTMLAttributes, forwardRef, useId } from 'react';
 
 interface RadioProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 'type'> {
   label?: string;
@@ -8,10 +8,17 @@ interface RadioProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 'type'>
 
 export const Radio = forwardRef<HTMLInputElement, RadioProps>(
   ({ label, description, error, className = '', ...props }, ref) => {
+    const generatedId = useId();
+    const radioId = props.id ?? generatedId;
+    const messageId = `${radioId}-message`;
+
     return (
       <div className="flex items-start gap-3">
         <div className="flex items-center h-5">
           <input
+            aria-describedby={description ? messageId : undefined}
+            aria-invalid={Boolean(error)}
+            id={radioId}
             ref={ref}
             type="radio"
             className={`
@@ -30,24 +37,19 @@ export const Radio = forwardRef<HTMLInputElement, RadioProps>(
           <div className="flex-1">
             {label && (
               <label
+                htmlFor={radioId}
                 className={`
                   block text-sm font-semibold cursor-pointer
                   ${error ? 'text-rose-600' : 'text-slate-700'}
                   ${props.disabled ? 'opacity-50' : ''}
                 `}
-                onClick={(e) => {
-                  if (!props.disabled) {
-                    const input = (e.currentTarget.previousElementSibling?.firstChild as HTMLInputElement);
-                    input?.click();
-                  }
-                }}
               >
                 {label}
                 {props.required && <span className="text-rose-500 ml-1">*</span>}
               </label>
             )}
             {description && (
-              <p className={`mt-0.5 text-xs ${error ? 'text-rose-600' : 'text-slate-500'}`}>
+              <p className={`mt-0.5 text-xs ${error ? 'text-rose-600' : 'text-slate-500'}`} id={messageId}>
                 {description}
               </p>
             )}
