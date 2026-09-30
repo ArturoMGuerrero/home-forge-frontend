@@ -189,16 +189,16 @@ export function PropertiesPage() {
 
       {!loading && properties.length > 0 && (
         <Card className="mb-6 space-y-4 p-4 sm:p-5">
-          <div className="flex flex-col gap-3 lg:flex-row">
+          <div className="grid gap-3">
             <SearchInput
               aria-label="Buscar propiedades"
-              containerClassName="lg:flex-1"
+              
               onChange={e => setSearchQuery(e.target.value)}
               onClear={() => setSearchQuery('')}
               placeholder="Buscar por código, título o ciudad..."
               value={searchQuery}
             />
-            <div className="grid gap-3 sm:grid-cols-4 lg:flex-[1.6]">
+            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
               <Select aria-label="Estado" onChange={e => setStatusFilter(e.target.value)} options={statusOptions} value={statusFilter} />
               <Select aria-label="Operación" onChange={e => setListingTypeFilter(e.target.value)} options={listingOptions} value={listingTypeFilter} />
               <Select aria-label="Tipo de inmueble" onChange={e => setPropertyTypeFilter(e.target.value)} options={propertyTypeOptions} value={propertyTypeFilter} />

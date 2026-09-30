@@ -11,12 +11,12 @@ const links = [
 /** Pestañas compartidas por las vistas del módulo de prospectos. */
 export function LeadsNav() {
   return (
-    <nav aria-label="Vistas de prospectos" className="overflow-x-auto border-b border-border">
+    <nav aria-label="Vistas de prospectos" className="overflow-x-auto overflow-y-hidden border-b border-border">
       <div className="flex gap-1">
         {links.map(link => (
           <NavLink
             className={({ isActive }) => cn(
-              '-mb-px mx-2 shrink-0 whitespace-nowrap border-b-2 px-1 py-2 text-sm font-medium transition-colors first:ml-0',
+              'mx-2 shrink-0 whitespace-nowrap border-b-2 px-1 py-2 text-sm font-medium transition-colors first:ml-0',
               'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary',
               isActive ? 'border-primary text-primary-fg' : 'border-transparent text-fg-subtle hover:border-border-strong hover:text-fg'
             )}

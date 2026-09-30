@@ -32,7 +32,7 @@ export function StatCard({ label, value, icon, tone = 'primary', hint, to, class
     <div className="flex items-start justify-between gap-4">
       <div className="min-w-0">
         <p className="text-sm font-medium text-fg-subtle">{label}</p>
-        <p className="mt-2 text-2xl font-bold tracking-tight text-fg tabular-nums sm:text-3xl">{value}</p>
+        <p className="mt-2 truncate text-2xl font-bold tracking-tight text-fg tabular-nums">{value}</p>
         {hint && <div className="mt-1.5 text-xs text-fg-subtle">{hint}</div>}
       </div>
       {icon && (

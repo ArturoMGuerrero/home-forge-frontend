@@ -1,4 +1,5 @@
 import { LineChart, Line, BarChart, Bar, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
+import { useId } from 'react';
 import { useTheme } from '../../../shared/contexts/ThemeContext';
 
 type ChartData = {
@@ -125,12 +126,15 @@ export function TrendBarChart({ data, bars, height = 300 }: BarChartProps) {
 
 export function TrendAreaChart({ data, areas, height = 300 }: AreaChartProps) {
   const palette = useChartPalette();
+  // El id del degradado no puede tener espacios: url(#...) inválido deja el área rellena de negro.
+  const gradientPrefix = useId().replace(/[^a-zA-Z0-9_-]/g, '');
+  const gradientId = (key: string) => `${gradientPrefix}-${key.replace(/[^a-zA-Z0-9_-]/g, '-')}`;
   return (
     <ResponsiveContainer width="100%" height={height}>
       <AreaChart data={data} margin={{ top: 5, right: 20, left: 0, bottom: 5 }}>
         <defs>
           {areas.map(area => (
-            <linearGradient key={`gradient-${area.key}`} id={`color-${area.key}`} x1="0" y1="0" x2="0" y2="1">
+            <linearGradient key={`gradient-${area.key}`} id={gradientId(area.key)} x1="0" y1="0" x2="0" y2="1">
               <stop offset="5%" stopColor={area.color} stopOpacity={0.3} />
               <stop offset="95%" stopColor={area.color} stopOpacity={0} />
             </linearGradient>
@@ -167,7 +171,7 @@ export function TrendAreaChart({ data, areas, height = 300 }: AreaChartProps) {
             name={area.name}
             stroke={area.color}
             strokeWidth={2}
-            fill={`url(#color-${area.key})`}
+            fill={`url(#${gradientId(area.key)})`}
           />
         ))}
       </AreaChart>

@@ -92,6 +92,7 @@ export function LeadList({
               value={statusFilter}
             />
             <FilterChips
+              className="lg:shrink-0"
               label="Prioridad"
               onChange={value => setPriorityFilter(value as LeadItem['priority'] | 'ALL')}
               options={priorityOptions}
@@ -137,14 +138,15 @@ export function LeadList({
   );
 }
 
-function FilterChips({ label, options, value, onChange }: {
+function FilterChips({ label, options, value, onChange, className }: {
+  className?: string;
   label: string;
   options: Array<{ value: string; label: string }>;
   value: string;
   onChange: (value: string) => void;
 }) {
   return (
-    <fieldset className="min-w-0">
+    <fieldset className={cn('min-w-0', className)}>
       <legend className="mb-2 text-xs font-semibold text-fg-subtle">{label}</legend>
       <div className="flex flex-wrap gap-1.5">
         {options.map(option => {

@@ -86,16 +86,16 @@ export function PropertyFilters({ filters, onChange, resultCount, totalCount }: 
 
   return (
     <Card className="space-y-4 p-4 sm:p-5">
-      <div className="flex flex-col gap-3 lg:flex-row">
+      <div className="grid gap-3">
         <SearchInput
           aria-label="Buscar propiedades"
-          containerClassName="lg:flex-1"
+          
           onChange={e => updateFilter('searchQuery', e.target.value)}
           onClear={() => updateFilter('searchQuery', '')}
           placeholder="Buscar por código, título o ciudad..."
           value={filters.searchQuery}
         />
-        <div className="grid gap-3 sm:grid-cols-[1fr_1fr_1fr_auto] lg:flex-[1.4]">
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-[1fr_1fr_1fr_auto]">
           <Select aria-label="Estado" onChange={e => updateFilter('statusFilter', e.target.value)} options={statusOptions} value={filters.statusFilter} />
           <Select aria-label="Operación" onChange={e => updateFilter('listingTypeFilter', e.target.value)} options={listingOptions} value={filters.listingTypeFilter} />
           <Select aria-label="Tipo de inmueble" onChange={e => updateFilter('propertyTypeFilter', e.target.value)} options={propertyTypeOptions} value={filters.propertyTypeFilter} />

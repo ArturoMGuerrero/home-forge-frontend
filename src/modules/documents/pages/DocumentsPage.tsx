@@ -165,16 +165,16 @@ export function DocumentsPage() {
 
       {documents.length > 0 && (
         <Card className="mb-6 space-y-4 p-4 sm:p-5">
-          <div className="flex flex-col gap-3 lg:flex-row">
+          <div className="grid gap-3">
             <SearchInput
               aria-label="Buscar documentos"
-              containerClassName="lg:flex-1"
+              
               onChange={e => setSearchQuery(e.target.value)}
               onClear={() => setSearchQuery('')}
               placeholder="Buscar por nombre de archivo..."
               value={searchQuery}
             />
-            <div className="grid gap-3 sm:grid-cols-3 lg:flex-[1.3]">
+            <div className="grid gap-3 sm:grid-cols-3">
               <Select aria-label="Tipo de documento" onChange={e => setTypeFilter(e.target.value)} options={[{ value: 'ALL', label: 'Todos los tipos' }, ...documentTypeOptions]} value={typeFilter} />
               <Select aria-label="Estado" onChange={e => setStatusFilter(e.target.value)} options={[{ value: 'ALL', label: 'Todos los estados' }, ...documentStatusOptions]} value={statusFilter} />
               <Select aria-label="Relacionado con" onChange={e => setEntityFilter(e.target.value)} options={entityOptions} value={entityFilter} />

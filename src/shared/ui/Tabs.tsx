@@ -29,7 +29,7 @@ const variantClasses = {
   underline: {
     container: 'border-b border-border',
     wrapper: 'flex gap-1',
-    tab: '-mb-px rounded-none border-b-2 px-1 mx-2 first:ml-0',
+    tab: 'rounded-none border-b-2 px-1 mx-2 first:ml-0',
     active: 'border-primary text-primary-fg',
     inactive: 'border-transparent text-fg-subtle hover:border-border-strong hover:text-fg',
   },
@@ -46,7 +46,7 @@ export function Tabs({ tabs, activeTab, onChange, variant = 'default', size = 'm
   const styles = variant === 'pills' || variant === 'cards' ? variantClasses.pills : variantClasses.underline;
 
   return (
-    <div className={cn('overflow-x-auto overscroll-x-contain', styles.container, className)}>
+    <div className={cn('overflow-x-auto overflow-y-hidden overscroll-x-contain', styles.container, className)}>
       <div className={styles.wrapper} role="tablist">
         {tabs.map(tab => {
           const isActive = activeTab === tab.id;
