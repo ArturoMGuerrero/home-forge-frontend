@@ -4,7 +4,7 @@ import { PlanCards } from '../components/PlanCards';
 import { getSession, updateSessionSubscription } from '../../auth';
 import { changeSubscriptionPlan, getSubscription, getPlans, Plan, PlanCode, Subscription } from '../api/subscriptionApi';
 import { createSubscription, getPaymentStatus, PaymentStatusResponse } from '../api/paymentApi';
-import { SubscriptionDetails } from '../../../shared/SubscriptionBadge';
+import { SubscriptionDetails } from '../../../shared/SubscriptionDetails';
 import { Alert, Badge, Card, LoadingState, PageHeader } from '../../../shared/ui';
 
 export function PlansPage() {

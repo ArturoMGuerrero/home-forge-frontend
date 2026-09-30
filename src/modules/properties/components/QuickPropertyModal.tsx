@@ -1,7 +1,7 @@
 import { FormEvent, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
-import { Modal, Input, Select, Button, Alert } from '../../../shared/ui';
+import { Alert, Button, fieldClass, fieldLabelClass, Input, Modal, RequiredMark, Select } from '../../../shared/ui';
 import { createProperty, ListingType } from '../api/propertyApi';
 import { MoneyInput } from '../../../shared/MoneyInput';
 import { getJson } from '../../../shared/services/api';
@@ -83,8 +83,7 @@ export function QuickPropertyModal({ isOpen, onClose, onSuccess }: QuickProperty
       // Redirigir a la página de edición completa
       navigate(`/app/propiedades/${created.id}/editar`);
     } catch (error) {
-      console.error('Error creating property:', error);
-      toast.error('Error al crear la propiedad');
+      toast.error(error instanceof Error ? error.message : 'Error al crear la propiedad');
     } finally {
       setSaving(false);
     }
@@ -99,11 +98,17 @@ export function QuickPropertyModal({ isOpen, onClose, onSuccess }: QuickProperty
     <Modal
       isOpen={isOpen}
       onClose={handleClose}
-      title="Crear Propiedad Rápida"
+      title="Crear propiedad rápida"
       subtitle="Completa la información básica, luego agrega fotos y detalles"
       maxWidth="2xl"
+      footer={
+        <>
+          <Button onClick={handleClose} variant="tertiary">Cancelar</Button>
+          <Button form="quick-property-form" loading={saving} type="submit">Crear y continuar</Button>
+        </>
+      }
     >
-      <form onSubmit={handleSubmit} className="space-y-5">
+      <form className="space-y-5" id="quick-property-form" onSubmit={handleSubmit}>
         {/* Título */}
         <Input
           label="Título de la propiedad"
@@ -148,15 +153,14 @@ export function QuickPropertyModal({ isOpen, onClose, onSuccess }: QuickProperty
 
         {/* Precio */}
         <div>
-          <label className="block text-sm font-semibold text-fg-muted mb-2">
-            Precio *
-          </label>
+          <label className={fieldLabelClass} htmlFor="quick-property-price">Precio<RequiredMark /></label>
           <MoneyInput
+            className={fieldClass()}
             currency={form.currencyCode}
+            id="quick-property-price"
             onChange={value => update('price', value)}
-            value={form.price}
-            className="w-full px-3.5 py-3 border border-border rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent text-sm"
             required
+            value={form.price}
           />
         </div>
 
@@ -183,25 +187,6 @@ export function QuickPropertyModal({ isOpen, onClose, onSuccess }: QuickProperty
           Después de crear la propiedad, podrás agregar fotos, descripción detallada, amenidades y más información en la página de edición.
         </Alert>
 
-        {/* Botones */}
-        <div className="flex gap-3 pt-4 border-t border-border">
-          <Button
-            type="button"
-            onClick={handleClose}
-            variant="tertiary"
-            className="flex-1"
-          >
-            Cancelar
-          </Button>
-          <Button
-            type="submit"
-            variant="primary"
-            loading={saving}
-            className="flex-1"
-          >
-            Crear y continuar
-          </Button>
-        </div>
       </form>
     </Modal>
   );
