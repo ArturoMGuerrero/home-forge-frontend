@@ -1,43 +1,24 @@
 import { useEffect, useState } from 'react';
-import { Link, useOutletContext } from 'react-router-dom';
+import { useOutletContext } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import toast from 'react-hot-toast';
-import { LeadList } from '../components/LeadList';
-import { PageHeader } from '../../../shared/ui/PageHeader';
+import { formatBudget, formatPhone, LeadList } from '../components/LeadList';
+import { LeadsNav } from '../components/LeadsNav';
 import { ExportButton } from '../../../shared/ExportButton';
 import { LEADS_CHANGED_EVENT, LeadItem, leadStatusLabels, listLeads } from '../api/leadsApi';
 import { CreateLeadModal } from '../components/CreateLeadModal';
 import { ImportLeadsModal } from '../components/ImportLeadsModal';
 import { UpgradeModal } from '../../../shared/UpgradeModal';
 import { SubscriptionRestrictions } from '../../../shared/subscriptionRestrictions';
-import { exportToExcel, formatDate } from '../../../shared/excelExport';
-import { Button } from '../../../shared/ui';
+import { exportToExcel } from '../../../shared/excelExport';
+import { Icon } from '../../../shared/Icon';
+import { Button, PageHeader } from '../../../shared/ui';
 
 const priorityLabels: Record<string, string> = {
   HIGH: 'Alta',
   MEDIUM: 'Media',
   LOW: 'Baja'
 };
-
-function formatBudget(min?: number, max?: number, currency?: string): string {
-  const curr = currency || 'MXN';
-  if (min && max) return `${min.toLocaleString()} - ${max.toLocaleString()} ${curr}`;
-  if (max) return `Hasta ${max.toLocaleString()} ${curr}`;
-  if (min) return `Desde ${min.toLocaleString()} ${curr}`;
-  return '';
-}
-
-function formatPhone(phone?: string): string {
-  if (!phone) return '';
-  const cleaned = phone.replace(/\D/g, '');
-  if (cleaned.length === 12 && cleaned.startsWith('52')) {
-    const area = cleaned.slice(2, 5);
-    const first = cleaned.slice(5, 8);
-    const last = cleaned.slice(8);
-    return `(${area}) ${first}-${last}`;
-  }
-  return phone;
-}
 
 export function LeadsPage() {
   const { t } = useTranslation();
@@ -68,7 +49,8 @@ export function LeadsPage() {
       const query = searchQuery.toLowerCase();
       const matchesName = `${lead.firstName} ${lead.lastName}`.toLowerCase().includes(query);
       const matchesEmail = lead.email?.toLowerCase().includes(query);
-      const matchesPhone = lead.phoneE164?.includes(query.replace(/\D/g, ''));
+      const digits = query.replace(/\D/g, '');
+      const matchesPhone = digits !== '' && lead.phoneE164?.includes(digits);
       if (!matchesName && !matchesEmail && !matchesPhone) return false;
     }
     if (statusFilter !== 'ALL' && lead.status !== statusFilter) return false;
@@ -82,6 +64,14 @@ export function LeadsPage() {
       return;
     }
     setModalOpen(true);
+  }
+
+  function handleImport() {
+    if (!restrictions.canCreate) {
+      setUpgradeModalOpen(true);
+      return;
+    }
+    setImportModalOpen(true);
   }
 
   function handleExport() {
@@ -109,59 +99,43 @@ export function LeadsPage() {
   return (
     <>
       <PageHeader
-        title="Prospectos"
-        subtitle="Consulta y registra personas interesadas en tus propiedades"
         actions={
-          <div className="flex flex-wrap gap-3">
+          <>
             <ExportButton onExport={handleExport} variant="secondary" />
-            <Button
-              variant="tertiary"
-              onClick={() => restrictions.canCreate ? setImportModalOpen(true) : setUpgradeModalOpen(true)}
-              disabled={!restrictions.canCreate}
-            >
-              Importar
+            <Button icon={<Icon className="size-4" name="upload" />} onClick={handleImport} variant="tertiary">Importar</Button>
+            <Button icon={<Icon className="size-4" name={restrictions.canCreate ? 'plus' : 'lock'} />} onClick={handleCreateLead}>
+              {t('newLead')}
             </Button>
-            <Button
-              variant="primary"
-              onClick={handleCreateLead}
-              disabled={!restrictions.canCreate}
-            >
-              {restrictions.canCreate ? `+ ${t('newLead')}` : `🔒 ${t('newLead')}`}
-            </Button>
-            <Link to="/app/prospectos/tareas">
-              <Button variant="tertiary">
-                Ver Tareas
-              </Button>
-            </Link>
-            <Link to="/app/prospectos/pipeline">
-              <Button variant="primary">
-                Ver Pipeline
-              </Button>
-            </Link>
-          </div>
+          </>
         }
-      />
+        badge={{ value: leads.length, label: 'prospectos' }}
+        subtitle="Consulta y registra personas interesadas en tus propiedades."
+        title="Prospectos"
+      >
+        <LeadsNav />
+      </PageHeader>
+
       <LeadList
-        expanded
-        leads={leads}
-        searchQuery={searchQuery}
-        setSearchQuery={setSearchQuery}
-        statusFilter={statusFilter}
-        setStatusFilter={setStatusFilter}
-        priorityFilter={priorityFilter}
-        setPriorityFilter={setPriorityFilter}
         filteredLeads={filteredLeads}
+        leads={leads}
+        onCreate={restrictions.canCreate ? handleCreateLead : undefined}
+        priorityFilter={priorityFilter}
+        searchQuery={searchQuery}
+        setPriorityFilter={setPriorityFilter}
+        setSearchQuery={setSearchQuery}
+        setStatusFilter={setStatusFilter}
+        statusFilter={statusFilter}
       />
       <CreateLeadModal
-        open={modalOpen}
         onClose={() => setModalOpen(false)}
         onCreated={created => setLeads(current => [created, ...current])}
+        open={modalOpen}
       />
       <ImportLeadsModal
         existingLeads={leads}
-        open={importModalOpen}
         onClose={() => setImportModalOpen(false)}
         onImported={created => setLeads(current => [...created, ...current])}
+        open={importModalOpen}
       />
       <UpgradeModal
         feature="crear nuevos prospectos"

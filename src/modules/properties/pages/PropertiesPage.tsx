@@ -1,14 +1,48 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link, useOutletContext } from 'react-router-dom';
 import toast from 'react-hot-toast';
-import { ApiProperty, formatApiPrice, listingLabel, listProperties, propertyImages, propertyStatusClass, propertyStatusLabel } from '../api/propertyApi';
+import { ApiProperty, formatApiPrice, listingLabel, listProperties, propertyImages, propertyStatusLabel } from '../api/propertyApi';
 import { ExportButton } from '../../../shared/ExportButton';
 import { exportToExcel, formatCurrency } from '../../../shared/excelExport';
 import { UpgradeModal } from '../../../shared/UpgradeModal';
 import { SubscriptionRestrictions } from '../../../shared/subscriptionRestrictions';
-import { PageHeader } from '../../../shared/ui/PageHeader';
+import { Icon } from '../../../shared/Icon';
+import { Badge, BadgeVariant, Button, buttonClasses, Card, EmptyState, LoadingState, PageHeader, SearchInput, Select } from '../../../shared/ui';
 import { QuickPropertyModal } from '../components/QuickPropertyModal';
-import { Button } from '../../../shared/ui';
+
+type SortOption = 'recent' | 'price-asc' | 'price-desc' | 'alpha';
+
+const statusOptions = [
+  { value: 'ALL', label: 'Todos los estados' },
+  { value: 'AVAILABLE', label: 'Disponible' },
+  { value: 'RESERVED', label: 'Apartada' },
+  { value: 'SOLD', label: 'Vendida' },
+  { value: 'RENTED', label: 'Rentada' },
+  { value: 'UNAVAILABLE', label: 'No disponible' }
+];
+const listingOptions = [{ value: 'ALL', label: 'Venta y renta' }, { value: 'SALE', label: 'Venta' }, { value: 'RENT', label: 'Renta' }];
+const propertyTypeOptions = [
+  { value: 'ALL', label: 'Todos los tipos' },
+  { value: 'HOUSE', label: 'Casa' },
+  { value: 'APARTMENT', label: 'Departamento' },
+  { value: 'LAND', label: 'Terreno' },
+  { value: 'COMMERCIAL', label: 'Local comercial' },
+  { value: 'OFFICE', label: 'Oficina' },
+  { value: 'WAREHOUSE', label: 'Bodega' }
+];
+const sortOptions = [
+  { value: 'recent', label: 'Más recientes' },
+  { value: 'price-asc', label: 'Precio menor' },
+  { value: 'price-desc', label: 'Precio mayor' },
+  { value: 'alpha', label: 'Alfabético' }
+];
+const statusVariants: Record<string, BadgeVariant> = {
+  AVAILABLE: 'success',
+  RESERVED: 'warning',
+  SOLD: 'info',
+  RENTED: 'purple',
+  UNAVAILABLE: 'neutral'
+};
 
 export function PropertiesPage() {
   const context = useOutletContext<{ restrictions: SubscriptionRestrictions }>();
@@ -19,7 +53,7 @@ export function PropertiesPage() {
   const [statusFilter, setStatusFilter] = useState<string>('ALL');
   const [listingTypeFilter, setListingTypeFilter] = useState<string>('ALL');
   const [propertyTypeFilter, setPropertyTypeFilter] = useState<string>('ALL');
-  const [sortBy, setSortBy] = useState<'recent' | 'price-asc' | 'price-desc' | 'alpha'>('recent');
+  const [sortBy, setSortBy] = useState<SortOption>('recent');
   const [upgradeModalOpen, setUpgradeModalOpen] = useState(false);
   const [quickModalOpen, setQuickModalOpen] = useState(false);
 
@@ -95,12 +129,6 @@ export function PropertiesPage() {
     );
   }
 
-  function handleCreateProperty() {
-    if (!restrictions.canCreate) {
-      setUpgradeModalOpen(true);
-    }
-  }
-
   function handleQuickCreate() {
     if (!restrictions.canCreate) {
       setUpgradeModalOpen(true);
@@ -115,294 +143,149 @@ export function PropertiesPage() {
       .catch(() => toast.error('Error al recargar propiedades'));
   }
 
+  const hasFilters = Boolean(searchQuery) || statusFilter !== 'ALL' || listingTypeFilter !== 'ALL' || propertyTypeFilter !== 'ALL';
+
+  function clearFilters() {
+    setSearchQuery('');
+    setStatusFilter('ALL');
+    setListingTypeFilter('ALL');
+    setPropertyTypeFilter('ALL');
+    setSortBy('recent');
+  }
+
   return (
     <>
       <PageHeader
-        title="Propiedades"
-        subtitle="Administra inmuebles en venta y renta desde PostgreSQL"
-        badge={{ value: properties.length, label: 'propiedades' }}
         actions={
-          <div className="flex gap-3">
+          <>
             <ExportButton onExport={handleExport} variant="secondary" />
             {restrictions.canCreate ? (
               <>
                 <Button
+                  icon={<svg aria-hidden="true" className="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>}
                   onClick={handleQuickCreate}
-                  variant="secondary"
-                  icon={
-                    <svg className="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                    </svg>
-                  }
+                  variant="tertiary"
                 >
                   Crear rápida
                 </Button>
-                <Link to="/app/propiedades/nueva">
-                  <Button
-                    variant="primary"
-                    icon={
-                      <svg className="size-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                      </svg>
-                    }
-                  >
-                    Crear completa
-                  </Button>
+                <Link className={buttonClasses()} to="/app/propiedades/nueva">
+                  <Icon className="size-4" name="plus" />
+                  Nueva propiedad
                 </Link>
               </>
             ) : (
-              <Button
-                onClick={handleCreateProperty}
-                variant="tertiary"
-                disabled
-              >
-                🔒 Agregar propiedad
+              <Button icon={<Icon className="size-4" name="lock" />} onClick={() => setUpgradeModalOpen(true)} variant="tertiary">
+                Agregar propiedad
               </Button>
             )}
-          </div>
+          </>
         }
+        badge={{ value: properties.length, label: 'propiedades' }}
+        subtitle="Administra tu inventario de inmuebles en venta y renta."
+        title="Propiedades"
       />
 
-      {loading && <p className="rounded-2xl border border-border bg-surface p-8 text-center text-sm text-fg-subtle">Consultando propiedades...</p>}
+      {loading && <Card><LoadingState message="Consultando propiedades..." /></Card>}
 
-      {!loading && (
-        <>
-          {/* Búsqueda y Filtros */}
-          <div className="mb-6 space-y-4 rounded-2xl border border-border bg-surface p-5 shadow-sm">
-            {/* Búsqueda */}
-            <div className="relative">
-              <svg className="pointer-events-none absolute left-3.5 top-1/2 size-5 -translate-y-1/2 text-fg-subtle" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-              </svg>
-              <input
-                className="w-full rounded-xl border border-border py-2.5 pl-11 pr-4 text-sm transition focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
-                onChange={e => setSearchQuery(e.target.value)}
-                placeholder="Buscar por código, título o ciudad..."
-                type="text"
-                value={searchQuery}
-              />
-              {searchQuery && (
-                <button
-                  className="absolute right-3 top-1/2 -translate-y-1/2 rounded-lg p-1 text-fg-subtle transition hover:bg-surface-sunken hover:text-fg-muted"
-                  onClick={() => setSearchQuery('')}
-                  type="button"
-                >
-                  <svg className="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                  </svg>
-                </button>
-              )}
+      {!loading && properties.length > 0 && (
+        <Card className="mb-6 space-y-4 p-4 sm:p-5">
+          <div className="flex flex-col gap-3 lg:flex-row">
+            <SearchInput
+              aria-label="Buscar propiedades"
+              containerClassName="lg:flex-1"
+              onChange={e => setSearchQuery(e.target.value)}
+              onClear={() => setSearchQuery('')}
+              placeholder="Buscar por código, título o ciudad..."
+              value={searchQuery}
+            />
+            <div className="grid gap-3 sm:grid-cols-4 lg:flex-[1.6]">
+              <Select aria-label="Estado" onChange={e => setStatusFilter(e.target.value)} options={statusOptions} value={statusFilter} />
+              <Select aria-label="Operación" onChange={e => setListingTypeFilter(e.target.value)} options={listingOptions} value={listingTypeFilter} />
+              <Select aria-label="Tipo de inmueble" onChange={e => setPropertyTypeFilter(e.target.value)} options={propertyTypeOptions} value={propertyTypeFilter} />
+              <Select aria-label="Ordenar por" onChange={e => setSortBy(e.target.value as SortOption)} options={sortOptions} value={sortBy} />
             </div>
-
-            {/* Filtros */}
-            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-              {/* Filtro de Estado */}
-              <div>
-                <label className="mb-1.5 block text-xs font-semibold text-fg-muted">Estado</label>
-                <select
-                  className="w-full rounded-xl border border-border px-3 py-2 text-sm transition focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
-                  onChange={e => setStatusFilter(e.target.value)}
-                  value={statusFilter}
-                >
-                  <option value="ALL">Todos</option>
-                  <option value="AVAILABLE">Disponible</option>
-                  <option value="RESERVED">Apartada</option>
-                  <option value="SOLD">Vendida</option>
-                  <option value="RENTED">Rentada</option>
-                  <option value="UNAVAILABLE">No disponible</option>
-                </select>
-              </div>
-
-              {/* Filtro de Tipo de Operación */}
-              <div>
-                <label className="mb-1.5 block text-xs font-semibold text-fg-muted">Operación</label>
-                <select
-                  className="w-full rounded-xl border border-border px-3 py-2 text-sm transition focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
-                  onChange={e => setListingTypeFilter(e.target.value)}
-                  value={listingTypeFilter}
-                >
-                  <option value="ALL">Todas</option>
-                  <option value="SALE">Venta</option>
-                  <option value="RENT">Renta</option>
-                </select>
-              </div>
-
-              {/* Filtro de Tipo de Propiedad */}
-              <div>
-                <label className="mb-1.5 block text-xs font-semibold text-fg-muted">Tipo</label>
-                <select
-                  className="w-full rounded-xl border border-border px-3 py-2 text-sm transition focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
-                  onChange={e => setPropertyTypeFilter(e.target.value)}
-                  value={propertyTypeFilter}
-                >
-                  <option value="ALL">Todos</option>
-                  <option value="HOUSE">Casa</option>
-                  <option value="APARTMENT">Departamento</option>
-                  <option value="LAND">Terreno</option>
-                  <option value="COMMERCIAL">Local comercial</option>
-                  <option value="OFFICE">Oficina</option>
-                  <option value="WAREHOUSE">Bodega</option>
-                </select>
-              </div>
-
-              {/* Ordenamiento */}
-              <div>
-                <label className="mb-1.5 block text-xs font-semibold text-fg-muted">Ordenar por</label>
-                <select
-                  className="w-full rounded-xl border border-border px-3 py-2 text-sm transition focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
-                  onChange={e => setSortBy(e.target.value as any)}
-                  value={sortBy}
-                >
-                  <option value="recent">Más reciente</option>
-                  <option value="price-asc">Precio menor</option>
-                  <option value="price-desc">Precio mayor</option>
-                  <option value="alpha">Alfabético</option>
-                </select>
-              </div>
-            </div>
-
-            {/* Contador de resultados */}
-            {(searchQuery || statusFilter !== 'ALL' || listingTypeFilter !== 'ALL' || propertyTypeFilter !== 'ALL') && (
-              <div className="flex items-center justify-between rounded-lg bg-primary-soft px-4 py-2.5 text-xs">
-                <span className="font-medium text-primary-fg">
-                  {filteredProperties.length} {filteredProperties.length === 1 ? 'propiedad encontrada' : 'propiedades encontradas'}
-                </span>
-                <button
-                  className="font-semibold text-primary-fg transition hover:text-primary-fg"
-                  onClick={() => {
-                    setSearchQuery('');
-                    setStatusFilter('ALL');
-                    setListingTypeFilter('ALL');
-                    setPropertyTypeFilter('ALL');
-                    setSortBy('recent');
-                  }}
-                  type="button"
-                >
-                  Limpiar filtros
-                </button>
-              </div>
-            )}
           </div>
-
-          {/* Estado vacío cuando no hay resultados */}
-          {filteredProperties.length === 0 && properties.length > 0 && (
-            <div className="py-12 text-center">
-              <svg className="mx-auto mb-3 size-12 text-border-strong" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-              </svg>
-              <p className="text-sm font-medium text-fg-muted">No se encontraron propiedades</p>
-              <p className="mt-1 text-xs text-fg-subtle">Intenta ajustar los filtros de búsqueda</p>
+          {hasFilters && (
+            <div className="flex items-center justify-between gap-3 border-t border-border pt-3 text-sm">
+              <span className="text-fg-subtle">
+                <strong className="font-semibold text-fg">{filteredProperties.length}</strong> {filteredProperties.length === 1 ? 'propiedad encontrada' : 'propiedades encontradas'}
+              </span>
+              <Button onClick={clearFilters} size="sm" variant="ghost">Limpiar filtros</Button>
             </div>
           )}
-
-          {properties.length === 0 && <p className="rounded-2xl border border-border bg-surface p-8 text-center text-sm text-fg-subtle">Aún no hay propiedades registradas.</p>}
-        </>
+        </Card>
       )}
 
-      <div className="grid gap-4 p-4 lg:grid-cols-2 xl:grid-cols-3 lg:p-6">
-        {filteredProperties.map(property => (
-          <article
-            className="group flex flex-col overflow-hidden rounded-2xl border border-border bg-surface shadow-sm transition-all hover:border-primary hover:shadow-xl hover:shadow-indigo-500/10"
-            key={property.id}
-          >
-            {/* Header con imagen y badges */}
-            <div className="flex gap-4 p-5">
-              {propertyImages(property)[0] ? (
-                <div className="relative size-20 shrink-0">
-                  <img alt={property.title} className="size-20 rounded-xl object-cover" src={propertyImages(property)[0]} />
-                  {propertyImages(property).length > 1 && (
-                    <div className="absolute bottom-1.5 right-1.5 flex items-center gap-1 rounded-full bg-overlay px-2 py-0.5 text-xs font-bold text-white backdrop-blur-sm">
-                      <svg className="size-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                      </svg>
-                      {propertyImages(property).length}
-                    </div>
-                  )}
+      {!loading && properties.length === 0 && (
+        <Card className="border-dashed">
+          <EmptyState
+            actions={restrictions.canCreate ? <Link className={buttonClasses()} to="/app/propiedades/nueva">Registrar primera propiedad</Link> : undefined}
+            description="Registra tus inmuebles para publicarlos y asignarlos a tus prospectos."
+            icon={<Icon name="properties" />}
+            title="Aún no hay propiedades registradas"
+          />
+        </Card>
+      )}
+
+      {!loading && properties.length > 0 && filteredProperties.length === 0 && (
+        <EmptyState
+          actions={<Button onClick={clearFilters} variant="tertiary">Limpiar filtros</Button>}
+          description="Intenta ajustar los filtros de búsqueda."
+          title="No se encontraron propiedades"
+        />
+      )}
+
+      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+        {filteredProperties.map(property => {
+          const images = propertyImages(property);
+          return (
+            <Card className="flex flex-col" key={property.id} noPadding truncate>
+              <div className="flex gap-4 p-5">
+                {images[0] ? (
+                  <div className="relative size-20 shrink-0">
+                    <img alt={property.title} className="size-20 rounded-xl object-cover" loading="lazy" src={images[0]} />
+                    {images.length > 1 && (
+                      <span className="absolute bottom-1 right-1 rounded-full bg-black/60 px-1.5 py-0.5 text-[10px] font-semibold text-white">{images.length}</span>
+                    )}
+                  </div>
+                ) : (
+                  <div className="grid size-20 shrink-0 place-items-center rounded-xl bg-primary-soft text-primary-fg">
+                    <Icon className="size-8" name="properties" />
+                  </div>
+                )}
+                <div className="min-w-0 flex-1">
+                  <h2 className="truncate font-semibold text-fg">{property.title}</h2>
+                  <div className="mt-1.5 flex flex-wrap gap-1.5">
+                    <Badge variant={property.listingType === 'RENT' ? 'purple' : 'primary'}>{listingLabel(property.listingType)}</Badge>
+                    <Badge dot variant={statusVariants[property.status] ?? 'neutral'}>{propertyStatusLabel(property.status)}</Badge>
+                    {property.published && <Badge variant="info">Publicada</Badge>}
+                  </div>
+                  <p className="mt-2 truncate text-xs text-fg-subtle">
+                    <span className="font-mono">{property.code}</span> · {property.city}, {property.stateCode}
+                  </p>
                 </div>
-              ) : (
-                <div className="grid size-20 shrink-0 place-items-center rounded-xl bg-primary-soft text-primary-fg">
-                  <svg className="size-10" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-                  </svg>
-                </div>
-              )}
-              <div className="min-w-0 flex-1">
-                <h2 className="truncate font-bold text-fg group-hover:text-primary-fg transition mb-1.5">{property.title}</h2>
-                <div className="flex flex-wrap gap-1.5 mb-2">
-                  <span className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-bold ${property.listingType === 'RENT' ? 'bg-accent-muted border border-accent-line text-accent-fg' : 'bg-info-muted border border-info-line text-info-fg'}`}>
-                    {listingLabel(property.listingType)}
-                  </span>
-                  <span className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-bold ${
-                    property.status === 'AVAILABLE' ? 'bg-success-muted border border-success-line text-success-fg' :
-                    property.status === 'RESERVED' ? 'bg-warning-muted border border-warning-line text-warning-fg' :
-                    property.status === 'SOLD' ? 'bg-info-muted border border-info-line text-info-fg' :
-                    property.status === 'RENTED' ? 'bg-accent-muted border border-accent-line text-accent-fg' :
-                    'bg-surface-sunken border border-border text-fg-muted'
-                  }`}>
-                    {propertyStatusLabel(property.status)}
-                  </span>
-                  {property.published && (
-                    <span className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-bold bg-primary-muted border border-primary-line text-primary-fg">
-                      Publicada
-                    </span>
-                  )}
-                </div>
-                <p className="text-xs text-fg-subtle flex items-center gap-1.5">
-                  <span className="font-mono bg-surface-sunken px-1.5 py-0.5 rounded">{property.code}</span>
-                  <span>·</span>
-                  <span>{property.city}, {property.stateCode}</span>
-                </p>
               </div>
-            </div>
 
-            <div className="px-5 pb-3">
-              <div className="text-2xl font-bold text-primary-fg">{formatApiPrice(property)}</div>
-            </div>
+              <div className="px-5 pb-4 text-xl font-bold tracking-tight text-fg">{formatApiPrice(property)}</div>
 
-            {/* Features grid */}
-            <div className="grid grid-cols-5 gap-px bg-surface-sunken text-center text-xs border-y border-border">
-              <Feature icon={
-                <svg className="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-                </svg>
-              } value={property.bedrooms} label="Recámaras" />
-              <Feature icon={
-                <svg className="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 14v3m4-3v3m4-3v3M3 21h18M3 10h18M3 7l9-4 9 4M4 10h16v11H4V10z" />
-                </svg>
-              } value={property.bathrooms} label="Baños" />
-              <Feature icon={
-                <svg className="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                </svg>
-              } value={property.parkingSpaces} label="Autos" />
-              <Feature icon={
-                <svg className="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
-                </svg>
-              } value={property.landArea} label="Terreno m²" />
-              <Feature icon={
-                <svg className="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                </svg>
-              } value={property.constructionArea} label="Construcción m²" />
-            </div>
+              <dl className="grid grid-cols-5 divide-x divide-border border-y border-border text-center">
+                <Feature label="Recám." value={property.bedrooms} />
+                <Feature label="Baños" value={property.bathrooms} />
+                <Feature label="Autos" value={property.parkingSpaces} />
+                <Feature label="Terreno" value={property.landArea} />
+                <Feature label="Constr." value={property.constructionArea} />
+              </dl>
 
-            {/* Botones de acción */}
-            <div className="flex flex-col gap-2.5 p-5 mt-auto">
-              <Link to={`/app/propiedades/${property.id}/editar`}>
-                <button className="w-full inline-flex items-center justify-center gap-1.5 rounded-xl bg-primary px-3 py-2 text-xs font-semibold text-white shadow-sm shadow-indigo-600/30 transition-all hover:bg-primary-hover hover:shadow-md hover:shadow-indigo-600/40">
-                  <svg className="size-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                  </svg>
+              <div className="mt-auto p-4">
+                <Link className={buttonClasses({ variant: 'tertiary', size: 'sm', fullWidth: true })} to={`/app/propiedades/${property.id}/editar`}>
                   Editar propiedad
-                </button>
-              </Link>
-            </div>
-          </article>
-        ))}
+                </Link>
+              </div>
+            </Card>
+          );
+        })}
       </div>
+
       <QuickPropertyModal
         isOpen={quickModalOpen}
         onClose={() => setQuickModalOpen(false)}
@@ -419,14 +302,11 @@ export function PropertiesPage() {
   );
 }
 
-function Feature({ icon, value, label }: { icon: React.ReactNode; value?: number; label: string }) {
+function Feature({ value, label }: { value?: number; label: string }) {
   return (
-    <div className="bg-surface px-2 py-2.5">
-      <div className="flex items-center justify-center gap-1 mb-0.5 text-primary-fg">
-        {icon}
-        <strong className="text-base text-fg">{value ?? '-'}</strong>
-      </div>
-      <span className="block text-[9px] text-fg-subtle font-medium">{label}</span>
+    <div className="px-1 py-2.5">
+      <dd className="text-sm font-semibold tabular-nums text-fg">{value ?? '—'}</dd>
+      <dt className="text-[11px] text-fg-subtle">{label}</dt>
     </div>
   );
 }
