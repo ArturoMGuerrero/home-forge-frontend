@@ -394,7 +394,7 @@ export function NewNotificationModal({ isOpen, onClose, onSuccess }: NewNotifica
                   className={`px-4 py-2 rounded-lg border-2 transition-all text-sm font-medium ${
                     bulkRecipientType === 'LEAD'
                       ? 'border-primary bg-primary-soft text-primary-fg'
-                      : 'border-border hover:border-border-strong-strong text-fg-muted'
+                      : 'border-border hover:border-border-strong text-fg-muted'
                   }`}
                 >
                   👥 Prospectos
@@ -408,7 +408,7 @@ export function NewNotificationModal({ isOpen, onClose, onSuccess }: NewNotifica
                   className={`px-4 py-2 rounded-lg border-2 transition-all text-sm font-medium ${
                     bulkRecipientType === 'PROPERTY_OWNER'
                       ? 'border-primary bg-primary-soft text-primary-fg'
-                      : 'border-border hover:border-border-strong-strong text-fg-muted'
+                      : 'border-border hover:border-border-strong text-fg-muted'
                   }`}
                 >
                   🏠 Propietarios
@@ -432,7 +432,7 @@ export function NewNotificationModal({ isOpen, onClose, onSuccess }: NewNotifica
                   className={`px-4 py-2 rounded-lg border-2 transition-all text-sm font-medium ${
                     formData.notificationType === key
                       ? 'border-primary bg-primary-soft text-primary-fg'
-                      : 'border-border hover:border-border-strong-strong text-fg-muted'
+                      : 'border-border hover:border-border-strong text-fg-muted'
                   }`}
                 >
                   {label}
@@ -660,7 +660,7 @@ export function NewNotificationModal({ isOpen, onClose, onSuccess }: NewNotifica
                   className={`px-3 py-1.5 rounded-lg border-2 transition-all text-xs font-medium ${
                     formData.priority === key
                       ? 'border-primary bg-primary-soft text-primary-fg'
-                      : 'border-border hover:border-border-strong-strong text-fg-muted'
+                      : 'border-border hover:border-border-strong text-fg-muted'
                   }`}
                 >
                   {label}

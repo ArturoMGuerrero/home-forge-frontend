@@ -34,6 +34,8 @@ export { EmptyState } from './EmptyState';
 export { Tooltip } from './Tooltip';
 
 // Navegación
+export { Menu } from './Menu';
+export type { MenuItem } from './Menu';
 export { Tabs } from './Tabs';
 export type { Tab } from './Tabs';
 

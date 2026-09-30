@@ -1,10 +1,9 @@
 import { useEffect, useMemo, useState } from 'react';
 import toast from 'react-hot-toast';
-import { Link } from 'react-router-dom';
 import { AssignmentRule, AssignmentStrategy, createAssignmentRule, deleteAssignmentRule, listAssignmentRules, updateAssignmentRule } from '../api/assignmentRulesApi';
 import { CompanyUser, listCompanyUsers } from '../../users';
-import { Button } from '../../../shared/ui/Button';
-import { Modal } from '../../../shared/ui/Modal';
+import { Alert, Badge, Button, Card, cn, EmptyState, Input, LoadingState, Modal, PageHeader, Select, StatCard, Textarea } from '../../../shared/ui';
+import { ConfirmModal } from '../../../shared/ConfirmModal';
 import { Icon } from '../../../shared/Icon';
 
 const strategyLabels: Record<AssignmentStrategy, string> = {
@@ -12,6 +11,9 @@ const strategyLabels: Record<AssignmentStrategy, string> = {
   LEAST_ASSIGNED: 'Menor carga',
   RANDOM: 'Aleatoria'
 };
+
+const strategyOptions = Object.entries(strategyLabels).map(([value, label]) => ({ value, label }));
+const listingTypeOptions = [{ value: 'SALE', label: 'Venta' }, { value: 'RENT', label: 'Renta' }];
 
 const emptyForm = {
   name: '', description: '', priority: 10, assignmentStrategy: 'ROUND_ROBIN' as AssignmentStrategy,
@@ -25,6 +27,8 @@ export function AssignmentRulesPage() {
   const [open, setOpen] = useState(false);
   const [saving, setSaving] = useState(false);
   const [form, setForm] = useState(emptyForm);
+  const [ruleToDelete, setRuleToDelete] = useState<AssignmentRule | null>(null);
+  const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
     Promise.all([listAssignmentRules(), listCompanyUsers()])
@@ -70,56 +74,143 @@ export function AssignmentRulesPage() {
     } catch (error) { toast.error(error instanceof Error ? error.message : 'No fue posible cambiar la prioridad.'); }
   }
 
-  async function remove(rule: AssignmentRule) {
-    if (!window.confirm(`¿Eliminar la regla “${rule.name}”?`)) return;
-    try { await deleteAssignmentRule(rule.id); setRules(current => current.filter(item => item.id !== rule.id)); toast.success('Regla eliminada.'); }
-    catch (error) { toast.error(error instanceof Error ? error.message : 'No fue posible eliminar la regla.'); }
+  async function confirmRemove() {
+    if (!ruleToDelete) return;
+    setDeleting(true);
+    try {
+      await deleteAssignmentRule(ruleToDelete.id);
+      setRules(current => current.filter(item => item.id !== ruleToDelete.id));
+      toast.success('Regla eliminada.');
+      setRuleToDelete(null);
+    } catch (error) { toast.error(error instanceof Error ? error.message : 'No fue posible eliminar la regla.'); }
+    finally { setDeleting(false); }
+  }
+
+  function toggleAgent(userId: string) {
+    setForm(current => ({
+      ...current,
+      assignedUserIds: current.assignedUserIds.includes(userId)
+        ? current.assignedUserIds.filter(id => id !== userId)
+        : [...current.assignedUserIds, userId]
+    }));
   }
 
   return (
     <div className="mx-auto max-w-6xl">
-      <header className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-        <div><Link className="text-sm font-semibold text-primary-fg" to="/app/configuracion">&lt;- Volver a configuración</Link><p className="mb-1 mt-5 text-[11px] font-bold uppercase tracking-[0.16em] text-primary-fg">Automatización comercial</p><h1 className="text-3xl font-bold">Asignación de prospectos</h1><p className="mt-2 max-w-2xl text-sm text-fg-subtle">Distribuye automáticamente cada prospecto nuevo entre los agentes disponibles.</p></div>
-        <Button onClick={() => setOpen(true)}><Icon className="size-4" name="plus" />Nueva regla</Button>
-      </header>
+      <PageHeader
+        actions={<Button icon={<Icon className="size-4" name="plus" />} onClick={() => setOpen(true)}>Nueva regla</Button>}
+        backLink={{ to: '/app/configuracion', label: 'Configuración' }}
+        eyebrow="Automatización comercial"
+        subtitle="Distribuye automáticamente cada prospecto nuevo entre los agentes disponibles."
+        title="Asignación de prospectos"
+      />
 
       <section className="mb-6 grid gap-4 sm:grid-cols-3">
-        <Metric label="Reglas activas" value={rules.filter(rule => rule.active).length} />
-        <Metric label="Agentes disponibles" value={users.length} />
-        <Metric label="Estrategia recomendada" text="Turnos equilibrados" />
+        <StatCard icon={<Icon name="check" />} label="Reglas activas" tone="success" value={rules.filter(rule => rule.active).length} />
+        <StatCard icon={<Icon name="users" />} label="Agentes disponibles" tone="info" value={users.length} />
+        <StatCard icon={<Icon name="leads" />} label="Estrategia recomendada" value={<span className="text-lg">Turnos equilibrados</span>} />
       </section>
 
-      <div className="rounded-2xl border border-info-line bg-info-soft p-4 text-sm leading-6 text-info-fg"><strong>Cómo funciona:</strong> las reglas se evalúan de menor a mayor prioridad. La primera que coincida con el prospecto selecciona un agente y registra la asignación.</div>
+      <Alert title="Cómo funciona">
+        Las reglas se evalúan de menor a mayor prioridad. La primera que coincida con el prospecto selecciona un agente y registra la asignación.
+      </Alert>
 
       <section className="mt-6 space-y-3">
-        {loading && <p className="rounded-2xl border border-border bg-surface p-8 text-center text-fg-subtle">Cargando reglas...</p>}
-        {!loading && !rules.length && <div className="rounded-2xl border-2 border-dashed border-border bg-surface p-10 text-center"><Icon className="mx-auto size-9 text-fg-subtle" name="users" /><h2 className="mt-3 font-bold">Aún no hay reglas</h2><p className="mt-1 text-sm text-fg-subtle">Crea una regla general para empezar a repartir prospectos.</p><Button className="mt-5" onClick={() => setOpen(true)}>Crear primera regla</Button></div>}
+        {loading && <Card><LoadingState message="Cargando reglas..." /></Card>}
+        {!loading && !rules.length && (
+          <Card className="border-dashed">
+            <EmptyState
+              actionLabel="Crear primera regla"
+              description="Crea una regla general para empezar a repartir prospectos."
+              icon={<Icon name="users" />}
+              onAction={() => setOpen(true)}
+              title="Aún no hay reglas"
+            />
+          </Card>
+        )}
         {rules.map(rule => {
           const assignedNames = rule.assignedUserIds.split(',').map(id => userNames.get(id.trim())).filter(Boolean);
           const criteria = [rule.criteriaListingType === 'SALE' ? 'Venta' : rule.criteriaListingType === 'RENT' ? 'Renta' : '', rule.criteriaCity, rule.criteriaBudgetMin ? `Desde $${rule.criteriaBudgetMin.toLocaleString()}` : '', rule.criteriaBudgetMax ? `Hasta $${rule.criteriaBudgetMax.toLocaleString()}` : ''].filter(Boolean);
-          return <article className={`rounded-2xl border bg-surface p-5 shadow-sm transition ${rule.active ? 'border-border' : 'border-border opacity-65'}`} key={rule.id}>
-            <div className="flex flex-col gap-4 lg:flex-row lg:items-center">
-              <span className="grid size-12 shrink-0 place-items-center rounded-2xl bg-primary-muted font-black text-primary-fg">{rule.priority}</span>
-              <div className="min-w-0 flex-1"><div className="flex flex-wrap items-center gap-2"><h2 className="font-bold">{rule.name}</h2><span className={`rounded-full px-2.5 py-1 text-[10px] font-bold ${rule.active ? 'bg-success-muted text-success-fg' : 'bg-surface-sunken text-fg-muted'}`}>{rule.active ? 'ACTIVA' : 'PAUSADA'}</span></div><p className="mt-1 text-sm text-fg-subtle">{strategyLabels[rule.assignmentStrategy]} · {assignedNames.join(', ') || 'Agentes no disponibles'}</p>{criteria.length > 0 && <div className="mt-2 flex flex-wrap gap-2">{criteria.map(item => <span className="rounded-lg bg-surface-sunken px-2 py-1 text-xs font-semibold text-fg-muted" key={item}>{item}</span>)}</div>}</div>
-              <div className="flex flex-wrap gap-2"><Button aria-label="Subir prioridad" onClick={() => changePriority(rule, -1)} size="sm" variant="tertiary">↑</Button><Button aria-label="Bajar prioridad" onClick={() => changePriority(rule, 1)} size="sm" variant="tertiary">↓</Button><Button onClick={() => toggle(rule)} size="sm" variant="tertiary">{rule.active ? 'Pausar' : 'Activar'}</Button><Button onClick={() => remove(rule)} size="sm" variant="danger">Eliminar</Button></div>
-            </div>
-          </article>;
+          return (
+            <Card className={cn('p-4 sm:p-5', !rule.active && 'opacity-70')} key={rule.id}>
+              <div className="flex flex-col gap-4 lg:flex-row lg:items-center">
+                <span className="grid size-11 shrink-0 place-items-center rounded-xl bg-primary-soft text-lg font-bold text-primary-fg" title="Prioridad">{rule.priority}</span>
+                <div className="min-w-0 flex-1">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <h2 className="font-semibold text-fg">{rule.name}</h2>
+                    <Badge dot variant={rule.active ? 'success' : 'neutral'}>{rule.active ? 'Activa' : 'Pausada'}</Badge>
+                  </div>
+                  <p className="mt-1 text-sm text-fg-subtle">{strategyLabels[rule.assignmentStrategy]} · {assignedNames.join(', ') || 'Agentes no disponibles'}</p>
+                  {criteria.length > 0 && <div className="mt-2 flex flex-wrap gap-1.5">{criteria.map(item => <Badge key={item}>{item}</Badge>)}</div>}
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  <Button aria-label="Subir prioridad" onClick={() => changePriority(rule, -1)} size="sm" variant="tertiary">↑</Button>
+                  <Button aria-label="Bajar prioridad" onClick={() => changePriority(rule, 1)} size="sm" variant="tertiary">↓</Button>
+                  <Button onClick={() => toggle(rule)} size="sm" variant="tertiary">{rule.active ? 'Pausar' : 'Activar'}</Button>
+                  <Button onClick={() => setRuleToDelete(rule)} size="sm" variant="danger">Eliminar</Button>
+                </div>
+              </div>
+            </Card>
+          );
         })}
       </section>
 
-      <Modal isOpen={open} maxWidth="2xl" noPadding onClose={() => !saving && setOpen(false)} subtitle="Define cuándo y entre quiénes se distribuyen los prospectos" title="Nueva regla de asignación">
-        <div className="space-y-5 p-5 sm:p-6">
-          <div className="grid gap-4 sm:grid-cols-2"><Field label="Nombre"><input className={inputClass} onChange={e => setForm({ ...form, name: e.target.value })} placeholder="Ej. Equipo de ventas general" value={form.name} /></Field><Field label="Prioridad"><input className={inputClass} min="0" onChange={e => setForm({ ...form, priority: Number(e.target.value) })} type="number" value={form.priority} /></Field></div>
-          <Field label="Descripción"><textarea className={`${inputClass} min-h-20`} onChange={e => setForm({ ...form, description: e.target.value })} value={form.description} /></Field>
-          <div className="grid gap-4 sm:grid-cols-2"><Field label="Estrategia"><select className={inputClass} onChange={e => setForm({ ...form, assignmentStrategy: e.target.value as AssignmentStrategy })} value={form.assignmentStrategy}>{Object.entries(strategyLabels).map(([value, label]) => <option key={value} value={value}>{label}</option>)}</select></Field><Field label="Operación"><select className={inputClass} onChange={e => setForm({ ...form, criteriaListingType: e.target.value })} value={form.criteriaListingType}><option value="">Cualquier operación</option><option value="SALE">Venta</option><option value="RENT">Renta</option></select></Field><Field label="Ciudad"><input className={inputClass} onChange={e => setForm({ ...form, criteriaCity: e.target.value })} placeholder="Cualquier ciudad" value={form.criteriaCity} /></Field><div className="grid grid-cols-2 gap-2"><Field label="Presupuesto desde"><input className={inputClass} min="0" onChange={e => setForm({ ...form, criteriaBudgetMin: e.target.value })} type="number" value={form.criteriaBudgetMin} /></Field><Field label="Hasta"><input className={inputClass} min="0" onChange={e => setForm({ ...form, criteriaBudgetMax: e.target.value })} type="number" value={form.criteriaBudgetMax} /></Field></div></div>
-          <div><p className="text-sm font-semibold text-fg-muted">Agentes participantes</p><div className="mt-2 grid gap-2 sm:grid-cols-2">{users.map(user => <label className="flex cursor-pointer items-center gap-3 rounded-xl border border-border p-3 hover:border-primary-line" key={user.id}><input checked={form.assignedUserIds.includes(user.id)} className="size-4 accent-primary" onChange={() => setForm(current => ({ ...current, assignedUserIds: current.assignedUserIds.includes(user.id) ? current.assignedUserIds.filter(id => id !== user.id) : [...current.assignedUserIds, user.id] }))} type="checkbox" /><span className="min-w-0"><strong className="block truncate text-sm">{user.fullName}</strong><small className="text-fg-subtle">{user.role === 'ADMIN' ? 'Administrador' : 'Agente'}</small></span></label>)}</div></div>
-          <div className="flex flex-col-reverse gap-3 border-t border-border pt-5 sm:flex-row sm:justify-end"><Button disabled={saving} onClick={() => setOpen(false)} variant="ghost">Cancelar</Button><Button loading={saving} onClick={save}>Crear regla</Button></div>
+      <Modal
+        footer={
+          <>
+            <Button disabled={saving} onClick={() => setOpen(false)} variant="tertiary">Cancelar</Button>
+            <Button loading={saving} onClick={save}>Crear regla</Button>
+          </>
+        }
+        isOpen={open}
+        maxWidth="2xl"
+        onClose={() => !saving && setOpen(false)}
+        subtitle="Define cuándo y entre quiénes se distribuyen los prospectos"
+        title="Nueva regla de asignación"
+      >
+        <div className="space-y-5">
+          <div className="grid gap-4 sm:grid-cols-2">
+            <Input label="Nombre" onChange={e => setForm({ ...form, name: e.target.value })} placeholder="Ej. Equipo de ventas general" required value={form.name} />
+            <Input label="Prioridad" min="0" onChange={e => setForm({ ...form, priority: Number(e.target.value) })} type="number" value={form.priority} />
+          </div>
+          <Textarea className="min-h-20" label="Descripción" onChange={e => setForm({ ...form, description: e.target.value })} value={form.description} />
+          <div className="grid gap-4 sm:grid-cols-2">
+            <Select label="Estrategia" onChange={e => setForm({ ...form, assignmentStrategy: e.target.value as AssignmentStrategy })} options={strategyOptions} value={form.assignmentStrategy} />
+            <Select label="Operación" onChange={e => setForm({ ...form, criteriaListingType: e.target.value })} options={listingTypeOptions} placeholder="Cualquier operación" value={form.criteriaListingType} />
+            <Input label="Ciudad" onChange={e => setForm({ ...form, criteriaCity: e.target.value })} placeholder="Cualquier ciudad" value={form.criteriaCity} />
+            <div className="grid grid-cols-2 gap-2">
+              <Input label="Presupuesto desde" min="0" onChange={e => setForm({ ...form, criteriaBudgetMin: e.target.value })} type="number" value={form.criteriaBudgetMin} />
+              <Input label="Hasta" min="0" onChange={e => setForm({ ...form, criteriaBudgetMax: e.target.value })} type="number" value={form.criteriaBudgetMax} />
+            </div>
+          </div>
+          <fieldset>
+            <legend className="text-sm font-semibold text-fg-muted">Agentes participantes</legend>
+            <div className="mt-2 grid gap-2 sm:grid-cols-2">
+              {users.map(user => {
+                const checked = form.assignedUserIds.includes(user.id);
+                return (
+                  <label className={cn('flex cursor-pointer items-center gap-3 rounded-xl border p-3 transition', checked ? 'border-primary-line bg-primary-soft' : 'border-border hover:border-border-strong')} key={user.id}>
+                    <input checked={checked} className="size-4" onChange={() => toggleAgent(user.id)} type="checkbox" />
+                    <span className="min-w-0">
+                      <strong className="block truncate text-sm font-medium text-fg">{user.fullName}</strong>
+                      <small className="text-xs text-fg-subtle">{user.role === 'ADMIN' ? 'Administrador' : 'Agente'}</small>
+                    </span>
+                  </label>
+                );
+              })}
+            </div>
+          </fieldset>
         </div>
       </Modal>
+
+      <ConfirmModal
+        isOpen={ruleToDelete !== null}
+        loading={deleting}
+        message={<>Se eliminará la regla <strong className="text-fg">“{ruleToDelete?.name}”</strong>. Esta acción no se puede deshacer.</>}
+        onCancel={() => setRuleToDelete(null)}
+        onConfirm={confirmRemove}
+        title="¿Eliminar regla?"
+      />
     </div>
   );
 }
-
-const inputClass = 'w-full rounded-xl border border-border bg-surface px-3.5 py-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary-line';
-function Field({ children, label }: { children: React.ReactNode; label: string }) { return <label className="grid gap-2 text-sm font-semibold text-fg-muted">{label}{children}</label>; }
-function Metric({ label, text, value }: { label: string; text?: string; value?: number }) { return <div className="rounded-2xl border border-border bg-surface p-4 shadow-sm"><p className="text-xs font-semibold text-fg-subtle">{label}</p><strong className="mt-1 block text-xl text-fg">{text ?? value}</strong></div>; }
