@@ -13,6 +13,8 @@ export { SearchInput } from './SearchInput';
 export { Checkbox, CheckboxGroup, ChoiceGroup } from './Checkbox';
 export { Radio, RadioGroup } from './Radio';
 export { Switch } from './Switch';
+export { SegmentedControl } from './SegmentedControl';
+export type { SegmentedOption } from './SegmentedControl';
 export { FieldMessage, RequiredMark } from './FieldMessage';
 
 // Layout y contenedores

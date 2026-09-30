@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { ReactNode, useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 import {
   NotificationType,
@@ -12,8 +12,10 @@ import {
   notificationTypeLabels,
   notificationPriorityLabels
 } from '../api/notificationsApi';
-import { Modal } from '../../../shared/ui/Modal';
+import { Alert, Badge, Button, cn, Input, Modal, SearchInput, SegmentedControl, Select, Switch, Textarea } from '../../../shared/ui';
 import { listLeads, LeadItem } from '../../leads';
+
+const FORM_ID = 'new-notification-form';
 
 type NewNotificationModalProps = {
   isOpen: boolean;
@@ -86,7 +88,7 @@ export function NewNotificationModal({ isOpen, onClose, onSuccess }: NewNotifica
     }
   }
 
-  function handleChange(field: string, value: any) {
+  function handleChange<K extends keyof typeof formData>(field: K, value: (typeof formData)[K]) {
     setFormData(prev => ({ ...prev, [field]: value }));
   }
 
@@ -94,7 +96,7 @@ export function NewNotificationModal({ isOpen, onClose, onSuccess }: NewNotifica
     const template = templates.find(t => t.id === templateId);
     if (template) {
       setSelectedTemplate(template);
-      handleChange('notificationType', template.templateType);
+      handleChange('notificationType', template.templateType as NotificationType);
       handleChange('subject', template.subject || '');
       handleChange('content', template.content);
     } else {
@@ -343,396 +345,210 @@ export function NewNotificationModal({ isOpen, onClose, onSuccess }: NewNotifica
     );
   });
 
+  const isEmail = formData.notificationType === 'EMAIL';
+  const usesPhone = formData.notificationType === 'WHATSAPP' || formData.notificationType === 'SMS';
+  const bulkCount = bulkRecipientType === 'LEAD' ? selectedLeadIds.length : selectedOwnerIds.length;
+  const bulkNoun = bulkRecipientType === 'LEAD' ? (bulkCount === 1 ? 'prospecto' : 'prospectos') : (bulkCount === 1 ? 'propietario' : 'propietarios');
+  const contactKind = isEmail ? 'email' : 'teléfono';
+
   return (
     <Modal
+      footer={
+        <>
+          <Button onClick={handleClose} variant="tertiary">Cancelar</Button>
+          <Button disabled={isBulkMode && bulkCount === 0} form={FORM_ID} loading={saving} type="submit">
+            {saving
+              ? 'Enviando...'
+              : isBulkMode
+                ? `Enviar a ${bulkCount} ${bulkNoun}`
+                : formData.scheduledFor
+                  ? 'Programar'
+                  : 'Enviar'}
+          </Button>
+        </>
+      }
       isOpen={isOpen}
-      onClose={handleClose}
-      title="Nueva Notificación"
-      subtitle={isBulkMode ? `Envío masivo a ${bulkRecipientType === 'LEAD' ? selectedLeadIds.length + ' prospectos' : selectedOwnerIds.length + ' propietarios'}` : "Envía emails, WhatsApp, notificaciones push o SMS"}
       maxWidth="3xl"
+      onClose={handleClose}
+      subtitle={isBulkMode ? `Envío masivo a ${bulkCount} ${bulkNoun}` : 'Envía emails, WhatsApp, notificaciones push o SMS'}
+      title="Nueva notificación"
     >
-      <form onSubmit={handleSubmit} className="space-y-6">
-          {/* Toggle Individual / Masivo */}
-          <div className="flex items-center justify-between p-4 bg-surface-muted rounded-xl border border-border">
-            <div className="flex items-center gap-3">
-              <div className="grid size-10 place-items-center rounded-lg bg-surface border border-border">
-                <svg className="size-5 text-fg-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-                </svg>
-              </div>
-              <div>
-                <p className="text-sm font-semibold text-fg">Envío Masivo</p>
-                <p className="text-xs text-fg-subtle">Enviar a múltiples destinatarios a la vez</p>
-              </div>
-            </div>
-            <button
-              type="button"
-              onClick={() => setIsBulkMode(!isBulkMode)}
-              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                isBulkMode ? 'bg-primary' : 'bg-border-strong'
-              }`}
-            >
-              <span
-                className={`inline-block h-4 w-4 transform rounded-full bg-surface transition-transform ${
-                  isBulkMode ? 'translate-x-6' : 'translate-x-1'
-                }`}
-              />
-            </button>
-          </div>
+      <form className="space-y-6" id={FORM_ID} onSubmit={handleSubmit}>
+        <div className="rounded-xl border border-border bg-surface-muted p-4">
+          <Switch
+            checked={isBulkMode}
+            description="Enviar a múltiples destinatarios a la vez"
+            label="Envío masivo"
+            onChange={setIsBulkMode}
+          />
+        </div>
 
-          {/* Tipo de destinatario (solo en modo masivo) */}
-          {isBulkMode && (
-            <div>
-              <label className="block text-sm font-medium text-fg-muted mb-2">Tipo de Destinatario</label>
-              <div className="grid gap-3 sm:grid-cols-2">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setBulkRecipientType('LEAD');
-                    setSelectedOwnerIds([]);
-                  }}
-                  className={`px-4 py-2 rounded-lg border-2 transition-all text-sm font-medium ${
-                    bulkRecipientType === 'LEAD'
-                      ? 'border-primary bg-primary-soft text-primary-fg'
-                      : 'border-border hover:border-border-strong text-fg-muted'
-                  }`}
-                >
-                  👥 Prospectos
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setBulkRecipientType('PROPERTY_OWNER');
-                    setSelectedLeadIds([]);
-                  }}
-                  className={`px-4 py-2 rounded-lg border-2 transition-all text-sm font-medium ${
-                    bulkRecipientType === 'PROPERTY_OWNER'
-                      ? 'border-primary bg-primary-soft text-primary-fg'
-                      : 'border-border hover:border-border-strong text-fg-muted'
-                  }`}
-                >
-                  🏠 Propietarios
-                </button>
-              </div>
-            </div>
-          )}
+        {isBulkMode && (
+          <SegmentedControl
+            fullWidth
+            label="Tipo de destinatario"
+            onChange={value => {
+              setBulkRecipientType(value);
+              if (value === 'LEAD') setSelectedOwnerIds([]);
+              else setSelectedLeadIds([]);
+            }}
+            options={[{ value: 'LEAD', label: 'Prospectos' }, { value: 'PROPERTY_OWNER', label: 'Propietarios' }]}
+            value={bulkRecipientType}
+          />
+        )}
 
-          {/* Tipo de notificación */}
+        <SegmentedControl
+          fullWidth
+          label="Canal"
+          onChange={value => {
+            handleChange('notificationType', value);
+            setSelectedTemplate(null);
+          }}
+          options={(Object.entries(notificationTypeLabels) as Array<[NotificationType, string]>).map(([value, label]) => ({ value, label }))}
+          value={formData.notificationType}
+        />
+
+        {filteredTemplates.length > 0 && (
+          <Select
+            label="Plantilla (opcional)"
+            onChange={e => handleTemplateSelect(e.target.value)}
+            options={filteredTemplates.map(template => ({ value: template.id, label: template.name }))}
+            placeholder="Sin plantilla"
+            value={selectedTemplate?.id || ''}
+          />
+        )}
+
+        {isBulkMode ? (
           <div>
-            <label className="block text-sm font-medium text-fg-muted mb-2">Tipo *</label>
-            <div className="grid gap-3 sm:grid-cols-2">
-              {Object.entries(notificationTypeLabels).map(([key, label]) => (
-                <button
-                  key={key}
-                  type="button"
-                  onClick={() => {
-                    handleChange('notificationType', key as NotificationType);
-                    setSelectedTemplate(null);
-                  }}
-                  className={`px-4 py-2 rounded-lg border-2 transition-all text-sm font-medium ${
-                    formData.notificationType === key
-                      ? 'border-primary bg-primary-soft text-primary-fg'
-                      : 'border-border hover:border-border-strong text-fg-muted'
-                  }`}
-                >
-                  {label}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Plantilla */}
-          {filteredTemplates.length > 0 && (
-            <div>
-              <label className="block text-sm font-medium text-fg-muted mb-2">Plantilla (opcional)</label>
-              <select
-                value={selectedTemplate?.id || ''}
-                onChange={e => handleTemplateSelect(e.target.value)}
-                className="w-full px-3 py-2 border border-border-strong rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent text-sm"
+            {bulkRecipientType === 'LEAD' ? (
+              <RecipientPicker
+                allSelected={filteredLeads.length > 0 && selectedLeadIds.length === filteredLeads.length}
+                emptyLabel="No hay prospectos disponibles"
+                label={`Prospectos (${selectedLeadIds.length} seleccionados)`}
+                onSearch={setSearchLead}
+                onToggleAll={toggleAllLeads}
+                search={searchLead}
+                searchPlaceholder="Buscar por nombre, email o teléfono..."
               >
-                <option value="">Sin plantilla</option>
-                {filteredTemplates.map(template => (
-                  <option key={template.id} value={template.id}>
-                    {template.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-          )}
+                {filteredLeads.map(lead => {
+                  const contact = isEmail ? lead.email : lead.phoneE164;
+                  return (
+                    <RecipientRow
+                      checked={selectedLeadIds.includes(lead.id)}
+                      detail={contact || 'Sin contacto'}
+                      disabledReason={contact ? undefined : `Sin ${contactKind}`}
+                      key={lead.id}
+                      name={`${lead.firstName} ${lead.lastName}`}
+                      onToggle={() => toggleLeadSelection(lead.id)}
+                    />
+                  );
+                })}
+              </RecipientPicker>
+            ) : (
+              <RecipientPicker
+                allSelected={filteredOwners.length > 0 && selectedOwnerIds.length === filteredOwners.length}
+                emptyLabel="No hay propietarios con información de contacto"
+                label={`Propietarios (${selectedOwnerIds.length} seleccionados)`}
+                onSearch={setSearchOwner}
+                onToggleAll={toggleAllOwners}
+                search={searchOwner}
+                searchPlaceholder="Buscar por nombre, propiedad, email o teléfono..."
+              >
+                {filteredOwners.map(owner => {
+                  const contact = isEmail ? owner.ownerEmail : owner.ownerPhone;
+                  return (
+                    <RecipientRow
+                      checked={selectedOwnerIds.includes(owner.propertyId)}
+                      detail={`${contact || 'Sin contacto'} · ${owner.propertyCode} · ${owner.propertyTitle}`}
+                      disabledReason={contact ? undefined : `Sin ${contactKind}`}
+                      key={owner.propertyId}
+                      name={owner.ownerName || 'Sin nombre'}
+                      onToggle={() => toggleOwnerSelection(owner.propertyId)}
+                    />
+                  );
+                })}
+              </RecipientPicker>
+            )}
 
-          {/* Destinatarios */}
-          {isBulkMode ? (
-            <div>
-              {bulkRecipientType === 'LEAD' ? (
-                <>
-                  <div className="flex items-center justify-between mb-3">
-                    <label className="block text-sm font-medium text-fg-muted">
-                      Prospectos ({selectedLeadIds.length} seleccionados)
-                    </label>
-                    <button
-                      type="button"
-                      onClick={toggleAllLeads}
-                      className="text-xs font-medium text-primary-fg hover:underline"
-                    >
-                      {selectedLeadIds.length === filteredLeads.length ? 'Deseleccionar todos' : 'Seleccionar todos'}
-                    </button>
-                  </div>
-
-                  <input
-                    type="text"
-                    value={searchLead}
-                    onChange={e => setSearchLead(e.target.value)}
-                    placeholder="Buscar por nombre, email o teléfono..."
-                    className="w-full px-3 py-2 mb-3 border border-border-strong rounded-lg focus:ring-2 focus:ring-primary text-sm"
-                  />
-
-                  <div className="max-h-64 overflow-y-auto border border-border rounded-lg divide-y divide-border">
-                    {filteredLeads.length === 0 ? (
-                      <div className="p-4 text-center text-sm text-fg-subtle">
-                        No hay prospectos disponibles
-                      </div>
-                    ) : (
-                      filteredLeads.map(lead => {
-                        const canReceive = formData.notificationType === 'EMAIL' ? lead.email : lead.phoneE164;
-                        return (
-                          <label
-                            key={lead.id}
-                            className={`flex items-center gap-3 p-3 hover:bg-surface-muted cursor-pointer ${
-                              !canReceive ? 'opacity-50' : ''
-                            }`}
-                          >
-                            <input
-                              type="checkbox"
-                              checked={selectedLeadIds.includes(lead.id)}
-                              onChange={() => toggleLeadSelection(lead.id)}
-                              disabled={!canReceive}
-                              className="rounded border-border-strong text-primary-fg focus:ring-primary"
-                            />
-                            <div className="flex-1 min-w-0">
-                              <p className="text-sm font-medium text-fg truncate">
-                                {lead.firstName} {lead.lastName}
-                              </p>
-                              <p className="text-xs text-fg-subtle truncate">
-                                {formData.notificationType === 'EMAIL' ? lead.email : lead.phoneE164 || 'Sin contacto'}
-                              </p>
-                            </div>
-                            {!canReceive && (
-                              <span className="text-xs text-warning-fg font-medium">
-                                Sin {formData.notificationType === 'EMAIL' ? 'email' : 'teléfono'}
-                              </span>
-                            )}
-                          </label>
-                        );
-                      })
-                    )}
-                  </div>
-                </>
-              ) : (
-                <>
-                  <div className="flex items-center justify-between mb-3">
-                    <label className="block text-sm font-medium text-fg-muted">
-                      Propietarios ({selectedOwnerIds.length} seleccionados)
-                    </label>
-                    <button
-                      type="button"
-                      onClick={toggleAllOwners}
-                      className="text-xs font-medium text-primary-fg hover:underline"
-                    >
-                      {selectedOwnerIds.length === filteredOwners.length ? 'Deseleccionar todos' : 'Seleccionar todos'}
-                    </button>
-                  </div>
-
-                  <input
-                    type="text"
-                    value={searchOwner}
-                    onChange={e => setSearchOwner(e.target.value)}
-                    placeholder="Buscar por nombre, propiedad, email o teléfono..."
-                    className="w-full px-3 py-2 mb-3 border border-border-strong rounded-lg focus:ring-2 focus:ring-primary text-sm"
-                  />
-
-                  <div className="max-h-64 overflow-y-auto border border-border rounded-lg divide-y divide-border">
-                    {filteredOwners.length === 0 ? (
-                      <div className="p-4 text-center text-sm text-fg-subtle">
-                        No hay propietarios con información de contacto
-                      </div>
-                    ) : (
-                      filteredOwners.map(owner => {
-                        const canReceive = formData.notificationType === 'EMAIL' ? owner.ownerEmail : owner.ownerPhone;
-                        return (
-                          <label
-                            key={owner.propertyId}
-                            className={`flex items-center gap-3 p-3 hover:bg-surface-muted cursor-pointer ${
-                              !canReceive ? 'opacity-50' : ''
-                            }`}
-                          >
-                            <input
-                              type="checkbox"
-                              checked={selectedOwnerIds.includes(owner.propertyId)}
-                              onChange={() => toggleOwnerSelection(owner.propertyId)}
-                              disabled={!canReceive}
-                              className="rounded border-border-strong text-primary-fg focus:ring-primary"
-                            />
-                            <div className="flex-1 min-w-0">
-                              <p className="text-sm font-medium text-fg truncate">
-                                {owner.ownerName || 'Sin nombre'}
-                              </p>
-                              <p className="text-xs text-fg-subtle truncate">
-                                {formData.notificationType === 'EMAIL' ? owner.ownerEmail : owner.ownerPhone || 'Sin contacto'} • {owner.propertyCode}
-                              </p>
-                              <p className="text-xs text-fg-subtle truncate">
-                                {owner.propertyTitle}
-                              </p>
-                            </div>
-                            {!canReceive && (
-                              <span className="text-xs text-warning-fg font-medium">
-                                Sin {formData.notificationType === 'EMAIL' ? 'email' : 'teléfono'}
-                              </span>
-                            )}
-                          </label>
-                        );
-                      })
-                    )}
-                  </div>
-                </>
-              )}
-
-              {/* Variables disponibles */}
-              <div className="mt-3 p-3 bg-primary-soft rounded-lg border border-primary-line">
-                <p className="text-xs font-semibold text-primary-fg mb-1">💡 Variables disponibles:</p>
-                <p className="text-xs text-primary-fg">
-                  {'{nombre}'}, {'{apellido}'}, {'{email}'}, {'{telefono}'}, {'{empresa}'}, {'{origen}'}
-                </p>
-              </div>
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-fg-muted mb-2">Nombre *</label>
-                <input
-                  type="text"
-                  required
-                  value={formData.recipientName}
-                  onChange={e => handleChange('recipientName', e.target.value)}
-                  className="w-full px-3 py-2 border border-border-strong rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent text-sm"
-                  placeholder="Juan Pérez"
-                />
-              </div>
-
-              {formData.notificationType === 'EMAIL' && (
-                <div>
-                  <label className="block text-sm font-medium text-fg-muted mb-2">Email *</label>
-                  <input
-                    type="email"
-                    required
-                    value={formData.recipientEmail}
-                    onChange={e => handleChange('recipientEmail', e.target.value)}
-                    className="w-full px-3 py-2 border border-border-strong rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent text-sm"
-                    placeholder="ejemplo@email.com"
-                  />
-                </div>
-              )}
-
-              {(formData.notificationType === 'WHATSAPP' || formData.notificationType === 'SMS') && (
-                <div>
-                  <label className="block text-sm font-medium text-fg-muted mb-2">Teléfono *</label>
-                  <input
-                    type="tel"
-                    required
-                    value={formData.recipientPhone}
-                    onChange={e => handleChange('recipientPhone', e.target.value)}
-                    className="w-full px-3 py-2 border border-border-strong rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent text-sm"
-                    placeholder="+52 614 123 4567"
-                  />
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* Prioridad */}
-          <div>
-            <label className="block text-sm font-medium text-fg-muted mb-2">Prioridad</label>
-            <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
-              {Object.entries(notificationPriorityLabels).map(([key, label]) => (
-                <button
-                  key={key}
-                  type="button"
-                  onClick={() => handleChange('priority', key as NotificationPriority)}
-                  className={`px-3 py-1.5 rounded-lg border-2 transition-all text-xs font-medium ${
-                    formData.priority === key
-                      ? 'border-primary bg-primary-soft text-primary-fg'
-                      : 'border-border hover:border-border-strong text-fg-muted'
-                  }`}
-                >
-                  {label}
-                </button>
-              ))}
-            </div>
+            <Alert className="mt-3" title="Variables disponibles">
+              <code className="text-xs">
+                {bulkRecipientType === 'LEAD'
+                  ? '{nombre}, {apellido}, {email}, {telefono}, {empresa}, {origen}'
+                  : '{nombreDueno}, {emailDueno}, {telefonoDueno}, {propiedad}, {codigoPropiedad}'}
+              </code>
+            </Alert>
           </div>
-
-          {/* Asunto (emails) */}
-          {formData.notificationType === 'EMAIL' && (
-            <div>
-              <label className="block text-sm font-medium text-fg-muted mb-2">Asunto *</label>
-              <input
-                type="text"
-                required
-                value={formData.subject}
-                onChange={e => handleChange('subject', e.target.value)}
-                className="w-full px-3 py-2 border border-border-strong rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent text-sm"
-                placeholder="Información sobre tu propiedad"
-              />
-            </div>
-          )}
-
-          {/* Mensaje */}
-          <div>
-            <label className="block text-sm font-medium text-fg-muted mb-2">Mensaje *</label>
-            <textarea
-              required
-              value={formData.content}
-              onChange={e => handleChange('content', e.target.value)}
-              rows={6}
-              className="w-full px-3 py-2 border border-border-strong rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent text-sm"
-              placeholder="Escribe tu mensaje aquí..."
-            />
+        ) : (
+          <div className="grid gap-4 md:grid-cols-2">
+            <Input label="Nombre" onChange={e => handleChange('recipientName', e.target.value)} placeholder="Juan Pérez" required value={formData.recipientName} />
+            {isEmail && (
+              <Input label="Email" onChange={e => handleChange('recipientEmail', e.target.value)} placeholder="ejemplo@email.com" required type="email" value={formData.recipientEmail} />
+            )}
+            {usesPhone && (
+              <Input label="Teléfono" onChange={e => handleChange('recipientPhone', e.target.value)} placeholder="+52 614 123 4567" required type="tel" value={formData.recipientPhone} />
+            )}
           </div>
+        )}
 
-          {/* Programar */}
-          <div>
-            <label className="block text-sm font-medium text-fg-muted mb-2">Programar envío (opcional)</label>
-            <input
-              type="datetime-local"
-              value={formData.scheduledFor}
-              onChange={e => handleChange('scheduledFor', e.target.value)}
-              className="w-full px-3 py-2 border border-border-strong rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent text-sm"
-            />
-          </div>
+        <SegmentedControl
+          label="Prioridad"
+          onChange={value => handleChange('priority', value)}
+          options={(Object.entries(notificationPriorityLabels) as Array<[NotificationPriority, string]>).map(([value, label]) => ({ value, label }))}
+          size="sm"
+          value={formData.priority}
+        />
 
-          {/* Botones */}
-          <div className="flex gap-3 pt-4 border-t border-border">
-            <button
-              type="button"
-              onClick={handleClose}
-              className="flex-1 px-4 py-2 border border-border-strong text-fg-muted rounded-lg hover:bg-surface-muted transition-colors font-medium"
-            >
-              Cancelar
-            </button>
-            <button
-              type="submit"
-              disabled={saving || (isBulkMode && selectedLeadIds.length === 0)}
-              className="flex-1 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-hover transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {saving
-                ? 'Enviando...'
-                : isBulkMode
-                  ? `Enviar a ${selectedLeadIds.length} prospectos`
-                  : formData.scheduledFor
-                    ? 'Programar'
-                    : 'Enviar'
-              }
-            </button>
-          </div>
-        </form>
+        {isEmail && (
+          <Input label="Asunto" onChange={e => handleChange('subject', e.target.value)} placeholder="Información sobre tu propiedad" required value={formData.subject} />
+        )}
+
+        <Textarea label="Mensaje" onChange={e => handleChange('content', e.target.value)} placeholder="Escribe tu mensaje aquí..." required rows={6} value={formData.content} />
+
+        <Input containerClassName="sm:max-w-xs" label="Programar envío (opcional)" onChange={e => handleChange('scheduledFor', e.target.value)} type="datetime-local" value={formData.scheduledFor} />
+      </form>
     </Modal>
+  );
+}
+
+function RecipientPicker({ label, allSelected, onToggleAll, search, onSearch, searchPlaceholder, emptyLabel, children }: {
+  label: string;
+  allSelected: boolean;
+  onToggleAll: () => void;
+  search: string;
+  onSearch: (value: string) => void;
+  searchPlaceholder: string;
+  emptyLabel: string;
+  children: ReactNode[];
+}) {
+  return (
+    <fieldset>
+      <div className="mb-2 flex items-center justify-between gap-3">
+        <legend className="text-sm font-semibold text-fg-muted">{label}</legend>
+        <Button onClick={onToggleAll} size="sm" variant="ghost">{allSelected ? 'Deseleccionar todos' : 'Seleccionar todos'}</Button>
+      </div>
+      <SearchInput aria-label={searchPlaceholder} containerClassName="mb-2" onChange={e => onSearch(e.target.value)} onClear={() => onSearch('')} placeholder={searchPlaceholder} value={search} />
+      <div className="max-h-64 divide-y divide-border overflow-y-auto rounded-xl border border-border">
+        {children.length === 0 ? <p className="p-4 text-center text-sm text-fg-subtle">{emptyLabel}</p> : children}
+      </div>
+    </fieldset>
+  );
+}
+
+function RecipientRow({ name, detail, checked, disabledReason, onToggle }: {
+  name: string;
+  detail: string;
+  checked: boolean;
+  disabledReason?: string;
+  onToggle: () => void;
+}) {
+  return (
+    <label className={cn('flex items-center gap-3 px-3 py-2.5', disabledReason ? 'cursor-not-allowed opacity-50' : 'cursor-pointer hover:bg-surface-muted')}>
+      <input checked={checked} className="size-4" disabled={Boolean(disabledReason)} onChange={onToggle} type="checkbox" />
+      <span className="min-w-0 flex-1">
+        <span className="block truncate text-sm font-medium text-fg">{name}</span>
+        <span className="block truncate text-xs text-fg-subtle">{detail}</span>
+      </span>
+      {disabledReason && <Badge variant="warning">{disabledReason}</Badge>}
+    </label>
   );
 }
