@@ -24,15 +24,16 @@ type AreaChartProps = {
   height?: number;
 };
 
+// Recharts recibe colores como atributos SVG (no admiten var()), por eso se replican los tokens de index.css.
 function useChartPalette() {
   const { theme } = useTheme();
   if (theme === 'light') {
     return { grid: '#e2e8f0', tick: '#64748b', axis: '#cbd5e1', tooltip: '#ffffff', tooltipText: '#0f172a', tooltipBorder: '#e2e8f0' };
   }
   if (theme === 'dark') {
-    return { grid: '#334155', tick: '#cbd5e1', axis: '#475569', tooltip: '#1e293b', tooltipText: '#f8fafc', tooltipBorder: '#475569' };
+    return { grid: '#243049', tick: '#94a3b8', axis: '#364560', tooltip: '#131c2e', tooltipText: '#f1f5f9', tooltipBorder: '#364560' };
   }
-  return { grid: '#2a2a34', tick: '#d4d4e1', axis: '#3f3f4d', tooltip: '#1b1c26', tooltipText: '#f5f5fa', tooltipBorder: '#353544' };
+  return { grid: '#232329', tick: '#a1a1aa', axis: '#383842', tooltip: '#121216', tooltipText: '#f4f4f5', tooltipBorder: '#383842' };
 }
 
 export function TrendLineChart({ data, lines, height = 300 }: LineChartProps) {

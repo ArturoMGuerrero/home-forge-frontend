@@ -2,10 +2,11 @@ import { useState, useEffect } from 'react';
 import { getDashboardMetrics, DashboardMetrics, DateRange, dateRangeLabels } from '../api/dashboardApi';
 import { getSession } from '../../auth';
 import { listProperties, ApiProperty } from '../../properties';
-import { listLeads, LeadItem } from '../../leads';
+import { listLeads, LeadItem, LeadStatus, leadStatusLabels } from '../../leads';
 import { exportToExcel } from '../../../shared/excelExport';
 import toast from 'react-hot-toast';
-import { Button, Select, Spinner } from '../../../shared/ui';
+import { Icon, IconName } from '../../../shared/Icon';
+import { Alert, Button, Card, CardWithHeader, LoadingState, PageHeader, Select, StatCard } from '../../../shared/ui';
 
 const money = new Intl.NumberFormat('es-MX', {
   style: 'currency',
@@ -135,132 +136,95 @@ export function ReportsPage() {
   }
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <Spinner size="lg" />
-      </div>
-    );
+    return <Card><LoadingState message="Cargando reportes..." /></Card>;
   }
 
   if (!metrics) {
-    return <div className="rounded-3xl border border-danger-line bg-danger-soft p-12 text-center text-sm text-danger-fg">No se pudieron cargar los datos</div>;
+    return <Alert variant="error">No se pudieron cargar los datos.</Alert>;
   }
 
   return (
     <>
-      <header className="mb-8">
-        <p className="mb-1 text-[11px] font-bold uppercase tracking-[0.16em] text-primary-fg">Reportes</p>
-        <h1 className="text-3xl font-bold">Reportes y Análisis</h1>
-        <p className="mt-2 text-sm text-fg-subtle">Exporta y analiza datos de tu operación inmobiliaria</p>
-      </header>
+      <PageHeader
+        actions={
+          <Select
+            aria-label="Período del reporte"
+            containerClassName="w-56"
+            onChange={e => setDateRange(e.target.value as DateRange)}
+            options={(Object.keys(dateRangeLabels) as DateRange[]).filter(key => key !== 'custom').map(key => ({ value: key, label: dateRangeLabels[key] }))}
+            value={dateRange}
+          />
+        }
+        subtitle={`Del ${new Date(metrics.startDate).toLocaleDateString('es-MX')} al ${new Date(metrics.endDate).toLocaleDateString('es-MX')}`}
+        title="Reportes y análisis"
+      />
 
-      {/* Selector de rango */}
-      <section className="mb-6 rounded-2xl border border-border bg-surface p-6 shadow-sm">
-        <Select
-          label="Período del reporte"
-          value={dateRange}
-          onChange={e => setDateRange(e.target.value as DateRange)}
-        >
-          {(Object.keys(dateRangeLabels) as DateRange[]).filter(key => key !== 'custom').map(key => (
-            <option key={key} value={key}>{dateRangeLabels[key]}</option>
-          ))}
-        </Select>
-        <p className="mt-2 text-xs text-fg-subtle">
-          Del {new Date(metrics.startDate).toLocaleDateString('es-MX')} al {new Date(metrics.endDate).toLocaleDateString('es-MX')}
-        </p>
+      <section className="mb-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <StatCard icon={<Icon name="currency" />} label="Valor vendido" tone="primary" value={money.format(metrics.soldValue)} />
+        <StatCard icon={<Icon name="properties" />} label="Propiedades vendidas" tone="success" value={metrics.soldProperties} />
+        <StatCard icon={<Icon name="leads" />} label="Leads cerrados" tone="info" value={metrics.closedLeads} />
+        <StatCard icon={<Icon name="finance" />} label="Tasa de cierre" tone="accent" value={`${metrics.leadToClosedRate.toFixed(1)}%`} />
       </section>
 
-      {/* Resumen ejecutivo */}
-      <section className="mb-6 rounded-2xl border border-border bg-gradient-to-br from-indigo-600 to-violet-600 p-8 text-white shadow-lg">
-        <h2 className="text-2xl font-bold">Resumen Ejecutivo</h2>
-        <p className="mt-1 text-sm text-indigo-100">Indicadores clave de tu negocio</p>
-
-        <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          <StatCard label="Valor vendido" value={money.format(metrics.soldValue)} />
-          <StatCard label="Propiedades vendidas" value={metrics.soldProperties.toString()} />
-          <StatCard label="Leads cerrados" value={metrics.closedLeads.toString()} />
-          <StatCard label="Tasa de cierre" value={`${metrics.leadToClosedRate.toFixed(1)}%`} />
-        </div>
-      </section>
-
-      {/* Reportes disponibles */}
-      <div className="grid gap-6 lg:grid-cols-2">
+      <div className="grid gap-4 md:grid-cols-2">
         <ReportCard
-          icon="📊"
-          title="Reporte de Ventas"
           description="Ventas diarias, valores y conversiones"
+          icon="currency"
+          onExport={exportSalesReport}
           stats={[
             { label: 'Propiedades vendidas', value: metrics.soldProperties },
             { label: 'Valor total', value: money.format(metrics.soldValue) }
           ]}
-          onExport={exportSalesReport}
+          title="Reporte de ventas"
         />
-
         <ReportCard
-          icon="🏠"
-          title="Reporte de Propiedades"
           description="Listado completo de inventario"
+          icon="properties"
+          onExport={exportPropertiesReport}
           stats={[
             { label: 'Total propiedades', value: properties.length },
             { label: 'Activas en venta', value: metrics.activeSales }
           ]}
-          onExport={exportPropertiesReport}
+          title="Reporte de propiedades"
         />
-
         <ReportCard
-          icon="👥"
-          title="Reporte de Leads"
           description="Base de datos completa de prospectos"
+          icon="leads"
+          onExport={exportLeadsReport}
           stats={[
             { label: 'Total leads', value: leads.length },
             { label: 'Activos', value: metrics.openLeads }
           ]}
-          onExport={exportLeadsReport}
+          title="Reporte de leads"
         />
-
         <ReportCard
-          icon="📈"
-          title="Reporte Completo"
           description="Resumen ejecutivo de todas las métricas"
+          icon="reports"
+          onExport={exportFullReport}
           stats={[
             { label: 'Período', value: dateRangeLabels[dateRange] },
             { label: 'Tasa de cierre', value: `${metrics.leadToClosedRate.toFixed(1)}%` }
           ]}
-          onExport={exportFullReport}
+          title="Reporte completo"
         />
       </div>
 
-      {/* Métricas detalladas */}
-      <section className="mt-6 rounded-2xl border border-border bg-surface p-6 shadow-sm">
-        <h2 className="mb-4 text-xl font-bold">Desglose por Estado</h2>
-
-        <div className="mb-6">
-          <h3 className="mb-3 text-sm font-semibold text-fg-muted">Leads por Estado</h3>
-          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-            {Object.entries(metrics.leadsByStatus).map(([status, count]) => (
-              <div key={status} className="rounded-xl border border-border bg-surface-muted p-3">
-                <strong className="block text-2xl">{count}</strong>
-                <span className="text-xs text-fg-muted">{status}</span>
-              </div>
-            ))}
-          </div>
+      <CardWithHeader className="mt-6" subtitle="Distribución de prospectos en el período" title="Leads por etapa">
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          {Object.entries(metrics.leadsByStatus).map(([status, count]) => (
+            <div className="rounded-xl bg-surface-muted p-3.5" key={status}>
+              <strong className="block text-2xl font-bold tabular-nums text-fg">{count}</strong>
+              <span className="text-sm text-fg-subtle">{leadStatusLabels[status as LeadStatus] ?? status}</span>
+            </div>
+          ))}
         </div>
-      </section>
+      </CardWithHeader>
     </>
   );
 }
 
-function StatCard({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="rounded-xl bg-white/10 p-4 backdrop-blur">
-      <span className="text-sm text-indigo-100">{label}</span>
-      <strong className="mt-1 block text-2xl">{value}</strong>
-    </div>
-  );
-}
-
 type ReportCardProps = {
-  icon: string;
+  icon: IconName;
   title: string;
   description: string;
   stats: { label: string; value: string | number }[];
@@ -269,36 +233,35 @@ type ReportCardProps = {
 
 function ReportCard({ icon, title, description, stats, onExport }: ReportCardProps) {
   return (
-    <article className="rounded-2xl border border-border bg-surface p-6 shadow-sm">
-      <div className="mb-4 flex items-start justify-between">
+    <Card className="flex flex-col">
+      <div className="flex items-start gap-3">
+        <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-primary-soft text-primary-fg">
+          <Icon className="size-5" name={icon} />
+        </span>
         <div>
-          <span className="text-3xl">{icon}</span>
-          <h3 className="mt-2 text-lg font-bold">{title}</h3>
+          <h3 className="font-semibold text-fg">{title}</h3>
           <p className="text-sm text-fg-subtle">{description}</p>
         </div>
       </div>
 
-      <div className="mb-4 space-y-2">
+      <dl className="my-5 space-y-2 text-sm">
         {stats.map(stat => (
-          <div key={stat.label} className="flex justify-between text-sm">
-            <span className="text-fg-muted">{stat.label}</span>
-            <strong className="text-fg">{stat.value}</strong>
+          <div className="flex justify-between gap-3" key={stat.label}>
+            <dt className="text-fg-subtle">{stat.label}</dt>
+            <dd className="font-semibold tabular-nums text-fg">{stat.value}</dd>
           </div>
         ))}
-      </div>
+      </dl>
 
       <Button
-        onClick={onExport}
-        variant="primary"
+        className="mt-auto"
         fullWidth
-        icon={
-          <svg className="size-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-          </svg>
-        }
+        icon={<svg aria-hidden="true" className="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>}
+        onClick={onExport}
+        variant="tertiary"
       >
         Exportar a Excel
       </Button>
-    </article>
+    </Card>
   );
 }
