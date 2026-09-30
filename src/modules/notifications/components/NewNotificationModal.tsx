@@ -353,27 +353,27 @@ export function NewNotificationModal({ isOpen, onClose, onSuccess }: NewNotifica
     >
       <form onSubmit={handleSubmit} className="space-y-6">
           {/* Toggle Individual / Masivo */}
-          <div className="flex items-center justify-between p-4 bg-slate-50 rounded-xl border border-slate-200">
+          <div className="flex items-center justify-between p-4 bg-surface-muted rounded-xl border border-border">
             <div className="flex items-center gap-3">
-              <div className="grid size-10 place-items-center rounded-lg bg-white border border-slate-200">
-                <svg className="size-5 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="grid size-10 place-items-center rounded-lg bg-surface border border-border">
+                <svg className="size-5 text-fg-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
                 </svg>
               </div>
               <div>
-                <p className="text-sm font-semibold text-slate-900">Envío Masivo</p>
-                <p className="text-xs text-slate-500">Enviar a múltiples destinatarios a la vez</p>
+                <p className="text-sm font-semibold text-fg">Envío Masivo</p>
+                <p className="text-xs text-fg-subtle">Enviar a múltiples destinatarios a la vez</p>
               </div>
             </div>
             <button
               type="button"
               onClick={() => setIsBulkMode(!isBulkMode)}
               className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                isBulkMode ? 'bg-indigo-600' : 'bg-slate-300'
+                isBulkMode ? 'bg-primary' : 'bg-border-strong'
               }`}
             >
               <span
-                className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                className={`inline-block h-4 w-4 transform rounded-full bg-surface transition-transform ${
                   isBulkMode ? 'translate-x-6' : 'translate-x-1'
                 }`}
               />
@@ -383,7 +383,7 @@ export function NewNotificationModal({ isOpen, onClose, onSuccess }: NewNotifica
           {/* Tipo de destinatario (solo en modo masivo) */}
           {isBulkMode && (
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-2">Tipo de Destinatario</label>
+              <label className="block text-sm font-medium text-fg-muted mb-2">Tipo de Destinatario</label>
               <div className="grid gap-3 sm:grid-cols-2">
                 <button
                   type="button"
@@ -393,8 +393,8 @@ export function NewNotificationModal({ isOpen, onClose, onSuccess }: NewNotifica
                   }}
                   className={`px-4 py-2 rounded-lg border-2 transition-all text-sm font-medium ${
                     bulkRecipientType === 'LEAD'
-                      ? 'border-indigo-500 bg-indigo-50 text-indigo-700'
-                      : 'border-slate-200 hover:border-slate-300 text-slate-600'
+                      ? 'border-primary bg-primary-soft text-primary-fg'
+                      : 'border-border hover:border-border-strong-strong text-fg-muted'
                   }`}
                 >
                   👥 Prospectos
@@ -407,8 +407,8 @@ export function NewNotificationModal({ isOpen, onClose, onSuccess }: NewNotifica
                   }}
                   className={`px-4 py-2 rounded-lg border-2 transition-all text-sm font-medium ${
                     bulkRecipientType === 'PROPERTY_OWNER'
-                      ? 'border-indigo-500 bg-indigo-50 text-indigo-700'
-                      : 'border-slate-200 hover:border-slate-300 text-slate-600'
+                      ? 'border-primary bg-primary-soft text-primary-fg'
+                      : 'border-border hover:border-border-strong-strong text-fg-muted'
                   }`}
                 >
                   🏠 Propietarios
@@ -419,7 +419,7 @@ export function NewNotificationModal({ isOpen, onClose, onSuccess }: NewNotifica
 
           {/* Tipo de notificación */}
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-2">Tipo *</label>
+            <label className="block text-sm font-medium text-fg-muted mb-2">Tipo *</label>
             <div className="grid gap-3 sm:grid-cols-2">
               {Object.entries(notificationTypeLabels).map(([key, label]) => (
                 <button
@@ -431,8 +431,8 @@ export function NewNotificationModal({ isOpen, onClose, onSuccess }: NewNotifica
                   }}
                   className={`px-4 py-2 rounded-lg border-2 transition-all text-sm font-medium ${
                     formData.notificationType === key
-                      ? 'border-indigo-500 bg-indigo-50 text-indigo-700'
-                      : 'border-slate-200 hover:border-slate-300 text-slate-600'
+                      ? 'border-primary bg-primary-soft text-primary-fg'
+                      : 'border-border hover:border-border-strong-strong text-fg-muted'
                   }`}
                 >
                   {label}
@@ -444,11 +444,11 @@ export function NewNotificationModal({ isOpen, onClose, onSuccess }: NewNotifica
           {/* Plantilla */}
           {filteredTemplates.length > 0 && (
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-2">Plantilla (opcional)</label>
+              <label className="block text-sm font-medium text-fg-muted mb-2">Plantilla (opcional)</label>
               <select
                 value={selectedTemplate?.id || ''}
                 onChange={e => handleTemplateSelect(e.target.value)}
-                className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm"
+                className="w-full px-3 py-2 border border-border-strong rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent text-sm"
               >
                 <option value="">Sin plantilla</option>
                 {filteredTemplates.map(template => (
@@ -466,13 +466,13 @@ export function NewNotificationModal({ isOpen, onClose, onSuccess }: NewNotifica
               {bulkRecipientType === 'LEAD' ? (
                 <>
                   <div className="flex items-center justify-between mb-3">
-                    <label className="block text-sm font-medium text-slate-700">
+                    <label className="block text-sm font-medium text-fg-muted">
                       Prospectos ({selectedLeadIds.length} seleccionados)
                     </label>
                     <button
                       type="button"
                       onClick={toggleAllLeads}
-                      className="text-xs font-medium text-indigo-600 hover:text-indigo-700"
+                      className="text-xs font-medium text-primary-fg hover:underline"
                     >
                       {selectedLeadIds.length === filteredLeads.length ? 'Deseleccionar todos' : 'Seleccionar todos'}
                     </button>
@@ -483,12 +483,12 @@ export function NewNotificationModal({ isOpen, onClose, onSuccess }: NewNotifica
                     value={searchLead}
                     onChange={e => setSearchLead(e.target.value)}
                     placeholder="Buscar por nombre, email o teléfono..."
-                    className="w-full px-3 py-2 mb-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 text-sm"
+                    className="w-full px-3 py-2 mb-3 border border-border-strong rounded-lg focus:ring-2 focus:ring-primary text-sm"
                   />
 
-                  <div className="max-h-64 overflow-y-auto border border-slate-200 rounded-lg divide-y divide-slate-200">
+                  <div className="max-h-64 overflow-y-auto border border-border rounded-lg divide-y divide-border">
                     {filteredLeads.length === 0 ? (
-                      <div className="p-4 text-center text-sm text-slate-500">
+                      <div className="p-4 text-center text-sm text-fg-subtle">
                         No hay prospectos disponibles
                       </div>
                     ) : (
@@ -497,7 +497,7 @@ export function NewNotificationModal({ isOpen, onClose, onSuccess }: NewNotifica
                         return (
                           <label
                             key={lead.id}
-                            className={`flex items-center gap-3 p-3 hover:bg-slate-50 cursor-pointer ${
+                            className={`flex items-center gap-3 p-3 hover:bg-surface-muted cursor-pointer ${
                               !canReceive ? 'opacity-50' : ''
                             }`}
                           >
@@ -506,18 +506,18 @@ export function NewNotificationModal({ isOpen, onClose, onSuccess }: NewNotifica
                               checked={selectedLeadIds.includes(lead.id)}
                               onChange={() => toggleLeadSelection(lead.id)}
                               disabled={!canReceive}
-                              className="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
+                              className="rounded border-border-strong text-primary-fg focus:ring-primary"
                             />
                             <div className="flex-1 min-w-0">
-                              <p className="text-sm font-medium text-slate-900 truncate">
+                              <p className="text-sm font-medium text-fg truncate">
                                 {lead.firstName} {lead.lastName}
                               </p>
-                              <p className="text-xs text-slate-500 truncate">
+                              <p className="text-xs text-fg-subtle truncate">
                                 {formData.notificationType === 'EMAIL' ? lead.email : lead.phoneE164 || 'Sin contacto'}
                               </p>
                             </div>
                             {!canReceive && (
-                              <span className="text-xs text-amber-600 font-medium">
+                              <span className="text-xs text-warning-fg font-medium">
                                 Sin {formData.notificationType === 'EMAIL' ? 'email' : 'teléfono'}
                               </span>
                             )}
@@ -530,13 +530,13 @@ export function NewNotificationModal({ isOpen, onClose, onSuccess }: NewNotifica
               ) : (
                 <>
                   <div className="flex items-center justify-between mb-3">
-                    <label className="block text-sm font-medium text-slate-700">
+                    <label className="block text-sm font-medium text-fg-muted">
                       Propietarios ({selectedOwnerIds.length} seleccionados)
                     </label>
                     <button
                       type="button"
                       onClick={toggleAllOwners}
-                      className="text-xs font-medium text-indigo-600 hover:text-indigo-700"
+                      className="text-xs font-medium text-primary-fg hover:underline"
                     >
                       {selectedOwnerIds.length === filteredOwners.length ? 'Deseleccionar todos' : 'Seleccionar todos'}
                     </button>
@@ -547,12 +547,12 @@ export function NewNotificationModal({ isOpen, onClose, onSuccess }: NewNotifica
                     value={searchOwner}
                     onChange={e => setSearchOwner(e.target.value)}
                     placeholder="Buscar por nombre, propiedad, email o teléfono..."
-                    className="w-full px-3 py-2 mb-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 text-sm"
+                    className="w-full px-3 py-2 mb-3 border border-border-strong rounded-lg focus:ring-2 focus:ring-primary text-sm"
                   />
 
-                  <div className="max-h-64 overflow-y-auto border border-slate-200 rounded-lg divide-y divide-slate-200">
+                  <div className="max-h-64 overflow-y-auto border border-border rounded-lg divide-y divide-border">
                     {filteredOwners.length === 0 ? (
-                      <div className="p-4 text-center text-sm text-slate-500">
+                      <div className="p-4 text-center text-sm text-fg-subtle">
                         No hay propietarios con información de contacto
                       </div>
                     ) : (
@@ -561,7 +561,7 @@ export function NewNotificationModal({ isOpen, onClose, onSuccess }: NewNotifica
                         return (
                           <label
                             key={owner.propertyId}
-                            className={`flex items-center gap-3 p-3 hover:bg-slate-50 cursor-pointer ${
+                            className={`flex items-center gap-3 p-3 hover:bg-surface-muted cursor-pointer ${
                               !canReceive ? 'opacity-50' : ''
                             }`}
                           >
@@ -570,21 +570,21 @@ export function NewNotificationModal({ isOpen, onClose, onSuccess }: NewNotifica
                               checked={selectedOwnerIds.includes(owner.propertyId)}
                               onChange={() => toggleOwnerSelection(owner.propertyId)}
                               disabled={!canReceive}
-                              className="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
+                              className="rounded border-border-strong text-primary-fg focus:ring-primary"
                             />
                             <div className="flex-1 min-w-0">
-                              <p className="text-sm font-medium text-slate-900 truncate">
+                              <p className="text-sm font-medium text-fg truncate">
                                 {owner.ownerName || 'Sin nombre'}
                               </p>
-                              <p className="text-xs text-slate-500 truncate">
+                              <p className="text-xs text-fg-subtle truncate">
                                 {formData.notificationType === 'EMAIL' ? owner.ownerEmail : owner.ownerPhone || 'Sin contacto'} • {owner.propertyCode}
                               </p>
-                              <p className="text-xs text-slate-400 truncate">
+                              <p className="text-xs text-fg-subtle truncate">
                                 {owner.propertyTitle}
                               </p>
                             </div>
                             {!canReceive && (
-                              <span className="text-xs text-amber-600 font-medium">
+                              <span className="text-xs text-warning-fg font-medium">
                                 Sin {formData.notificationType === 'EMAIL' ? 'email' : 'teléfono'}
                               </span>
                             )}
@@ -597,9 +597,9 @@ export function NewNotificationModal({ isOpen, onClose, onSuccess }: NewNotifica
               )}
 
               {/* Variables disponibles */}
-              <div className="mt-3 p-3 bg-indigo-50 rounded-lg border border-indigo-200">
-                <p className="text-xs font-semibold text-indigo-900 mb-1">💡 Variables disponibles:</p>
-                <p className="text-xs text-indigo-700">
+              <div className="mt-3 p-3 bg-primary-soft rounded-lg border border-primary-line">
+                <p className="text-xs font-semibold text-primary-fg mb-1">💡 Variables disponibles:</p>
+                <p className="text-xs text-primary-fg">
                   {'{nombre}'}, {'{apellido}'}, {'{email}'}, {'{telefono}'}, {'{empresa}'}, {'{origen}'}
                 </p>
               </div>
@@ -607,26 +607,26 @@ export function NewNotificationModal({ isOpen, onClose, onSuccess }: NewNotifica
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">Nombre *</label>
+                <label className="block text-sm font-medium text-fg-muted mb-2">Nombre *</label>
                 <input
                   type="text"
                   required
                   value={formData.recipientName}
                   onChange={e => handleChange('recipientName', e.target.value)}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm"
+                  className="w-full px-3 py-2 border border-border-strong rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent text-sm"
                   placeholder="Juan Pérez"
                 />
               </div>
 
               {formData.notificationType === 'EMAIL' && (
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-2">Email *</label>
+                  <label className="block text-sm font-medium text-fg-muted mb-2">Email *</label>
                   <input
                     type="email"
                     required
                     value={formData.recipientEmail}
                     onChange={e => handleChange('recipientEmail', e.target.value)}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm"
+                    className="w-full px-3 py-2 border border-border-strong rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent text-sm"
                     placeholder="ejemplo@email.com"
                   />
                 </div>
@@ -634,13 +634,13 @@ export function NewNotificationModal({ isOpen, onClose, onSuccess }: NewNotifica
 
               {(formData.notificationType === 'WHATSAPP' || formData.notificationType === 'SMS') && (
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-2">Teléfono *</label>
+                  <label className="block text-sm font-medium text-fg-muted mb-2">Teléfono *</label>
                   <input
                     type="tel"
                     required
                     value={formData.recipientPhone}
                     onChange={e => handleChange('recipientPhone', e.target.value)}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm"
+                    className="w-full px-3 py-2 border border-border-strong rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent text-sm"
                     placeholder="+52 614 123 4567"
                   />
                 </div>
@@ -650,7 +650,7 @@ export function NewNotificationModal({ isOpen, onClose, onSuccess }: NewNotifica
 
           {/* Prioridad */}
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-2">Prioridad</label>
+            <label className="block text-sm font-medium text-fg-muted mb-2">Prioridad</label>
             <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
               {Object.entries(notificationPriorityLabels).map(([key, label]) => (
                 <button
@@ -659,8 +659,8 @@ export function NewNotificationModal({ isOpen, onClose, onSuccess }: NewNotifica
                   onClick={() => handleChange('priority', key as NotificationPriority)}
                   className={`px-3 py-1.5 rounded-lg border-2 transition-all text-xs font-medium ${
                     formData.priority === key
-                      ? 'border-indigo-500 bg-indigo-50 text-indigo-700'
-                      : 'border-slate-200 hover:border-slate-300 text-slate-600'
+                      ? 'border-primary bg-primary-soft text-primary-fg'
+                      : 'border-border hover:border-border-strong-strong text-fg-muted'
                   }`}
                 >
                   {label}
@@ -672,13 +672,13 @@ export function NewNotificationModal({ isOpen, onClose, onSuccess }: NewNotifica
           {/* Asunto (emails) */}
           {formData.notificationType === 'EMAIL' && (
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-2">Asunto *</label>
+              <label className="block text-sm font-medium text-fg-muted mb-2">Asunto *</label>
               <input
                 type="text"
                 required
                 value={formData.subject}
                 onChange={e => handleChange('subject', e.target.value)}
-                className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm"
+                className="w-full px-3 py-2 border border-border-strong rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent text-sm"
                 placeholder="Información sobre tu propiedad"
               />
             </div>
@@ -686,41 +686,41 @@ export function NewNotificationModal({ isOpen, onClose, onSuccess }: NewNotifica
 
           {/* Mensaje */}
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-2">Mensaje *</label>
+            <label className="block text-sm font-medium text-fg-muted mb-2">Mensaje *</label>
             <textarea
               required
               value={formData.content}
               onChange={e => handleChange('content', e.target.value)}
               rows={6}
-              className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm"
+              className="w-full px-3 py-2 border border-border-strong rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent text-sm"
               placeholder="Escribe tu mensaje aquí..."
             />
           </div>
 
           {/* Programar */}
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-2">Programar envío (opcional)</label>
+            <label className="block text-sm font-medium text-fg-muted mb-2">Programar envío (opcional)</label>
             <input
               type="datetime-local"
               value={formData.scheduledFor}
               onChange={e => handleChange('scheduledFor', e.target.value)}
-              className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm"
+              className="w-full px-3 py-2 border border-border-strong rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent text-sm"
             />
           </div>
 
           {/* Botones */}
-          <div className="flex gap-3 pt-4 border-t border-slate-200">
+          <div className="flex gap-3 pt-4 border-t border-border">
             <button
               type="button"
               onClick={handleClose}
-              className="flex-1 px-4 py-2 border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50 transition-colors font-medium"
+              className="flex-1 px-4 py-2 border border-border-strong text-fg-muted rounded-lg hover:bg-surface-muted transition-colors font-medium"
             >
               Cancelar
             </button>
             <button
               type="submit"
               disabled={saving || (isBulkMode && selectedLeadIds.length === 0)}
-              className="flex-1 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex-1 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-hover transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {saving
                 ? 'Enviando...'

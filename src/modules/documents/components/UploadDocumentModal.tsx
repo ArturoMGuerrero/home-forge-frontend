@@ -151,25 +151,25 @@ export function UploadDocumentModal({ isOpen, onClose, onDocumentUploaded, leads
               <label
                 className={`group relative flex cursor-pointer flex-col items-center justify-center gap-3 rounded-2xl border-2 border-dashed px-6 py-10 text-center transition-all ${
                   isDragging
-                    ? 'border-indigo-500 bg-indigo-100 scale-[1.02]'
+                    ? 'border-primary bg-primary-muted scale-[1.02]'
                     : file
-                    ? 'border-green-400 bg-green-50'
-                    : 'border-slate-300 bg-slate-50 hover:border-indigo-400 hover:bg-indigo-50'
+                    ? 'border-success bg-success-soft'
+                    : 'border-border-strong bg-surface-muted hover:border-primary hover:bg-primary-soft'
                 }`}
                 onDragOver={handleDragOver}
                 onDragLeave={handleDragLeave}
                 onDrop={handleDrop}
               >
-                <div className={`rounded-full p-4 transition-all ${isDragging ? 'bg-indigo-200' : file ? 'bg-green-200' : 'bg-slate-200 group-hover:bg-indigo-100'}`}>
-                  <svg className={`size-8 transition-colors ${isDragging ? 'text-indigo-600' : file ? 'text-green-600' : 'text-slate-400 group-hover:text-indigo-600'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div className={`rounded-full p-4 transition-all ${isDragging ? 'bg-primary-muted' : file ? 'bg-success-muted' : 'bg-surface-strong group-hover:bg-primary-muted'}`}>
+                  <svg className={`size-8 transition-colors ${isDragging ? 'text-primary-fg' : file ? 'text-success-fg' : 'text-fg-subtle group-hover:text-primary-fg'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                   </svg>
                 </div>
                 <div>
-                  <p className={`text-sm font-semibold transition-colors ${isDragging ? 'text-indigo-700' : file ? 'text-green-700' : 'text-slate-700'}`}>
+                  <p className={`text-sm font-semibold transition-colors ${isDragging ? 'text-primary-fg' : file ? 'text-success-fg' : 'text-fg-muted'}`}>
                     {isDragging ? 'Suelta el archivo aquí' : file ? file.name : 'Arrastra un archivo o haz clic para seleccionar'}
                   </p>
-                  <p className={`mt-1 text-xs transition-colors ${isDragging ? 'text-indigo-600' : file ? 'text-green-600' : 'text-slate-500'}`}>
+                  <p className={`mt-1 text-xs transition-colors ${isDragging ? 'text-primary-fg' : file ? 'text-success-fg' : 'text-fg-subtle'}`}>
                     {file ? `${sizeLabel(file.size)} • Listo para subir` : 'PDF, DOC, DOCX, JPG, JPEG, PNG • Máximo 8MB'}
                   </p>
                 </div>
@@ -189,10 +189,10 @@ export function UploadDocumentModal({ isOpen, onClose, onDocumentUploaded, leads
 
             {/* Formulario */}
             <div className="grid gap-4 md:grid-cols-2">
-              <label className="grid gap-2 text-sm font-semibold text-slate-700">
+              <label className="grid gap-2 text-sm font-semibold text-fg-muted">
                 Tipo
                 <select
-                  className="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-3 text-sm font-normal outline-none transition focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100"
+                  className="w-full rounded-xl border border-border bg-surface px-3.5 py-3 text-sm font-normal outline-none transition focus:border-primary focus:ring-2 focus:ring-primary-line"
                   onChange={e => setForm({ ...form, documentType: e.target.value })}
                   value={form.documentType}
                 >
@@ -205,10 +205,10 @@ export function UploadDocumentModal({ isOpen, onClose, onDocumentUploaded, leads
                 </select>
               </label>
 
-              <label className="grid gap-2 text-sm font-semibold text-slate-700">
+              <label className="grid gap-2 text-sm font-semibold text-fg-muted">
                 Estado
                 <select
-                  className="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-3 text-sm font-normal outline-none transition focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100"
+                  className="w-full rounded-xl border border-border bg-surface px-3.5 py-3 text-sm font-normal outline-none transition focus:border-primary focus:ring-2 focus:ring-primary-line"
                   onChange={e => setForm({ ...form, status: e.target.value })}
                   value={form.status}
                 >
@@ -219,10 +219,10 @@ export function UploadDocumentModal({ isOpen, onClose, onDocumentUploaded, leads
                 </select>
               </label>
 
-              <label className="grid gap-2 text-sm font-semibold text-slate-700">
+              <label className="grid gap-2 text-sm font-semibold text-fg-muted">
                 Prospecto
                 <select
-                  className="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-3 text-sm font-normal outline-none transition focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100"
+                  className="w-full rounded-xl border border-border bg-surface px-3.5 py-3 text-sm font-normal outline-none transition focus:border-primary focus:ring-2 focus:ring-primary-line"
                   onChange={e => setForm({ ...form, leadId: e.target.value })}
                   value={form.leadId}
                 >
@@ -235,10 +235,10 @@ export function UploadDocumentModal({ isOpen, onClose, onDocumentUploaded, leads
                 </select>
               </label>
 
-              <label className="grid gap-2 text-sm font-semibold text-slate-700">
+              <label className="grid gap-2 text-sm font-semibold text-fg-muted">
                 Propiedad
                 <select
-                  className="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-3 text-sm font-normal outline-none transition focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100"
+                  className="w-full rounded-xl border border-border bg-surface px-3.5 py-3 text-sm font-normal outline-none transition focus:border-primary focus:ring-2 focus:ring-primary-line"
                   onChange={e => setForm({ ...form, propertyId: e.target.value })}
                   value={form.propertyId}
                 >
@@ -251,10 +251,10 @@ export function UploadDocumentModal({ isOpen, onClose, onDocumentUploaded, leads
                 </select>
               </label>
 
-              <label className="grid gap-2 text-sm font-semibold text-slate-700 md:col-span-2">
+              <label className="grid gap-2 text-sm font-semibold text-fg-muted md:col-span-2">
                 Notas
                 <input
-                  className="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-3 text-sm font-normal outline-none transition placeholder:text-slate-400 focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100"
+                  className="w-full rounded-xl border border-border bg-surface px-3.5 py-3 text-sm font-normal outline-none transition placeholder:text-fg-subtle focus:border-primary focus:ring-2 focus:ring-primary-line"
                   onChange={e => setForm({ ...form, notes: e.target.value })}
                   placeholder="Observaciones adicionales..."
                   value={form.notes}
@@ -265,14 +265,14 @@ export function UploadDocumentModal({ isOpen, onClose, onDocumentUploaded, leads
             {/* Footer con botones */}
             <div className="mt-6 flex justify-end gap-3">
               <button
-                className="rounded-xl border border-slate-200 bg-white px-6 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
+                className="rounded-xl border border-border bg-surface px-6 py-3 text-sm font-semibold text-fg-muted transition hover:bg-surface-muted"
                 onClick={handleClose}
                 type="button"
               >
                 Cancelar
               </button>
               <button
-                className="rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-indigo-900/20 transition hover:shadow-xl hover:shadow-indigo-900/30 disabled:cursor-not-allowed disabled:opacity-60"
+                className="rounded-xl bg-primary px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-indigo-900/20 transition hover:shadow-xl hover:shadow-indigo-900/30 disabled:cursor-not-allowed disabled:opacity-60"
                 disabled={saving}
               >
                 {saving ? 'Subiendo...' : 'Guardar documento'}

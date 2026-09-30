@@ -29,17 +29,17 @@ export function PublicCompanyPage() {
   const location = [company.address, company.city, company.stateCode, countryName(company.countryCode), company.postalCode].filter(Boolean).join(', ');
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-950">
+    <div className="min-h-screen bg-surface-muted text-fg">
       <PublicHeader />
-      <section className="bg-slate-950 px-5 py-16 text-white">
+      <section className="bg-inverse px-5 py-16 text-white">
         <div className="mx-auto max-w-6xl">
           <p className="text-xs font-bold uppercase tracking-[.2em] text-cyan-300">Perfil inmobiliario verificado</p>
           <h1 className="mt-3 text-4xl font-bold sm:text-6xl">{company.name}</h1>
-          <p className="mt-5 max-w-3xl text-lg leading-8 text-slate-300">{company.publicDescription || 'Empresa inmobiliaria con propiedades disponibles en HomeForge.'}</p>
+          <p className="mt-5 max-w-3xl text-lg leading-8 text-border-strong">{company.publicDescription || 'Empresa inmobiliaria con propiedades disponibles en HomeForge.'}</p>
           <div className="mt-7 flex flex-wrap gap-3">
-            {phone && <a className="rounded-xl bg-emerald-600 px-4 py-3 text-sm font-bold text-white hover:bg-emerald-700" href={`https://wa.me/${phone}`} rel="noreferrer" target="_blank">Contactar por WhatsApp</a>}
-            {company.publicEmail && <a className="rounded-xl bg-white px-4 py-3 text-sm font-bold text-slate-900" href={`mailto:${company.publicEmail}`}>Enviar correo</a>}
-            {company.websiteUrl && <a className="rounded-xl border border-slate-700 px-4 py-3 text-sm font-bold text-white hover:bg-slate-800" href={company.websiteUrl} rel="noreferrer" target="_blank">Visitar sitio web</a>}
+            {phone && <a className="rounded-xl bg-success px-4 py-3 text-sm font-bold text-white hover:bg-success-hover" href={`https://wa.me/${phone}`} rel="noreferrer" target="_blank">Contactar por WhatsApp</a>}
+            {company.publicEmail && <a className="rounded-xl bg-surface px-4 py-3 text-sm font-bold text-fg" href={`mailto:${company.publicEmail}`}>Enviar correo</a>}
+            {company.websiteUrl && <a className="rounded-xl border border-slate-700 px-4 py-3 text-sm font-bold text-white hover:bg-inverse-hover" href={company.websiteUrl} rel="noreferrer" target="_blank">Visitar sitio web</a>}
           </div>
         </div>
       </section>
@@ -60,18 +60,18 @@ export function PublicCompanyPage() {
 
         <section>
           <div className="mb-6">
-            <p className="text-xs font-bold uppercase tracking-[.16em] text-indigo-600">Inventario publicado</p>
+            <p className="text-xs font-bold uppercase tracking-[.16em] text-primary-fg">Inventario publicado</p>
             <h2 className="mt-1 text-2xl font-bold">{listings.length} propiedades de {company.name}</h2>
           </div>
-          {listings.length === 0 && <p className="rounded-2xl border border-slate-200 bg-white p-8 text-center text-sm text-slate-500">Esta empresa todavía no tiene propiedades públicas.</p>}
+          {listings.length === 0 && <p className="rounded-2xl border border-border bg-surface p-8 text-center text-sm text-fg-subtle">Esta empresa todavía no tiene propiedades públicas.</p>}
           <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
             {listings.map(({ property }) => (
-              <Link className="group overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-lg" key={property.id} to={`/propiedades/${property.id}`}>
+              <Link className="group overflow-hidden rounded-2xl border border-border bg-surface shadow-sm transition hover:-translate-y-1 hover:shadow-lg" key={property.id} to={`/propiedades/${property.id}`}>
                 <img alt={property.title} className="h-52 w-full object-cover transition group-hover:scale-105" src={propertyImages(property)[0] || fallbackImage} />
                 <div className="p-5">
-                  <small className="font-semibold text-indigo-600">{property.city}, {property.stateCode}</small>
+                  <small className="font-semibold text-primary-fg">{property.city}, {property.stateCode}</small>
                   <h3 className="mt-2 text-lg font-bold">{property.title}</h3>
-                  <strong className="mt-3 block text-indigo-700">{formatApiPrice(property)}</strong>
+                  <strong className="mt-3 block text-primary-fg">{formatApiPrice(property)}</strong>
                 </div>
               </Link>
             ))}
@@ -84,26 +84,26 @@ export function PublicCompanyPage() {
 
 function PublicHeader() {
   return (
-    <header className="border-b border-slate-200 bg-white">
+    <header className="border-b border-border bg-surface">
       <div className="mx-auto flex max-w-6xl items-center justify-between px-5 py-5">
         <Link className="flex items-center gap-3" to="/propiedades">
           <img alt="HomeForge" className="size-10 rounded-xl object-cover" src="/favicon.png" />
-          <div><strong className="block font-bold">HomeForge</strong><small className="text-slate-500">Propiedades</small></div>
+          <div><strong className="block font-bold">HomeForge</strong><small className="text-fg-subtle">Propiedades</small></div>
         </Link>
-        <Link className="text-sm font-semibold text-indigo-600" to="/propiedades">Ver todas las propiedades</Link>
+        <Link className="text-sm font-semibold text-primary-fg" to="/propiedades">Ver todas las propiedades</Link>
       </div>
     </header>
   );
 }
 
 function TrustCard({ label, value }: { label: string; value: string }) {
-  return <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm"><span className="text-xs font-bold uppercase tracking-wider text-slate-400">{label}</span><strong className="mt-2 block text-base leading-6 text-slate-800">{value}</strong></div>;
+  return <div className="rounded-2xl border border-border bg-surface p-5 shadow-sm"><span className="text-xs font-bold uppercase tracking-wider text-fg-subtle">{label}</span><strong className="mt-2 block text-base leading-6 text-fg">{value}</strong></div>;
 }
 
 function InstitutionCard({ title, text }: { title: string; text: string }) {
-  return <article className="rounded-3xl border border-slate-200 bg-white p-7 shadow-sm"><h2 className="text-xl font-bold">{title}</h2><p className="mt-4 whitespace-pre-line text-sm leading-7 text-slate-600">{text}</p></article>;
+  return <article className="rounded-3xl border border-border bg-surface p-7 shadow-sm"><h2 className="text-xl font-bold">{title}</h2><p className="mt-4 whitespace-pre-line text-sm leading-7 text-fg-muted">{text}</p></article>;
 }
 
 function PublicMessage({ text }: { text: string }) {
-  return <div className="grid min-h-screen place-items-center bg-slate-50 px-5"><div className="text-center"><img alt="HomeForge" className="mx-auto size-16 rounded-2xl" src="/favicon.png" /><p className="mt-5 text-sm text-slate-500">{text}</p><Link className="mt-4 inline-block font-semibold text-indigo-600" to="/propiedades">Volver al catálogo</Link></div></div>;
+  return <div className="grid min-h-screen place-items-center bg-surface-muted px-5"><div className="text-center"><img alt="HomeForge" className="mx-auto size-16 rounded-2xl" src="/favicon.png" /><p className="mt-5 text-sm text-fg-subtle">{text}</p><Link className="mt-4 inline-block font-semibold text-primary-fg" to="/propiedades">Volver al catálogo</Link></div></div>;
 }

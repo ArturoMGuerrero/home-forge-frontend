@@ -255,7 +255,7 @@ export function AgendaPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
+    <div className="min-h-screen bg-app">
       <AppointmentModal isOpen={modalOpen} onClose={() => setModalOpen(false)} onAppointmentCreated={handleAppointmentCreated} leads={leads} properties={properties} restrictions={restrictions} />
 
       <PageHeader
@@ -283,9 +283,9 @@ export function AgendaPage() {
       <div className="p-4 lg:p-6">
         <div className="grid gap-6 lg:grid-cols-[1fr_380px]">
         {/* Calendario Premium */}
-        <div className="overflow-hidden rounded-3xl border-2 border-indigo-100 bg-white shadow-2xl shadow-indigo-500/10">
+        <div className="overflow-hidden rounded-3xl border-2 border-primary-line bg-surface shadow-2xl shadow-indigo-500/10">
           {/* Header del Calendario con Gradiente */}
-          <div className="relative border-b-2 border-indigo-200 bg-gradient-to-r from-indigo-600 via-purple-600 to-indigo-600 px-8 py-6">
+          <div className="relative border-b-2 border-primary-line bg-primary px-8 py-6">
             {/* Selector de vistas */}
             <div className="mb-4 flex items-center justify-between border-b border-white/20 pb-4">
               <div className="inline-flex rounded-xl bg-white/10 p-1 backdrop-blur-sm">
@@ -300,7 +300,7 @@ export function AgendaPage() {
                     onClick={() => setView(value)}
                     className={`flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold transition ${
                       view === value
-                        ? 'bg-white text-indigo-600 shadow-lg'
+                        ? 'bg-surface text-primary-fg shadow-lg'
                         : 'text-white hover:bg-white/10'
                     }`}
                   >
@@ -356,7 +356,7 @@ export function AgendaPage() {
             </div>
           </div>
 
-          <div className="bg-gradient-to-b from-indigo-50/50 to-white p-8">
+          <div className="bg-gradient-to-b from-primary-soft/50 to-surface p-8">
             {/* VISTA DE MES */}
             {view === 'month' && (
               <>
@@ -381,11 +381,11 @@ export function AgendaPage() {
                     className={`group relative min-h-32 overflow-hidden rounded-2xl transition-all duration-200 ${
                       day.date
                         ? isToday
-                          ? 'bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 ring-4 ring-indigo-300 shadow-2xl shadow-indigo-500/50 scale-105'
+                          ? 'bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 ring-4 ring-primary-line shadow-2xl shadow-indigo-500/50 scale-105'
                           : hasAppointments
-                          ? 'border-2 border-indigo-300 bg-gradient-to-br from-white to-indigo-50 hover:border-indigo-400 hover:shadow-xl hover:shadow-indigo-200/50 cursor-pointer hover:scale-105'
-                          : 'border-2 border-slate-200 bg-white hover:border-indigo-200 hover:bg-gradient-to-br hover:from-white hover:to-slate-50 hover:shadow-lg'
-                        : 'bg-slate-100/50'
+                          ? 'border-2 border-primary-line bg-gradient-to-br from-surface to-primary-soft hover:border-primary hover:shadow-xl hover:shadow-indigo-200/50 cursor-pointer hover:scale-105'
+                          : 'border-2 border-border bg-surface hover:border-primary-line hover:bg-gradient-to-br hover:from-surface hover:to-surface-muted hover:shadow-lg'
+                        : 'bg-surface-sunken/50'
                     }`}
                   >
                     {day.date && (
@@ -395,8 +395,8 @@ export function AgendaPage() {
                           isToday
                             ? 'bg-white/30 text-white backdrop-blur-sm'
                             : hasAppointments
-                            ? 'bg-indigo-100 text-indigo-700'
-                            : 'bg-slate-100 text-slate-700'
+                            ? 'bg-primary-muted text-primary-fg'
+                            : 'bg-surface-sunken text-fg-muted'
                         }`}>
                           {day.date.getDate()}
                         </div>
@@ -409,7 +409,7 @@ export function AgendaPage() {
                               className={`truncate rounded-lg px-2 py-1 text-xs font-medium transition ${
                                 isToday
                                   ? 'bg-white/30 text-white backdrop-blur-sm'
-                                  : 'bg-gradient-to-r from-indigo-50 to-purple-50 text-indigo-700'
+                                  : 'bg-gradient-to-r from-primary-soft to-accent-soft text-primary-fg'
                               }`}
                               title={apt.title}
                             >
@@ -426,7 +426,7 @@ export function AgendaPage() {
                           ))}
                           {day.appointments.length > 2 && (
                             <div className={`text-center text-xs font-semibold ${
-                              isToday ? 'text-white/90' : 'text-indigo-600'
+                              isToday ? 'text-white/90' : 'text-primary-fg'
                             }`}>
                               +{day.appointments.length - 2} más
                             </div>
@@ -437,7 +437,7 @@ export function AgendaPage() {
                         {hasAppointments && !isToday && (
                           <div className="absolute bottom-1 left-1/2 flex -translate-x-1/2 gap-1">
                             {Array.from({ length: Math.min(day.appointments.length, 3) }).map((_, i) => (
-                              <div key={i} className="size-1.5 rounded-full bg-indigo-400" />
+                              <div key={i} className="size-1.5 rounded-full bg-primary" />
                             ))}
                           </div>
                         )}
@@ -456,19 +456,19 @@ export function AgendaPage() {
                 <div className="min-w-[800px]">
                   {/* Header con días de la semana */}
                   <div className="grid grid-cols-8 gap-2 mb-4">
-                    <div className="text-xs font-semibold text-slate-500 text-right pr-2">Hora</div>
+                    <div className="text-xs font-semibold text-fg-subtle text-right pr-2">Hora</div>
                     {weekDaysForWeekView.map((date, i) => {
                       const isToday = date.toDateString() === new Date().toDateString();
                       return (
                         <div key={i} className={`rounded-xl p-3 text-center ${
                           isToday
                             ? 'bg-gradient-to-br from-indigo-500 to-purple-500 text-white shadow-lg'
-                            : 'bg-white border-2 border-slate-200'
+                            : 'bg-surface border-2 border-border'
                         }`}>
-                          <div className={`text-xs font-semibold ${isToday ? 'text-white' : 'text-slate-500'}`}>
+                          <div className={`text-xs font-semibold ${isToday ? 'text-white' : 'text-fg-subtle'}`}>
                             {weekDays[date.getDay()]}
                           </div>
-                          <div className={`text-lg font-bold mt-1 ${isToday ? 'text-white' : 'text-slate-900'}`}>
+                          <div className={`text-lg font-bold mt-1 ${isToday ? 'text-white' : 'text-fg'}`}>
                             {date.getDate()}
                           </div>
                         </div>
@@ -481,7 +481,7 @@ export function AgendaPage() {
                     {/* Columna de horas */}
                     <div className="space-y-[60px]">
                       {Array.from({ length: 24 }).map((_, hour) => (
-                        <div key={hour} className="text-xs font-medium text-slate-500 text-right pr-2 -mt-2">
+                        <div key={hour} className="text-xs font-medium text-fg-subtle text-right pr-2 -mt-2">
                           {hour.toString().padStart(2, '0')}:00
                         </div>
                       ))}
@@ -495,10 +495,10 @@ export function AgendaPage() {
                       });
 
                       return (
-                        <div key={dayIndex} className="relative border-l-2 border-slate-200">
+                        <div key={dayIndex} className="relative border-l-2 border-border">
                           {/* Líneas de horas */}
                           {Array.from({ length: 24 }).map((_, hour) => (
-                            <div key={hour} className="h-[60px] border-b border-slate-100" />
+                            <div key={hour} className="h-[60px] border-b border-border" />
                           ))}
 
                           {/* Appointments */}
@@ -546,13 +546,13 @@ export function AgendaPage() {
                   return (
                     <div key={index} className={`flex gap-4 p-3 rounded-xl border-2 transition ${
                       isCurrentTime()
-                        ? 'border-indigo-500 bg-indigo-50'
+                        ? 'border-primary bg-primary-soft'
                         : slotAppointments.length > 0
-                          ? 'border-indigo-200 bg-white hover:shadow-md'
-                          : 'border-slate-100 bg-slate-50'
+                          ? 'border-primary-line bg-surface hover:shadow-md'
+                          : 'border-border bg-surface-muted'
                     }`}>
                       <div className="w-20 shrink-0">
-                        <div className={`text-sm font-bold ${isCurrentTime() ? 'text-indigo-600' : 'text-slate-900'}`}>
+                        <div className={`text-sm font-bold ${isCurrentTime() ? 'text-primary-fg' : 'text-fg'}`}>
                           {time}
                         </div>
                       </div>
@@ -582,7 +582,7 @@ export function AgendaPage() {
                             ))}
                           </div>
                         ) : (
-                          <div className="text-sm text-slate-400">-</div>
+                          <div className="text-sm text-fg-subtle">-</div>
                         )}
                       </div>
                     </div>
@@ -601,12 +601,12 @@ export function AgendaPage() {
                     const isTomorrow = aptDate.toDateString() === new Date(Date.now() + 86400000).toDateString();
 
                     return (
-                      <div key={apt.id} className="group rounded-2xl border-2 border-slate-200 bg-white hover:border-indigo-300 hover:shadow-lg transition overflow-hidden">
+                      <div key={apt.id} className="group rounded-2xl border-2 border-border bg-surface hover:border-primary-line hover:shadow-lg transition overflow-hidden">
                         {/* Fecha */}
                         <div className={`px-4 py-2 text-xs font-semibold ${
-                          isToday ? 'bg-gradient-to-r from-indigo-500 to-purple-500 text-white' :
+                          isToday ? 'bg-primary text-white' :
                           isTomorrow ? 'bg-gradient-to-r from-cyan-500 to-blue-500 text-white' :
-                          'bg-slate-100 text-slate-700'
+                          'bg-surface-sunken text-fg-muted'
                         }`}>
                           {isToday ? '🔥 HOY' : isTomorrow ? '📅 MAÑANA' : aptDate.toLocaleDateString('es-MX', { weekday: 'long', day: 'numeric', month: 'long' })}
                         </div>
@@ -624,16 +624,16 @@ export function AgendaPage() {
                             </div>
 
                             <div className="flex-1 min-w-0">
-                              <h3 className="text-lg font-bold text-slate-900 group-hover:text-indigo-600 transition">{apt.title}</h3>
+                              <h3 className="text-lg font-bold text-fg group-hover:text-primary-fg transition">{apt.title}</h3>
                               <div className="mt-2 flex flex-wrap gap-2">
-                                <span className="inline-flex items-center gap-1.5 rounded-lg bg-indigo-100 px-3 py-1 text-xs font-semibold text-indigo-700">
+                                <span className="inline-flex items-center gap-1.5 rounded-lg bg-primary-muted px-3 py-1 text-xs font-semibold text-primary-fg">
                                   <svg className="size-3" fill="currentColor" viewBox="0 0 20 20">
                                     <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clipRule="evenodd" />
                                   </svg>
                                   {new Date(apt.startsAt).toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' })}
                                 </span>
                                 {apt.location && (
-                                  <span className="inline-flex items-center gap-1.5 rounded-lg bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-700">
+                                  <span className="inline-flex items-center gap-1.5 rounded-lg bg-surface-sunken px-3 py-1 text-xs font-semibold text-fg-muted">
                                     <svg className="size-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                                     </svg>
@@ -642,7 +642,7 @@ export function AgendaPage() {
                                 )}
                               </div>
                               {apt.notes && (
-                                <p className="mt-2 text-sm text-slate-600 line-clamp-2">{apt.notes}</p>
+                                <p className="mt-2 text-sm text-fg-muted line-clamp-2">{apt.notes}</p>
                               )}
                             </div>
                           </div>
@@ -651,14 +651,14 @@ export function AgendaPage() {
                     );
                   })
                 ) : (
-                  <div className="flex flex-col items-center justify-center rounded-2xl border-2 border-dashed border-slate-200 bg-slate-50 py-16 text-center">
-                    <div className="rounded-full bg-indigo-100 p-4">
-                      <svg className="size-10 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <div className="flex flex-col items-center justify-center rounded-2xl border-2 border-dashed border-border bg-surface-muted py-16 text-center">
+                    <div className="rounded-full bg-primary-muted p-4">
+                      <svg className="size-10 text-primary-fg" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
                       </svg>
                     </div>
-                    <p className="mt-4 text-base font-semibold text-slate-700">No hay eventos próximos</p>
-                    <p className="mt-1 text-sm text-slate-500">Todas tus citas están al día</p>
+                    <p className="mt-4 text-base font-semibold text-fg-muted">No hay eventos próximos</p>
+                    <p className="mt-1 text-sm text-fg-subtle">Todas tus citas están al día</p>
                   </div>
                 )}
               </div>
@@ -669,29 +669,29 @@ export function AgendaPage() {
         {/* Panel lateral con próximos eventos */}
         <div className="space-y-6">
           {/* Eventos de hoy */}
-          <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+          <div className="rounded-2xl border border-border bg-surface p-6 shadow-sm">
             <div className="mb-4 flex items-center gap-2">
-              <div className="rounded-lg bg-indigo-100 p-2">
-                <svg className="size-5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="rounded-lg bg-primary-muted p-2">
+                <svg className="size-5 text-primary-fg" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
               </div>
               <div>
-                <h2 className="text-lg font-bold text-slate-900">Hoy</h2>
-                <p className="text-xs text-slate-500">{new Date().toLocaleDateString('es-MX', { weekday: 'long', day: 'numeric', month: 'long' })}</p>
+                <h2 className="text-lg font-bold text-fg">Hoy</h2>
+                <p className="text-xs text-fg-subtle">{new Date().toLocaleDateString('es-MX', { weekday: 'long', day: 'numeric', month: 'long' })}</p>
               </div>
             </div>
             {selectedDayAppointments.length > 0 ? (
               <div className="space-y-3">
                 {selectedDayAppointments.map(apt => (
-                  <article key={apt.id} className="group overflow-hidden rounded-xl border border-slate-200 bg-white transition hover:border-indigo-300 hover:shadow-md">
+                  <article key={apt.id} className="group overflow-hidden rounded-xl border border-border bg-surface transition hover:border-primary-line hover:shadow-md">
                   {/* Header con hora y estado */}
-                  <div className="flex items-start gap-3 border-b border-slate-100 bg-gradient-to-br from-slate-50 to-white p-4">
+                  <div className="flex items-start gap-3 border-b border-border bg-surface-muted p-4">
                     {/* Icono de la cita */}
                     <div className={`flex size-12 shrink-0 items-center justify-center rounded-2xl shadow-lg ring-4 ${
-                      apt.status === 'COMPLETED' ? 'bg-gradient-to-br from-emerald-500 to-teal-600 ring-emerald-50' :
-                      apt.status === 'CANCELLED' ? 'bg-gradient-to-br from-slate-400 to-slate-600 ring-slate-50' :
-                      'bg-gradient-to-br from-indigo-500 to-purple-600 ring-indigo-50'
+                      apt.status === 'COMPLETED' ? 'bg-gradient-to-br from-emerald-500 to-teal-600 ring-success-line' :
+                      apt.status === 'CANCELLED' ? 'bg-gradient-to-br from-slate-400 to-slate-600 ring-border' :
+                      'bg-gradient-to-br from-indigo-500 to-purple-600 ring-primary-line'
                     }`}>
                       <svg className="size-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         {apt.appointmentType === 'PROPERTY_TOUR' ? (
@@ -707,18 +707,18 @@ export function AgendaPage() {
                     <div className="min-w-0 flex-1">
                       <div className="flex items-start justify-between gap-3">
                         <div className="min-w-0 flex-1">
-                          <h3 className="font-bold text-slate-900 group-hover:text-indigo-600 transition">{apt.title}</h3>
+                          <h3 className="font-bold text-fg group-hover:text-primary-fg transition">{apt.title}</h3>
                           <div className="mt-1.5 flex items-center gap-2">
-                            <span className="inline-flex items-center gap-1.5 rounded-lg bg-indigo-100 px-2.5 py-1 text-xs font-semibold text-indigo-700">
+                            <span className="inline-flex items-center gap-1.5 rounded-lg bg-primary-muted px-2.5 py-1 text-xs font-semibold text-primary-fg">
                               <svg className="size-3" fill="currentColor" viewBox="0 0 20 20">
                                 <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clipRule="evenodd" />
                               </svg>
                               {new Date(apt.startsAt).toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' })}
                             </span>
                             <span className={`inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs font-semibold ${
-                              apt.status === 'COMPLETED' ? 'bg-emerald-100 text-emerald-800' :
-                              apt.status === 'CANCELLED' ? 'bg-slate-200 text-slate-700' :
-                              'bg-cyan-100 text-cyan-800'
+                              apt.status === 'COMPLETED' ? 'bg-success-muted text-success-fg' :
+                              apt.status === 'CANCELLED' ? 'bg-surface-strong text-fg-muted' :
+                              'bg-info-muted text-info-fg'
                             }`}>
                               <span className="size-1.5 rounded-full bg-current opacity-75"></span>
                               {apt.status === 'COMPLETED' ? 'Realizada' : apt.status === 'CANCELLED' ? 'Cancelada' : apt.status === 'CONFIRMED' ? 'Confirmada' : 'Programada'}
@@ -731,32 +731,32 @@ export function AgendaPage() {
 
                   {/* Detalles */}
                   {(apt.location || apt.notes) && (
-                    <div className="space-y-2 border-b border-slate-100 bg-white px-4 py-3">
+                    <div className="space-y-2 border-b border-border bg-surface px-4 py-3">
                       {apt.location && (
                         <div className="flex items-start gap-2 text-sm">
-                          <svg className="size-4 mt-0.5 shrink-0 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <svg className="size-4 mt-0.5 shrink-0 text-fg-subtle" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                           </svg>
-                          <span className="text-slate-700">{apt.location}</span>
+                          <span className="text-fg-muted">{apt.location}</span>
                         </div>
                       )}
                       {apt.notes && (
                         <div className="flex items-start gap-2 text-sm">
-                          <svg className="size-4 mt-0.5 shrink-0 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <svg className="size-4 mt-0.5 shrink-0 text-fg-subtle" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z" />
                           </svg>
-                          <span className="text-slate-600">{apt.notes}</span>
+                          <span className="text-fg-muted">{apt.notes}</span>
                         </div>
                       )}
                     </div>
                   )}
 
                   {/* Acciones */}
-                  <div className="flex flex-wrap gap-2 bg-slate-50/50 px-4 py-3">
+                  <div className="flex flex-wrap gap-2 bg-surface-muted/50 px-4 py-3">
                     {apt.status === 'SCHEDULED' && (
                       <button
-                        className="inline-flex items-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-2 text-sm font-semibold text-emerald-700 transition hover:bg-emerald-100 hover:border-emerald-300"
+                        className="inline-flex items-center gap-2 rounded-xl border border-success-line bg-success-soft px-4 py-2 text-sm font-semibold text-success-fg transition hover:bg-success-muted hover:border-success-line"
                         onClick={() => complete(apt)}
                       >
                         <svg className="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -766,7 +766,7 @@ export function AgendaPage() {
                       </button>
                     )}
                     <button
-                      className="inline-flex items-center gap-2 rounded-xl border border-rose-200 bg-rose-50 px-4 py-2 text-sm font-semibold text-rose-700 transition hover:bg-rose-100 hover:border-rose-300"
+                      className="inline-flex items-center gap-2 rounded-xl border border-danger-line bg-danger-soft px-4 py-2 text-sm font-semibold text-danger-fg transition hover:bg-danger-muted hover:border-danger-line"
                       onClick={() => setAppointmentToDelete(apt.id)}
                     >
                       <svg className="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -779,26 +779,26 @@ export function AgendaPage() {
                 ))}
               </div>
             ) : (
-              <div className="flex flex-col items-center justify-center rounded-xl border-2 border-dashed border-slate-200 bg-slate-50 py-8 text-center">
-                <svg className="size-8 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="flex flex-col items-center justify-center rounded-xl border-2 border-dashed border-border bg-surface-muted py-8 text-center">
+                <svg className="size-8 text-fg-subtle" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                 </svg>
-                <p className="mt-2 text-sm font-semibold text-slate-700">Sin eventos hoy</p>
+                <p className="mt-2 text-sm font-semibold text-fg-muted">Sin eventos hoy</p>
               </div>
             )}
           </div>
 
           {/* Próximos eventos */}
-          <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+          <div className="rounded-2xl border border-border bg-surface p-6 shadow-sm">
             <div className="mb-4 flex items-center gap-2">
-              <div className="rounded-lg bg-purple-100 p-2">
-                <svg className="size-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="rounded-lg bg-accent-muted p-2">
+                <svg className="size-5 text-accent-fg" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
                 </svg>
               </div>
               <div>
-                <h2 className="text-lg font-bold text-slate-900">Próximos</h2>
-                <p className="text-xs text-slate-500">Siguientes {upcomingAppointments.length} eventos</p>
+                <h2 className="text-lg font-bold text-fg">Próximos</h2>
+                <p className="text-xs text-fg-subtle">Siguientes {upcomingAppointments.length} eventos</p>
               </div>
             </div>
 
@@ -810,7 +810,7 @@ export function AgendaPage() {
                   const isTomorrow = aptDate.toDateString() === new Date(Date.now() + 86400000).toDateString();
 
                   return (
-                    <div key={apt.id} className="group rounded-lg border border-slate-200 bg-white p-3 hover:border-indigo-300 hover:shadow-md transition">
+                    <div key={apt.id} className="group rounded-lg border border-border bg-surface p-3 hover:border-primary-line hover:shadow-md transition">
                       <div className="flex items-start gap-3">
                         <div className={`size-10 shrink-0 rounded-lg flex items-center justify-center ${
                           isToday ? 'bg-gradient-to-br from-indigo-500 to-purple-500' :
@@ -822,8 +822,8 @@ export function AgendaPage() {
                           </svg>
                         </div>
                         <div className="flex-1 min-w-0">
-                          <div className="text-sm font-bold text-slate-900 truncate">{apt.title}</div>
-                          <div className="text-xs text-slate-500 mt-1">
+                          <div className="text-sm font-bold text-fg truncate">{apt.title}</div>
+                          <div className="text-xs text-fg-subtle mt-1">
                             {isToday ? 'Hoy' : isTomorrow ? 'Mañana' : aptDate.toLocaleDateString('es-MX', { weekday: 'short', day: 'numeric', month: 'short' })} • {aptDate.toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' })}
                           </div>
                         </div>
@@ -833,11 +833,11 @@ export function AgendaPage() {
                 })}
               </div>
             ) : (
-              <div className="flex flex-col items-center justify-center rounded-xl border-2 border-dashed border-slate-200 bg-slate-50 py-8 text-center">
-                <svg className="size-8 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="flex flex-col items-center justify-center rounded-xl border-2 border-dashed border-border bg-surface-muted py-8 text-center">
+                <svg className="size-8 text-fg-subtle" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
                 </svg>
-                <p className="mt-2 text-sm font-semibold text-slate-700">Sin eventos próximos</p>
+                <p className="mt-2 text-sm font-semibold text-fg-muted">Sin eventos próximos</p>
               </div>
             )}
           </div>

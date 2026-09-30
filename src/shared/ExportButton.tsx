@@ -22,8 +22,8 @@ export function ExportButton({ onExport, variant = 'primary', className = '' }: 
 
   const baseClasses = 'inline-flex items-center gap-2 rounded-xl px-4 py-3 text-sm font-semibold transition disabled:cursor-not-allowed disabled:opacity-60';
   const variantClasses = variant === 'primary'
-    ? 'bg-indigo-600 text-white hover:bg-indigo-700'
-    : 'border border-slate-200 bg-white text-slate-700 hover:bg-slate-50';
+    ? 'bg-primary text-white hover:bg-primary-hover'
+    : 'border border-border bg-surface text-fg-muted hover:bg-surface-muted';
 
   return (
     <button

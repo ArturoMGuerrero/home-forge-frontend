@@ -17,7 +17,7 @@ interface Props {
   restrictions: SubscriptionRestrictions;
 }
 
-const inputClass = 'w-full rounded-xl border border-slate-200 bg-white px-3.5 py-3 text-sm outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100';
+const inputClass = 'w-full rounded-xl border border-border bg-surface px-3.5 py-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary-line';
 const initialForm = {
   title: '',
   appointmentType: 'PROPERTY_TOUR' as Appointment['appointmentType'],
@@ -193,11 +193,11 @@ export function AppointmentModal({ isOpen, onClose, onAppointmentCreated, leads,
               <div>
                 <label className="text-sm font-semibold">Prospecto (opcional)</label>
                 <div className="relative mb-2 mt-2">
-                  <svg className="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-fg-subtle" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                   </svg>
                   <input
-                    className="w-full rounded-lg border border-slate-200 py-2 pl-11 pr-9 text-sm transition focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-100"
+                    className="w-full rounded-lg border border-border py-2 pl-11 pr-9 text-sm transition focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary-line"
                     onChange={e => setSearchLead(e.target.value)}
                     placeholder="Buscar prospecto..."
                     type="text"
@@ -205,7 +205,7 @@ export function AppointmentModal({ isOpen, onClose, onAppointmentCreated, leads,
                   />
                   {searchLead && (
                     <button
-                      className="absolute right-2.5 top-1/2 -translate-y-1/2 rounded p-1 text-slate-400 transition hover:bg-slate-100 hover:text-slate-600"
+                      className="absolute right-2.5 top-1/2 -translate-y-1/2 rounded p-1 text-fg-subtle transition hover:bg-surface-sunken hover:text-fg-muted"
                       onClick={() => setSearchLead('')}
                       type="button"
                     >
@@ -229,11 +229,11 @@ export function AppointmentModal({ isOpen, onClose, onAppointmentCreated, leads,
               <div>
                 <label className="text-sm font-semibold">Propiedad (opcional)</label>
                 <div className="relative mb-2 mt-2">
-                  <svg className="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-fg-subtle" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                   </svg>
                   <input
-                    className="w-full rounded-lg border border-slate-200 py-2 pl-11 pr-9 text-sm transition focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-100"
+                    className="w-full rounded-lg border border-border py-2 pl-11 pr-9 text-sm transition focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary-line"
                     onChange={e => setSearchProperty(e.target.value)}
                     placeholder="Buscar propiedad..."
                     type="text"
@@ -241,7 +241,7 @@ export function AppointmentModal({ isOpen, onClose, onAppointmentCreated, leads,
                   />
                   {searchProperty && (
                     <button
-                      className="absolute right-2.5 top-1/2 -translate-y-1/2 rounded p-1 text-slate-400 transition hover:bg-slate-100 hover:text-slate-600"
+                      className="absolute right-2.5 top-1/2 -translate-y-1/2 rounded p-1 text-fg-subtle transition hover:bg-surface-sunken hover:text-fg-muted"
                       onClick={() => setSearchProperty('')}
                       type="button"
                     >
@@ -275,14 +275,14 @@ export function AppointmentModal({ isOpen, onClose, onAppointmentCreated, leads,
             {/* Footer con botones */}
             <div className="mt-6 flex justify-end gap-3">
               <button
-                className="rounded-xl border border-slate-200 bg-white px-6 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
+                className="rounded-xl border border-border bg-surface px-6 py-3 text-sm font-semibold text-fg-muted transition hover:bg-surface-muted"
                 onClick={handleClose}
                 type="button"
               >
                 Cancelar
               </button>
               <button
-                className="rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-indigo-900/20 transition hover:shadow-xl hover:shadow-indigo-900/30 disabled:cursor-not-allowed disabled:opacity-60"
+                className="rounded-xl bg-primary px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-indigo-900/20 transition hover:shadow-xl hover:shadow-indigo-900/30 disabled:cursor-not-allowed disabled:opacity-60"
                 disabled={saving}
               >
                 {saving ? 'Guardando...' : 'Agregar cita'}

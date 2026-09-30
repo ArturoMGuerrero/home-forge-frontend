@@ -134,7 +134,7 @@ export function propertyStatusLabel(status: PropertyStatus) {
 }
 
 export function propertyStatusClass(status: PropertyStatus) {
-  if (status === 'AVAILABLE') return 'bg-emerald-100 text-emerald-800';
-  if (status === 'SOLD' || status === 'RENTED' || status === 'INACTIVE') return 'bg-slate-800 text-white';
-  return 'bg-amber-100 text-amber-800';
+  if (status === 'AVAILABLE') return 'bg-success-muted text-success-fg';
+  if (status === 'SOLD' || status === 'RENTED' || status === 'INACTIVE') return 'bg-inverse text-white';
+  return 'bg-warning-muted text-warning-fg';
 }

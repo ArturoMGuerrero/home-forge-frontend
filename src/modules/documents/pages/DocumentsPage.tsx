@@ -88,7 +88,7 @@ export function DocumentsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
+    <div className="min-h-screen bg-app">
       {previewDocument && <DocumentPreviewModal document={previewDocument} onClose={() => setPreviewDocument(undefined)} />}
 
       <UploadDocumentModal
@@ -125,14 +125,14 @@ export function DocumentsPage() {
       <div className="p-4 lg:p-6">
         {/* Búsqueda y Filtros */}
         {documents.length > 0 && (
-          <div className="mb-6 space-y-4 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+          <div className="mb-6 space-y-4 rounded-2xl border border-border bg-surface p-5 shadow-sm">
       {/* Búsqueda */}
       <div className="relative">
-        <svg className="pointer-events-none absolute left-3.5 top-1/2 size-5 -translate-y-1/2 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <svg className="pointer-events-none absolute left-3.5 top-1/2 size-5 -translate-y-1/2 text-fg-subtle" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
         </svg>
         <input
-          className="w-full rounded-xl border border-slate-200 py-2.5 pl-11 pr-4 text-sm transition focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+          className="w-full rounded-xl border border-border py-2.5 pl-11 pr-4 text-sm transition focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
           onChange={e => setSearchQuery(e.target.value)}
           placeholder="Buscar por nombre de archivo..."
           type="text"
@@ -140,7 +140,7 @@ export function DocumentsPage() {
         />
         {searchQuery && (
           <button
-            className="absolute right-3 top-1/2 -translate-y-1/2 rounded-lg p-1 text-slate-400 transition hover:bg-slate-100 hover:text-slate-600"
+            className="absolute right-3 top-1/2 -translate-y-1/2 rounded-lg p-1 text-fg-subtle transition hover:bg-surface-sunken hover:text-fg-muted"
             onClick={() => setSearchQuery('')}
             type="button"
           >
@@ -155,9 +155,9 @@ export function DocumentsPage() {
       <div className="grid gap-3 sm:grid-cols-3">
         {/* Filtro por Tipo */}
         <div>
-          <label className="mb-1.5 block text-xs font-semibold text-slate-600">Tipo de documento</label>
+          <label className="mb-1.5 block text-xs font-semibold text-fg-muted">Tipo de documento</label>
           <select
-            className="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm transition focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+            className="w-full rounded-xl border border-border px-3 py-2 text-sm transition focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
             onChange={e => setTypeFilter(e.target.value)}
             value={typeFilter}
           >
@@ -173,9 +173,9 @@ export function DocumentsPage() {
 
         {/* Filtro por Estado */}
         <div>
-          <label className="mb-1.5 block text-xs font-semibold text-slate-600">Estado</label>
+          <label className="mb-1.5 block text-xs font-semibold text-fg-muted">Estado</label>
           <select
-            className="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm transition focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+            className="w-full rounded-xl border border-border px-3 py-2 text-sm transition focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
             onChange={e => setStatusFilter(e.target.value)}
             value={statusFilter}
           >
@@ -189,9 +189,9 @@ export function DocumentsPage() {
 
         {/* Filtro por Entidad */}
         <div>
-          <label className="mb-1.5 block text-xs font-semibold text-slate-600">Relacionado con</label>
+          <label className="mb-1.5 block text-xs font-semibold text-fg-muted">Relacionado con</label>
           <select
-            className="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm transition focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+            className="w-full rounded-xl border border-border px-3 py-2 text-sm transition focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
             onChange={e => setEntityFilter(e.target.value)}
             value={entityFilter}
           >
@@ -205,12 +205,12 @@ export function DocumentsPage() {
 
       {/* Contador de resultados */}
       {(searchQuery || typeFilter !== 'ALL' || statusFilter !== 'ALL' || entityFilter !== 'ALL') && (
-        <div className="flex items-center justify-between rounded-lg bg-indigo-50 px-4 py-2.5 text-xs">
-          <span className="font-medium text-indigo-900">
+        <div className="flex items-center justify-between rounded-lg bg-primary-soft px-4 py-2.5 text-xs">
+          <span className="font-medium text-primary-fg">
             {filteredDocuments.length} {filteredDocuments.length === 1 ? 'documento encontrado' : 'documentos encontrados'}
           </span>
           <button
-            className="font-semibold text-indigo-600 transition hover:text-indigo-700"
+            className="font-semibold text-primary-fg transition hover:text-primary-fg"
             onClick={() => {
               setSearchQuery('');
               setTypeFilter('ALL');
@@ -229,21 +229,21 @@ export function DocumentsPage() {
         {/* Estado vacío cuando no hay resultados */}
         {filteredDocuments.length === 0 && documents.length > 0 && (
           <div className="py-12 text-center">
-            <svg className="mx-auto mb-3 size-12 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="mx-auto mb-3 size-12 text-border-strong" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
             </svg>
-            <p className="text-sm font-medium text-slate-600">No se encontraron documentos</p>
-            <p className="mt-1 text-xs text-slate-500">Intenta ajustar los filtros de búsqueda</p>
+            <p className="text-sm font-medium text-fg-muted">No se encontraron documentos</p>
+            <p className="mt-1 text-xs text-fg-subtle">Intenta ajustar los filtros de búsqueda</p>
           </div>
         )}
 
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
         {filteredDocuments.map(item => (
-          <article className="group overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition-all hover:border-indigo-400 hover:shadow-xl hover:shadow-indigo-500/10 flex flex-col" key={item.id}>
+          <article className="group overflow-hidden rounded-2xl border border-border bg-surface shadow-sm transition-all hover:border-primary hover:shadow-xl hover:shadow-indigo-500/10 flex flex-col" key={item.id}>
             {/* Header */}
             <div className="flex items-start gap-4 p-5">
               {/* Icono del documento */}
-              <div className="flex size-12 shrink-0 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600">
+              <div className="flex size-12 shrink-0 items-center justify-center rounded-xl bg-primary-soft text-primary-fg">
                 <svg className="size-6" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                 </svg>
@@ -253,32 +253,32 @@ export function DocumentsPage() {
               <div className="min-w-0 flex-1">
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0 flex-1">
-                    <h3 className="truncate text-base font-bold text-slate-900 group-hover:text-indigo-600 transition">
+                    <h3 className="truncate text-base font-bold text-fg group-hover:text-primary-fg transition">
                       {item.fileName}
                     </h3>
                     <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
-                      <span className="inline-flex items-center gap-1 rounded-full bg-indigo-100 border border-indigo-200 px-2.5 py-0.5 text-xs font-bold text-indigo-700">
+                      <span className="inline-flex items-center gap-1 rounded-full bg-primary-muted border border-primary-line px-2.5 py-0.5 text-xs font-bold text-primary-fg">
                         {item.documentType}
                       </span>
                       <span className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-bold ${
-                        item.status === 'APPROVED' ? 'bg-emerald-100 border border-emerald-200 text-emerald-700' :
-                        item.status === 'REJECTED' ? 'bg-rose-100 border border-rose-200 text-rose-700' :
-                        item.status === 'VALIDATED' ? 'bg-cyan-100 border border-cyan-200 text-cyan-700' :
-                        item.status === 'RECEIVED' ? 'bg-blue-100 border border-blue-200 text-blue-700' :
-                        'bg-amber-100 border border-amber-200 text-amber-700'
+                        item.status === 'APPROVED' ? 'bg-success-muted border border-success-line text-success-fg' :
+                        item.status === 'REJECTED' ? 'bg-danger-muted border border-danger-line text-danger-fg' :
+                        item.status === 'VALIDATED' ? 'bg-info-muted border border-info-line text-info-fg' :
+                        item.status === 'RECEIVED' ? 'bg-info-muted border border-info-line text-info-fg' :
+                        'bg-warning-muted border border-warning-line text-warning-fg'
                       }`}>
                         {item.status === 'APPROVED' ? 'Aprobado' :
                          item.status === 'REJECTED' ? 'Rechazado' :
                          item.status === 'VALIDATED' ? 'Validado' :
                          item.status === 'RECEIVED' ? 'Recibido' : 'Pendiente'}
                       </span>
-                      <span className="text-xs font-medium text-slate-500">
+                      <span className="text-xs font-medium text-fg-subtle">
                         {new Date(item.createdAt).toLocaleDateString('es-MX', { day: 'numeric', month: 'short', year: 'numeric' })}
                       </span>
                     </div>
                   </div>
                   <div className="flex flex-col items-end gap-1">
-                    <span className="text-sm font-bold text-slate-600">{sizeLabel(item.fileSize)}</span>
+                    <span className="text-sm font-bold text-fg-muted">{sizeLabel(item.fileSize)}</span>
                   </div>
                 </div>
               </div>
@@ -286,28 +286,28 @@ export function DocumentsPage() {
 
             {/* Relacionado con */}
             {(item.leadName || item.propertyTitle) && (
-              <div className="border-t border-slate-100 bg-slate-50 px-5 py-2">
+              <div className="border-t border-border bg-surface-muted px-5 py-2">
                 <div className="flex items-center gap-2 text-xs">
-                  <svg className="size-3.5 text-indigo-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="size-3.5 text-primary shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
                   </svg>
-                  <span className="text-slate-600 font-medium">Relacionado con:</span>
-                  <span className="font-bold text-slate-900 truncate">{item.leadName || item.propertyTitle}</span>
+                  <span className="text-fg-muted font-medium">Relacionado con:</span>
+                  <span className="font-bold text-fg truncate">{item.leadName || item.propertyTitle}</span>
                 </div>
               </div>
             )}
 
             {/* Notas */}
             {item.notes && (
-              <div className="border-t border-slate-100 bg-white px-5 py-2">
-                <p className="text-xs text-slate-600 line-clamp-1">{item.notes}</p>
+              <div className="border-t border-border bg-surface px-5 py-2">
+                <p className="text-xs text-fg-muted line-clamp-1">{item.notes}</p>
               </div>
             )}
 
             {/* Acciones */}
-            <div className="flex flex-col gap-2 border-t border-slate-100 bg-white px-5 py-3 mt-auto">
+            <div className="flex flex-col gap-2 border-t border-border bg-surface px-5 py-3 mt-auto">
               <button
-                className="inline-flex items-center justify-center gap-1.5 rounded-xl bg-indigo-600 px-3 py-2 text-xs font-semibold text-white shadow-sm shadow-indigo-600/30 transition-all hover:bg-indigo-700 hover:shadow-md hover:shadow-indigo-600/40"
+                className="inline-flex items-center justify-center gap-1.5 rounded-xl bg-primary px-3 py-2 text-xs font-semibold text-white shadow-sm shadow-indigo-600/30 transition-all hover:bg-primary-hover hover:shadow-md hover:shadow-indigo-600/40"
                 onClick={() => setPreviewDocument(item)}
               >
                 <svg className="size-3.5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
@@ -317,7 +317,7 @@ export function DocumentsPage() {
                 Vista previa
               </button>
               <a
-                className="inline-flex items-center justify-center gap-1.5 rounded-xl border-2 border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 transition-all hover:bg-slate-50 hover:border-slate-300"
+                className="inline-flex items-center justify-center gap-1.5 rounded-xl border-2 border-border bg-surface px-3 py-2 text-xs font-semibold text-fg-muted transition-all hover:bg-surface-muted hover:border-border-strong"
                 href={documentDownloadUrl(item.id)}
               >
                 <svg className="size-3.5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
@@ -326,7 +326,7 @@ export function DocumentsPage() {
                 Descargar
               </a>
               <button
-                className="inline-flex items-center justify-center gap-1.5 rounded-xl border-2 border-rose-200 bg-white px-3 py-2 text-xs font-semibold text-rose-600 transition-all hover:bg-rose-50 hover:border-rose-300"
+                className="inline-flex items-center justify-center gap-1.5 rounded-xl border-2 border-danger-line bg-surface px-3 py-2 text-xs font-semibold text-danger-fg transition-all hover:bg-danger-soft hover:border-danger-line"
                 onClick={() => remove(item.id)}
               >
                 <svg className="size-3.5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
@@ -340,14 +340,14 @@ export function DocumentsPage() {
 
         {/* Estado vacío */}
         {documents.length === 0 && filteredDocuments.length === 0 && (
-          <div className="flex flex-col items-center justify-center rounded-2xl border-2 border-dashed border-slate-200 bg-slate-50 py-16">
-            <div className="rounded-full bg-indigo-100 p-4">
-              <svg className="size-12 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <div className="flex flex-col items-center justify-center rounded-2xl border-2 border-dashed border-border bg-surface-muted py-16">
+            <div className="rounded-full bg-primary-muted p-4">
+              <svg className="size-12 text-primary-fg" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
               </svg>
             </div>
-            <p className="mt-4 text-base font-semibold text-slate-700">No hay documentos guardados</p>
-            <p className="mt-1 text-sm text-slate-500">Haz clic en "Subir documento" para comenzar</p>
+            <p className="mt-4 text-base font-semibold text-fg-muted">No hay documentos guardados</p>
+            <p className="mt-1 text-sm text-fg-subtle">Haz clic en "Subir documento" para comenzar</p>
           </div>
         )}
         </div>

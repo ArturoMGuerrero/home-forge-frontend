@@ -51,7 +51,7 @@ export default function MessageTemplatesPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
+    <div className="min-h-screen bg-app">
       <PageHeader
         title="Plantillas de Mensajes"
         subtitle="Crea plantillas reutilizables para emails, WhatsApp, push y SMS"
@@ -84,8 +84,8 @@ export default function MessageTemplatesPage() {
 
         {filteredTemplates.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-20 text-center">
-            <div className="rounded-full bg-slate-100 p-6 mb-4">
-              <svg className="size-12 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="rounded-full bg-surface-sunken p-6 mb-4">
+              <svg className="size-12 text-fg-subtle" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path
                   strokeLinecap="round"
                   strokeLinejoin="round"
@@ -94,56 +94,56 @@ export default function MessageTemplatesPage() {
                 />
               </svg>
             </div>
-            <p className="text-slate-600 font-medium">No hay plantillas {!showInactive && 'activas'}</p>
-            <p className="text-sm text-slate-500 mt-1">Crea tu primera plantilla con variables dinámicas</p>
+            <p className="text-fg-muted font-medium">No hay plantillas {!showInactive && 'activas'}</p>
+            <p className="text-sm text-fg-subtle mt-1">Crea tu primera plantilla con variables dinámicas</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
             {filteredTemplates.map(template => (
               <div
                 key={template.id}
-                className={`bg-white rounded-xl border border-slate-200 p-5 hover:shadow-lg transition-all ${
+                className={`bg-surface rounded-xl border border-border p-5 hover:shadow-lg transition-all ${
                   !template.active ? 'opacity-60' : ''
                 }`}
               >
                 <div className="flex items-start justify-between mb-3">
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-1">
-                      <h3 className="font-semibold text-slate-900">{template.name}</h3>
+                      <h3 className="font-semibold text-fg">{template.name}</h3>
                       {template.isDefault && (
-                        <span className="inline-block px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                        <span className="inline-block px-2 py-0.5 rounded-full text-xs font-medium bg-info-muted text-info-fg">
                           Por defecto
                         </span>
                       )}
                       {!template.active && (
-                        <span className="inline-block px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-600">
+                        <span className="inline-block px-2 py-0.5 rounded-full text-xs font-medium bg-surface-sunken text-fg-muted">
                           Inactiva
                         </span>
                       )}
                     </div>
 
-                    <div className="flex items-center gap-2 text-xs text-slate-500 mb-2">
-                      <span className="px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-700">
+                    <div className="flex items-center gap-2 text-xs text-fg-subtle mb-2">
+                      <span className="px-2 py-0.5 rounded-full bg-primary-soft text-primary-fg">
                         {notificationTypeLabels[template.templateType]}
                       </span>
                       {template.category && (
-                        <span className="px-2 py-0.5 rounded-full bg-slate-50 text-slate-700">
+                        <span className="px-2 py-0.5 rounded-full bg-surface-muted text-fg-muted">
                           {templateCategoryLabels[template.category]}
                         </span>
                       )}
                     </div>
 
                     {template.description && (
-                      <p className="text-sm text-slate-600 mb-2">{template.description}</p>
+                      <p className="text-sm text-fg-muted mb-2">{template.description}</p>
                     )}
 
                     {template.subject && (
-                      <div className="text-sm text-slate-600 mb-2">
+                      <div className="text-sm text-fg-muted mb-2">
                         <span className="font-medium">Asunto:</span> {template.subject}
                       </div>
                     )}
 
-                    <div className="text-sm text-slate-600 line-clamp-2 bg-slate-50 p-2 rounded border border-slate-200">
+                    <div className="text-sm text-fg-muted line-clamp-2 bg-surface-muted p-2 rounded border border-border">
                       {template.content}
                     </div>
                   </div>

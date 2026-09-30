@@ -18,22 +18,22 @@ export function PlanCards({ plans, currentPlan, changing, onSelect, subscription
         const canRenew = current && isExpiredOrSuspended;
 
         return (
-          <article className={`relative overflow-hidden rounded-2xl border p-6 shadow-sm ${plan.featured ? 'border-indigo-500 bg-gradient-to-br from-indigo-600 to-violet-600 text-white shadow-lg shadow-indigo-200' : 'border-slate-200 bg-white'}`} key={plan.code}>
-            {current && !canRenew && <span className={`absolute right-5 top-5 rounded-full px-2.5 py-1 text-xs font-bold ${plan.featured ? 'bg-white/15 text-white' : 'bg-emerald-100 text-emerald-800'}`}>PLAN ACTUAL</span>}
-            {canRenew && <span className={`absolute right-5 top-5 rounded-full px-2.5 py-1 text-xs font-bold ${plan.featured ? 'bg-rose-200/20 text-rose-100' : 'bg-rose-100 text-rose-800'}`}>VENCIDO</span>}
+          <article className={`relative overflow-hidden rounded-2xl border p-6 shadow-sm ${plan.featured ? 'border-primary bg-gradient-to-br from-indigo-600 to-violet-600 text-white shadow-lg shadow-indigo-200' : 'border-border bg-surface'}`} key={plan.code}>
+            {current && !canRenew && <span className={`absolute right-5 top-5 rounded-full px-2.5 py-1 text-xs font-bold ${plan.featured ? 'bg-white/15 text-white' : 'bg-success-muted text-success-fg'}`}>PLAN ACTUAL</span>}
+            {canRenew && <span className={`absolute right-5 top-5 rounded-full px-2.5 py-1 text-xs font-bold ${plan.featured ? 'bg-danger-muted/20 text-rose-100' : 'bg-danger-muted text-danger-fg'}`}>VENCIDO</span>}
             <h3 className="text-xl font-bold">{plan.name}</h3>
-            <strong className={`mt-3 block text-2xl ${plan.featured ? 'text-cyan-200' : 'text-indigo-700'}`}>{plan.price}</strong>
-            <p className={`mt-3 text-sm ${plan.featured ? 'text-indigo-100' : 'text-slate-500'}`}>{plan.description}</p>
-            <ul className={`mt-5 space-y-2 text-sm ${plan.featured ? 'text-indigo-50' : 'text-slate-600'}`}>
+            <strong className={`mt-3 block text-2xl ${plan.featured ? 'text-cyan-200' : 'text-primary-fg'}`}>{plan.price}</strong>
+            <p className={`mt-3 text-sm ${plan.featured ? 'text-indigo-100' : 'text-fg-subtle'}`}>{plan.description}</p>
+            <ul className={`mt-5 space-y-2 text-sm ${plan.featured ? 'text-indigo-50' : 'text-fg-muted'}`}>
               {plan.features.map(feature => <li key={feature}>✓ {feature}</li>)}
             </ul>
             <button
               className={`mt-7 w-full rounded-xl px-3 py-3 text-sm font-bold disabled:cursor-not-allowed disabled:opacity-60 ${
                 plan.featured
-                  ? 'bg-white text-indigo-700 hover:bg-indigo-50'
+                  ? 'bg-surface text-primary-fg hover:bg-primary-soft'
                   : canRenew
-                    ? 'bg-emerald-600 text-white hover:bg-emerald-700'
-                    : 'bg-slate-100 text-slate-700 hover:bg-indigo-50'
+                    ? 'bg-success text-white hover:bg-success-hover'
+                    : 'bg-surface-sunken text-fg-muted hover:bg-primary-soft'
               }`}
               disabled={(current && !canRenew) || Boolean(changing)}
               onClick={() => onSelect(plan.code)}

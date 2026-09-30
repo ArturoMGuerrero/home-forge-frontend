@@ -163,19 +163,19 @@ export function PropertiesPage() {
         }
       />
 
-      {loading && <p className="rounded-2xl border border-slate-200 bg-white p-8 text-center text-sm text-slate-500">Consultando propiedades...</p>}
+      {loading && <p className="rounded-2xl border border-border bg-surface p-8 text-center text-sm text-fg-subtle">Consultando propiedades...</p>}
 
       {!loading && (
         <>
           {/* Búsqueda y Filtros */}
-          <div className="mb-6 space-y-4 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+          <div className="mb-6 space-y-4 rounded-2xl border border-border bg-surface p-5 shadow-sm">
             {/* Búsqueda */}
             <div className="relative">
-              <svg className="pointer-events-none absolute left-3.5 top-1/2 size-5 -translate-y-1/2 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="pointer-events-none absolute left-3.5 top-1/2 size-5 -translate-y-1/2 text-fg-subtle" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
               </svg>
               <input
-                className="w-full rounded-xl border border-slate-200 py-2.5 pl-11 pr-4 text-sm transition focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+                className="w-full rounded-xl border border-border py-2.5 pl-11 pr-4 text-sm transition focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
                 onChange={e => setSearchQuery(e.target.value)}
                 placeholder="Buscar por código, título o ciudad..."
                 type="text"
@@ -183,7 +183,7 @@ export function PropertiesPage() {
               />
               {searchQuery && (
                 <button
-                  className="absolute right-3 top-1/2 -translate-y-1/2 rounded-lg p-1 text-slate-400 transition hover:bg-slate-100 hover:text-slate-600"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 rounded-lg p-1 text-fg-subtle transition hover:bg-surface-sunken hover:text-fg-muted"
                   onClick={() => setSearchQuery('')}
                   type="button"
                 >
@@ -198,9 +198,9 @@ export function PropertiesPage() {
             <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
               {/* Filtro de Estado */}
               <div>
-                <label className="mb-1.5 block text-xs font-semibold text-slate-600">Estado</label>
+                <label className="mb-1.5 block text-xs font-semibold text-fg-muted">Estado</label>
                 <select
-                  className="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm transition focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+                  className="w-full rounded-xl border border-border px-3 py-2 text-sm transition focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
                   onChange={e => setStatusFilter(e.target.value)}
                   value={statusFilter}
                 >
@@ -215,9 +215,9 @@ export function PropertiesPage() {
 
               {/* Filtro de Tipo de Operación */}
               <div>
-                <label className="mb-1.5 block text-xs font-semibold text-slate-600">Operación</label>
+                <label className="mb-1.5 block text-xs font-semibold text-fg-muted">Operación</label>
                 <select
-                  className="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm transition focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+                  className="w-full rounded-xl border border-border px-3 py-2 text-sm transition focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
                   onChange={e => setListingTypeFilter(e.target.value)}
                   value={listingTypeFilter}
                 >
@@ -229,9 +229,9 @@ export function PropertiesPage() {
 
               {/* Filtro de Tipo de Propiedad */}
               <div>
-                <label className="mb-1.5 block text-xs font-semibold text-slate-600">Tipo</label>
+                <label className="mb-1.5 block text-xs font-semibold text-fg-muted">Tipo</label>
                 <select
-                  className="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm transition focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+                  className="w-full rounded-xl border border-border px-3 py-2 text-sm transition focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
                   onChange={e => setPropertyTypeFilter(e.target.value)}
                   value={propertyTypeFilter}
                 >
@@ -247,9 +247,9 @@ export function PropertiesPage() {
 
               {/* Ordenamiento */}
               <div>
-                <label className="mb-1.5 block text-xs font-semibold text-slate-600">Ordenar por</label>
+                <label className="mb-1.5 block text-xs font-semibold text-fg-muted">Ordenar por</label>
                 <select
-                  className="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm transition focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+                  className="w-full rounded-xl border border-border px-3 py-2 text-sm transition focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
                   onChange={e => setSortBy(e.target.value as any)}
                   value={sortBy}
                 >
@@ -263,12 +263,12 @@ export function PropertiesPage() {
 
             {/* Contador de resultados */}
             {(searchQuery || statusFilter !== 'ALL' || listingTypeFilter !== 'ALL' || propertyTypeFilter !== 'ALL') && (
-              <div className="flex items-center justify-between rounded-lg bg-indigo-50 px-4 py-2.5 text-xs">
-                <span className="font-medium text-indigo-900">
+              <div className="flex items-center justify-between rounded-lg bg-primary-soft px-4 py-2.5 text-xs">
+                <span className="font-medium text-primary-fg">
                   {filteredProperties.length} {filteredProperties.length === 1 ? 'propiedad encontrada' : 'propiedades encontradas'}
                 </span>
                 <button
-                  className="font-semibold text-indigo-600 transition hover:text-indigo-700"
+                  className="font-semibold text-primary-fg transition hover:text-primary-fg"
                   onClick={() => {
                     setSearchQuery('');
                     setStatusFilter('ALL');
@@ -287,22 +287,22 @@ export function PropertiesPage() {
           {/* Estado vacío cuando no hay resultados */}
           {filteredProperties.length === 0 && properties.length > 0 && (
             <div className="py-12 text-center">
-              <svg className="mx-auto mb-3 size-12 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="mx-auto mb-3 size-12 text-border-strong" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
               </svg>
-              <p className="text-sm font-medium text-slate-600">No se encontraron propiedades</p>
-              <p className="mt-1 text-xs text-slate-500">Intenta ajustar los filtros de búsqueda</p>
+              <p className="text-sm font-medium text-fg-muted">No se encontraron propiedades</p>
+              <p className="mt-1 text-xs text-fg-subtle">Intenta ajustar los filtros de búsqueda</p>
             </div>
           )}
 
-          {properties.length === 0 && <p className="rounded-2xl border border-slate-200 bg-white p-8 text-center text-sm text-slate-500">Aún no hay propiedades registradas.</p>}
+          {properties.length === 0 && <p className="rounded-2xl border border-border bg-surface p-8 text-center text-sm text-fg-subtle">Aún no hay propiedades registradas.</p>}
         </>
       )}
 
       <div className="grid gap-4 p-4 lg:grid-cols-2 xl:grid-cols-3 lg:p-6">
         {filteredProperties.map(property => (
           <article
-            className="group flex flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition-all hover:border-indigo-400 hover:shadow-xl hover:shadow-indigo-500/10"
+            className="group flex flex-col overflow-hidden rounded-2xl border border-border bg-surface shadow-sm transition-all hover:border-primary hover:shadow-xl hover:shadow-indigo-500/10"
             key={property.id}
           >
             {/* Header con imagen y badges */}
@@ -311,7 +311,7 @@ export function PropertiesPage() {
                 <div className="relative size-20 shrink-0">
                   <img alt={property.title} className="size-20 rounded-xl object-cover" src={propertyImages(property)[0]} />
                   {propertyImages(property).length > 1 && (
-                    <div className="absolute bottom-1.5 right-1.5 flex items-center gap-1 rounded-full bg-slate-950/90 px-2 py-0.5 text-xs font-bold text-white backdrop-blur-sm">
+                    <div className="absolute bottom-1.5 right-1.5 flex items-center gap-1 rounded-full bg-overlay px-2 py-0.5 text-xs font-bold text-white backdrop-blur-sm">
                       <svg className="size-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                       </svg>
@@ -320,35 +320,35 @@ export function PropertiesPage() {
                   )}
                 </div>
               ) : (
-                <div className="grid size-20 shrink-0 place-items-center rounded-xl bg-indigo-50 text-indigo-600">
+                <div className="grid size-20 shrink-0 place-items-center rounded-xl bg-primary-soft text-primary-fg">
                   <svg className="size-10" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
                   </svg>
                 </div>
               )}
               <div className="min-w-0 flex-1">
-                <h2 className="truncate font-bold text-slate-900 group-hover:text-indigo-600 transition mb-1.5">{property.title}</h2>
+                <h2 className="truncate font-bold text-fg group-hover:text-primary-fg transition mb-1.5">{property.title}</h2>
                 <div className="flex flex-wrap gap-1.5 mb-2">
-                  <span className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-bold ${property.listingType === 'RENT' ? 'bg-violet-100 border border-violet-200 text-violet-700' : 'bg-cyan-100 border border-cyan-200 text-cyan-700'}`}>
+                  <span className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-bold ${property.listingType === 'RENT' ? 'bg-accent-muted border border-accent-line text-accent-fg' : 'bg-info-muted border border-info-line text-info-fg'}`}>
                     {listingLabel(property.listingType)}
                   </span>
                   <span className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-bold ${
-                    property.status === 'AVAILABLE' ? 'bg-emerald-100 border border-emerald-200 text-emerald-700' :
-                    property.status === 'RESERVED' ? 'bg-amber-100 border border-amber-200 text-amber-700' :
-                    property.status === 'SOLD' ? 'bg-blue-100 border border-blue-200 text-blue-700' :
-                    property.status === 'RENTED' ? 'bg-purple-100 border border-purple-200 text-purple-700' :
-                    'bg-slate-100 border border-slate-200 text-slate-700'
+                    property.status === 'AVAILABLE' ? 'bg-success-muted border border-success-line text-success-fg' :
+                    property.status === 'RESERVED' ? 'bg-warning-muted border border-warning-line text-warning-fg' :
+                    property.status === 'SOLD' ? 'bg-info-muted border border-info-line text-info-fg' :
+                    property.status === 'RENTED' ? 'bg-accent-muted border border-accent-line text-accent-fg' :
+                    'bg-surface-sunken border border-border text-fg-muted'
                   }`}>
                     {propertyStatusLabel(property.status)}
                   </span>
                   {property.published && (
-                    <span className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-bold bg-indigo-100 border border-indigo-200 text-indigo-700">
+                    <span className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-bold bg-primary-muted border border-primary-line text-primary-fg">
                       Publicada
                     </span>
                   )}
                 </div>
-                <p className="text-xs text-slate-500 flex items-center gap-1.5">
-                  <span className="font-mono bg-slate-100 px-1.5 py-0.5 rounded">{property.code}</span>
+                <p className="text-xs text-fg-subtle flex items-center gap-1.5">
+                  <span className="font-mono bg-surface-sunken px-1.5 py-0.5 rounded">{property.code}</span>
                   <span>·</span>
                   <span>{property.city}, {property.stateCode}</span>
                 </p>
@@ -356,11 +356,11 @@ export function PropertiesPage() {
             </div>
 
             <div className="px-5 pb-3">
-              <div className="text-2xl font-bold text-indigo-600">{formatApiPrice(property)}</div>
+              <div className="text-2xl font-bold text-primary-fg">{formatApiPrice(property)}</div>
             </div>
 
             {/* Features grid */}
-            <div className="grid grid-cols-5 gap-px bg-slate-100 text-center text-xs border-y border-slate-100">
+            <div className="grid grid-cols-5 gap-px bg-surface-sunken text-center text-xs border-y border-border">
               <Feature icon={
                 <svg className="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
@@ -391,7 +391,7 @@ export function PropertiesPage() {
             {/* Botones de acción */}
             <div className="flex flex-col gap-2.5 p-5 mt-auto">
               <Link to={`/app/propiedades/${property.id}/editar`}>
-                <button className="w-full inline-flex items-center justify-center gap-1.5 rounded-xl bg-indigo-600 px-3 py-2 text-xs font-semibold text-white shadow-sm shadow-indigo-600/30 transition-all hover:bg-indigo-700 hover:shadow-md hover:shadow-indigo-600/40">
+                <button className="w-full inline-flex items-center justify-center gap-1.5 rounded-xl bg-primary px-3 py-2 text-xs font-semibold text-white shadow-sm shadow-indigo-600/30 transition-all hover:bg-primary-hover hover:shadow-md hover:shadow-indigo-600/40">
                   <svg className="size-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
@@ -421,12 +421,12 @@ export function PropertiesPage() {
 
 function Feature({ icon, value, label }: { icon: React.ReactNode; value?: number; label: string }) {
   return (
-    <div className="bg-white px-2 py-2.5">
-      <div className="flex items-center justify-center gap-1 mb-0.5 text-indigo-600">
+    <div className="bg-surface px-2 py-2.5">
+      <div className="flex items-center justify-center gap-1 mb-0.5 text-primary-fg">
         {icon}
-        <strong className="text-base text-slate-800">{value ?? '-'}</strong>
+        <strong className="text-base text-fg">{value ?? '-'}</strong>
       </div>
-      <span className="block text-[9px] text-slate-500 font-medium">{label}</span>
+      <span className="block text-[9px] text-fg-subtle font-medium">{label}</span>
     </div>
   );
 }

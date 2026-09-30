@@ -143,19 +143,19 @@ export function ReportsPage() {
   }
 
   if (!metrics) {
-    return <div className="rounded-3xl border border-rose-200 bg-rose-50 p-12 text-center text-sm text-rose-700">No se pudieron cargar los datos</div>;
+    return <div className="rounded-3xl border border-danger-line bg-danger-soft p-12 text-center text-sm text-danger-fg">No se pudieron cargar los datos</div>;
   }
 
   return (
     <>
       <header className="mb-8">
-        <p className="mb-1 text-[11px] font-bold uppercase tracking-[0.16em] text-indigo-600">Reportes</p>
+        <p className="mb-1 text-[11px] font-bold uppercase tracking-[0.16em] text-primary-fg">Reportes</p>
         <h1 className="text-3xl font-bold">Reportes y Análisis</h1>
-        <p className="mt-2 text-sm text-slate-500">Exporta y analiza datos de tu operación inmobiliaria</p>
+        <p className="mt-2 text-sm text-fg-subtle">Exporta y analiza datos de tu operación inmobiliaria</p>
       </header>
 
       {/* Selector de rango */}
-      <section className="mb-6 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+      <section className="mb-6 rounded-2xl border border-border bg-surface p-6 shadow-sm">
         <Select
           label="Período del reporte"
           value={dateRange}
@@ -165,13 +165,13 @@ export function ReportsPage() {
             <option key={key} value={key}>{dateRangeLabels[key]}</option>
           ))}
         </Select>
-        <p className="mt-2 text-xs text-slate-500">
+        <p className="mt-2 text-xs text-fg-subtle">
           Del {new Date(metrics.startDate).toLocaleDateString('es-MX')} al {new Date(metrics.endDate).toLocaleDateString('es-MX')}
         </p>
       </section>
 
       {/* Resumen ejecutivo */}
-      <section className="mb-6 rounded-2xl border border-slate-200 bg-gradient-to-br from-indigo-600 to-violet-600 p-8 text-white shadow-lg">
+      <section className="mb-6 rounded-2xl border border-border bg-gradient-to-br from-indigo-600 to-violet-600 p-8 text-white shadow-lg">
         <h2 className="text-2xl font-bold">Resumen Ejecutivo</h2>
         <p className="mt-1 text-sm text-indigo-100">Indicadores clave de tu negocio</p>
 
@@ -231,16 +231,16 @@ export function ReportsPage() {
       </div>
 
       {/* Métricas detalladas */}
-      <section className="mt-6 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+      <section className="mt-6 rounded-2xl border border-border bg-surface p-6 shadow-sm">
         <h2 className="mb-4 text-xl font-bold">Desglose por Estado</h2>
 
         <div className="mb-6">
-          <h3 className="mb-3 text-sm font-semibold text-slate-700">Leads por Estado</h3>
+          <h3 className="mb-3 text-sm font-semibold text-fg-muted">Leads por Estado</h3>
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
             {Object.entries(metrics.leadsByStatus).map(([status, count]) => (
-              <div key={status} className="rounded-xl border border-slate-200 bg-slate-50 p-3">
+              <div key={status} className="rounded-xl border border-border bg-surface-muted p-3">
                 <strong className="block text-2xl">{count}</strong>
-                <span className="text-xs text-slate-600">{status}</span>
+                <span className="text-xs text-fg-muted">{status}</span>
               </div>
             ))}
           </div>
@@ -269,20 +269,20 @@ type ReportCardProps = {
 
 function ReportCard({ icon, title, description, stats, onExport }: ReportCardProps) {
   return (
-    <article className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+    <article className="rounded-2xl border border-border bg-surface p-6 shadow-sm">
       <div className="mb-4 flex items-start justify-between">
         <div>
           <span className="text-3xl">{icon}</span>
           <h3 className="mt-2 text-lg font-bold">{title}</h3>
-          <p className="text-sm text-slate-500">{description}</p>
+          <p className="text-sm text-fg-subtle">{description}</p>
         </div>
       </div>
 
       <div className="mb-4 space-y-2">
         {stats.map(stat => (
           <div key={stat.label} className="flex justify-between text-sm">
-            <span className="text-slate-600">{stat.label}</span>
-            <strong className="text-slate-900">{stat.value}</strong>
+            <span className="text-fg-muted">{stat.label}</span>
+            <strong className="text-fg">{stat.value}</strong>
           </div>
         ))}
       </div>

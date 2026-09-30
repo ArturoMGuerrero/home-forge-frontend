@@ -70,14 +70,14 @@ export function PlansPage() {
     }
   }
 
-  if (!subscription || plans.length === 0) return <p className="rounded-2xl border border-slate-200 bg-white p-10 text-center text-sm text-slate-500">Consultando tu suscripción...</p>;
+  if (!subscription || plans.length === 0) return <p className="rounded-2xl border border-border bg-surface p-10 text-center text-sm text-fg-subtle">Consultando tu suscripción...</p>;
 
   return (
     <>
       <header className="mb-8">
-        <p className="mb-1 text-[11px] font-bold uppercase tracking-[0.16em] text-indigo-600">Suscripción</p>
+        <p className="mb-1 text-[11px] font-bold uppercase tracking-[0.16em] text-primary-fg">Suscripción</p>
         <h1 className="text-3xl font-bold">Plan y facturación</h1>
-        <p className="mt-2 text-sm text-slate-500">Aprovecha tu periodo de prueba gratuito de 14 días. Después, elige el plan que mejor se adapte a tu negocio.</p>
+        <p className="mt-2 text-sm text-fg-subtle">Aprovecha tu periodo de prueba gratuito de 14 días. Después, elige el plan que mejor se adapte a tu negocio.</p>
       </header>
 
       {subscription && plans.length > 0 && (
@@ -86,9 +86,9 @@ export function PlansPage() {
             <div className="grid gap-6 lg:grid-cols-[1fr_auto] lg:items-center">
               <div>
                 <span className={`rounded-full px-3 py-1 text-xs font-bold ${
-                  subscription.status === 'TRIAL' ? 'bg-cyan-300/15 text-cyan-200' :
-                  subscription.status === 'ACTIVE' ? 'bg-emerald-300/15 text-emerald-200' :
-                  'bg-rose-300/15 text-rose-200'
+                  subscription.status === 'TRIAL' ? 'bg-info-line/15 text-cyan-200' :
+                  subscription.status === 'ACTIVE' ? 'bg-success-line/15 text-emerald-200' :
+                  'bg-danger-line/15 text-rose-200'
                 }`}>
                   {subscription.status === 'TRIAL' ? 'PERIODO DE PRUEBA' :
                    subscription.status === 'ACTIVE' ? 'ACTIVO' :
@@ -134,10 +134,10 @@ export function PlansPage() {
             <SubscriptionDetails />
 
             {paymentStatus && !paymentStatus.hasActiveSubscription && subscription.planCode !== 'STARTER' && (
-              <article className="rounded-2xl border border-amber-200 bg-amber-50 p-6">
-                <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-amber-700">Próximo paso</p>
-                <h2 className="mt-2 text-xl font-bold text-amber-950">Suscripción pendiente</h2>
-                <p className="mt-3 text-sm leading-6 text-amber-800">
+              <article className="rounded-2xl border border-warning-line bg-warning-soft p-6">
+                <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-warning-fg">Próximo paso</p>
+                <h2 className="mt-2 text-xl font-bold text-warning-fg">Suscripción pendiente</h2>
+                <p className="mt-3 text-sm leading-6 text-warning-fg">
                   {paymentStatus.subscriptionStatus === 'PENDING'
                     ? 'Tu pago está siendo procesado. Te notificaremos cuando se active tu suscripción.'
                     : 'Selecciona un plan PRO o BUSINESS para activar funciones premium.'}
@@ -146,10 +146,10 @@ export function PlansPage() {
             )}
 
             {paymentStatus?.hasActiveSubscription && (
-              <article className="rounded-2xl border border-emerald-200 bg-emerald-50 p-6">
-                <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-emerald-700">Estado</p>
-                <h2 className="mt-2 text-xl font-bold text-emerald-950">Suscripción Activa</h2>
-                <p className="mt-3 text-sm leading-6 text-emerald-800">
+              <article className="rounded-2xl border border-success-line bg-success-soft p-6">
+                <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-success-fg">Estado</p>
+                <h2 className="mt-2 text-xl font-bold text-success-fg">Suscripción Activa</h2>
+                <p className="mt-3 text-sm leading-6 text-success-fg">
                   Tu plan {paymentStatus.planCode} está activo. El próximo cargo se realizará automáticamente.
                 </p>
               </article>

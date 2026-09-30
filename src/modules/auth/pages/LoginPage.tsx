@@ -28,7 +28,7 @@ export function LoginPage() {
   }
 
   return (
-    <div className="grid min-h-screen bg-slate-950 lg:grid-cols-[1.05fr_.95fr]">
+    <div className="grid min-h-screen bg-inverse lg:grid-cols-[1.05fr_.95fr]">
       <section className="relative hidden overflow-hidden p-12 text-white lg:flex lg:flex-col lg:justify-between">
         <div className="absolute inset-0 bg-gradient-to-br from-indigo-600/80 via-slate-950 to-cyan-500/40" />
         <div className="absolute -left-24 top-28 size-80 rounded-full border-[60px] border-white/5" />
@@ -36,21 +36,21 @@ export function LoginPage() {
         <div className="relative max-w-xl">
           <p className="mb-4 text-sm font-bold uppercase tracking-[.2em] text-cyan-300">Operación inmobiliaria</p>
           <h1 className="text-5xl font-bold leading-tight">Convierte cada oportunidad en una venta mejor gestionada.</h1>
-          <p className="mt-5 text-lg text-slate-300">Prospectos, inventario y publicación de propiedades en un solo lugar.</p>
+          <p className="mt-5 text-lg text-border-strong">Prospectos, inventario y publicación de propiedades en un solo lugar.</p>
         </div>
       </section>
 
-      <section className="flex items-center justify-center bg-slate-50 px-5 py-10">
+      <section className="flex items-center justify-center bg-surface-muted px-5 py-10">
         <div className="w-full max-w-md">
           <div className="mb-8 lg:hidden">
             <div className="flex items-center gap-3">
               <img alt="HomeForge" className="size-12 rounded-xl object-cover" src="/favicon.png" />
-              <strong className="text-xl font-bold text-slate-950">HomeForge</strong>
+              <strong className="text-xl font-bold text-fg">HomeForge</strong>
             </div>
           </div>
-          <p className="mb-1 text-[11px] font-bold uppercase tracking-[0.16em] text-indigo-600">Acceso privado</p>
+          <p className="mb-1 text-[11px] font-bold uppercase tracking-[0.16em] text-primary-fg">Acceso privado</p>
           <h2 className="text-3xl font-bold">Bienvenido de nuevo</h2>
-          <p className="mt-2 text-sm text-slate-500">Ingresa con la cuenta registrada para tu empresa.</p>
+          <p className="mt-2 text-sm text-fg-subtle">Ingresa con la cuenta registrada para tu empresa.</p>
 
 
           <form className="mt-8 space-y-5" onSubmit={submit}>
@@ -64,7 +64,7 @@ export function LoginPage() {
             />
             <div className="relative">
               <div className="absolute right-0 top-0 z-10">
-                <Link className="text-xs font-semibold text-indigo-600 hover:text-indigo-800" to="/recuperar-contraseña">
+                <Link className="text-xs font-semibold text-primary-fg hover:underline" to="/recuperar-contraseña">
                   ¿Olvidaste tu contraseña?
                 </Link>
               </div>
@@ -89,13 +89,13 @@ export function LoginPage() {
             </Button>
           </form>
 
-          <p className="mt-6 text-center text-sm text-slate-500">
+          <p className="mt-6 text-center text-sm text-fg-subtle">
             ¿Aún no tienes cuenta?{' '}
-            <Link className="font-semibold text-indigo-600 hover:text-indigo-800" to="/registro">
+            <Link className="font-semibold text-primary-fg hover:underline" to="/registro">
               Crear una cuenta
             </Link>
           </p>
-          <Link className="mt-6 block text-center text-sm font-semibold text-indigo-600 hover:text-indigo-800" to="/propiedades">
+          <Link className="mt-6 block text-center text-sm font-semibold text-primary-fg hover:underline" to="/propiedades">
             Ver propiedades sin iniciar sesión
           </Link>
         </div>

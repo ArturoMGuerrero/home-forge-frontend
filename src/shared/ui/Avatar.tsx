@@ -1,92 +1,77 @@
 import { ImgHTMLAttributes } from 'react';
+import { cn } from './cn';
 
 type AvatarSize = 'xs' | 'sm' | 'md' | 'lg' | 'xl' | '2xl';
 
 interface AvatarProps extends Omit<ImgHTMLAttributes<HTMLImageElement>, 'src' | 'size'> {
-  src?: string;
+  src?: string | null;
   name?: string;
   size?: AvatarSize;
   status?: 'online' | 'offline' | 'away';
 }
 
 const sizeClasses: Record<AvatarSize, { container: string; text: string; status: string }> = {
-  xs: { container: 'size-6', text: 'text-xs', status: 'size-2' },
-  sm: { container: 'size-8', text: 'text-sm', status: 'size-2.5' },
-  md: { container: 'size-10', text: 'text-base', status: 'size-3' },
-  lg: { container: 'size-12', text: 'text-lg', status: 'size-3.5' },
-  xl: { container: 'size-16', text: 'text-2xl', status: 'size-4' },
-  '2xl': { container: 'size-24', text: 'text-4xl', status: 'size-5' },
+  xs: { container: 'size-6', text: 'text-[10px]', status: 'size-2' },
+  sm: { container: 'size-8', text: 'text-xs', status: 'size-2.5' },
+  md: { container: 'size-10', text: 'text-sm', status: 'size-3' },
+  lg: { container: 'size-12', text: 'text-base', status: 'size-3.5' },
+  xl: { container: 'size-16', text: 'text-xl', status: 'size-4' },
+  '2xl': { container: 'size-24', text: 'text-3xl', status: 'size-5' },
 };
 
 const statusColors = {
-  online: 'bg-emerald-500',
-  offline: 'bg-slate-400',
-  away: 'bg-amber-500',
+  online: 'bg-success',
+  offline: 'bg-fg-subtle',
+  away: 'bg-warning',
 };
 
-function getInitials(name: string): string {
-  const parts = name.trim().split(' ');
-  if (parts.length >= 2) {
-    return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
-  }
-  return name.substring(0, 2).toUpperCase();
+const avatarColors = [
+  'bg-primary-muted text-primary-fg',
+  'bg-accent-muted text-accent-fg',
+  'bg-info-muted text-info-fg',
+  'bg-success-muted text-success-fg',
+  'bg-warning-muted text-warning-fg',
+  'bg-danger-muted text-danger-fg',
+];
+
+export function getInitials(name: string): string {
+  const parts = name.trim().split(/\s+/).filter(Boolean);
+  if (parts.length >= 2) return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+  return name.trim().substring(0, 2).toUpperCase() || '?';
 }
 
 function getColorFromName(name: string): string {
-  const colors = [
-    'bg-indigo-500',
-    'bg-purple-500',
-    'bg-pink-500',
-    'bg-rose-500',
-    'bg-amber-500',
-    'bg-emerald-500',
-    'bg-teal-500',
-    'bg-cyan-500',
-    'bg-blue-500',
-  ];
-  const index = name.charCodeAt(0) % colors.length;
-  return colors[index];
+  let hash = 0;
+  for (const char of name) hash = (hash * 31 + char.charCodeAt(0)) >>> 0;
+  return avatarColors[hash % avatarColors.length];
 }
 
-export function Avatar({ src, name = 'User', size = 'md', status, className = '', ...props }: AvatarProps) {
+export function Avatar({ src, name = 'Usuario', size = 'md', status, className, ...props }: AvatarProps) {
   const sizes = sizeClasses[size];
-  const bgColor = getColorFromName(name);
 
   return (
-    <div className={`relative inline-block ${className}`}>
-      <div
-        className={`
-          ${sizes.container}
-          flex items-center justify-center rounded-full
-          overflow-hidden border-2 border-white shadow-sm
-          ${!src ? `${bgColor} text-white font-semibold ${sizes.text}` : ''}
-        `}
+    <span className={cn('relative inline-flex shrink-0', className)}>
+      <span
+        className={cn(
+          'flex items-center justify-center overflow-hidden rounded-full font-semibold',
+          sizes.container,
+          !src && cn(getColorFromName(name), sizes.text),
+        )}
       >
         {src ? (
-          <img
-            src={src}
-            alt={name}
-            className="size-full object-cover"
-            {...props}
-          />
+          <img alt={name} className="size-full object-cover" src={src} {...props} />
         ) : (
-          <span>{getInitials(name)}</span>
+          <span aria-label={name} role="img">{getInitials(name)}</span>
         )}
-      </div>
+      </span>
 
       {status && (
-        <div
-          className={`
-            absolute bottom-0 right-0 rounded-full border-2 border-white
-            ${sizes.status} ${statusColors[status]}
-          `}
-        />
+        <span className={cn('absolute bottom-0 right-0 rounded-full ring-2 ring-surface', sizes.status, statusColors[status])} />
       )}
-    </div>
+    </span>
   );
 }
 
-// Avatar Group para mostrar múltiples avatares
 interface AvatarGroupProps {
   avatars: Array<{ src?: string; name: string }>;
   max?: number;
@@ -100,25 +85,18 @@ export function AvatarGroup({ avatars, max = 4, size = 'md' }: AvatarGroupProps)
   return (
     <div className="flex -space-x-2">
       {displayed.map((avatar, index) => (
-        <Avatar
-          key={index}
-          src={avatar.src}
-          name={avatar.name}
-          size={size}
-          className="ring-2 ring-white"
-        />
+        <Avatar className="rounded-full ring-2 ring-surface" key={index} name={avatar.name} size={size} src={avatar.src} />
       ))}
       {remaining > 0 && (
-        <div
-          className={`
-            ${sizeClasses[size].container}
-            flex items-center justify-center rounded-full
-            bg-slate-200 text-slate-700 font-semibold ${sizeClasses[size].text}
-            ring-2 ring-white
-          `}
+        <span
+          className={cn(
+            'flex items-center justify-center rounded-full bg-surface-strong font-semibold text-fg-muted ring-2 ring-surface',
+            sizeClasses[size].container,
+            sizeClasses[size].text,
+          )}
         >
           +{remaining}
-        </div>
+        </span>
       )}
     </div>
   );

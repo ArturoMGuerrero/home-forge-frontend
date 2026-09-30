@@ -164,13 +164,13 @@ export default function CalendarPage() {
 
   const getStatusColor = (status: AppointmentStatus) => {
     switch (status) {
-      case AppointmentStatus.SCHEDULED: return 'bg-blue-100 text-blue-800 border-blue-300';
-      case AppointmentStatus.CONFIRMED: return 'bg-green-100 text-green-800 border-green-300';
-      case AppointmentStatus.COMPLETED: return 'bg-gray-100 text-gray-800 border-gray-300';
-      case AppointmentStatus.CANCELLED: return 'bg-red-100 text-red-800 border-red-300';
-      case AppointmentStatus.NO_SHOW: return 'bg-orange-100 text-orange-800 border-orange-300';
-      case AppointmentStatus.RESCHEDULED: return 'bg-purple-100 text-purple-800 border-purple-300';
-      default: return 'bg-gray-100 text-gray-800 border-gray-300';
+      case AppointmentStatus.SCHEDULED: return 'bg-info-muted text-info-fg border-info-line';
+      case AppointmentStatus.CONFIRMED: return 'bg-success-muted text-success-fg border-success-line';
+      case AppointmentStatus.COMPLETED: return 'bg-surface-sunken text-fg border-border-strong';
+      case AppointmentStatus.CANCELLED: return 'bg-danger-muted text-danger-fg border-danger-line';
+      case AppointmentStatus.NO_SHOW: return 'bg-warning-muted text-warning-fg border-warning-line';
+      case AppointmentStatus.RESCHEDULED: return 'bg-accent-muted text-accent-fg border-accent-line';
+      default: return 'bg-surface-sunken text-fg border-border-strong';
     }
   };
 
@@ -185,7 +185,7 @@ export default function CalendarPage() {
             <h1 className="text-4xl font-bold bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent">
               Calendario de Citas
             </h1>
-            <p className="text-slate-600 mt-2 text-lg">Gestiona tus citas y eventos del día a día</p>
+            <p className="text-fg-muted mt-2 text-lg">Gestiona tus citas y eventos del día a día</p>
           </div>
           <div className="flex gap-3">
             <Button
@@ -215,7 +215,7 @@ export default function CalendarPage() {
       </div>
 
       {/* Calendar Card */}
-      <div className="bg-white rounded-2xl shadow-xl border border-slate-200 overflow-hidden">
+      <div className="bg-surface rounded-2xl shadow-xl border border-border overflow-hidden">
         {/* Calendar Controls */}
         <div className="bg-gradient-to-r from-slate-700 to-slate-800 p-6">
           <div className="flex justify-between items-center">
@@ -265,12 +265,12 @@ export default function CalendarPage() {
               </Button>
             </div>
 
-            <div className="flex gap-1 bg-slate-800/50 backdrop-blur-sm rounded-xl p-1.5 border border-white/10">
+            <div className="flex gap-1 bg-overlay backdrop-blur-sm rounded-xl p-1.5 border border-white/10">
               <button
                 onClick={() => setViewMode('month')}
                 className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 ${
                   viewMode === 'month'
-                    ? 'bg-white text-slate-800 shadow-lg'
+                    ? 'bg-surface text-fg shadow-lg'
                     : 'text-white/70 hover:text-white hover:bg-white/10'
                 }`}
               >
@@ -280,7 +280,7 @@ export default function CalendarPage() {
                 onClick={() => setViewMode('week')}
                 className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 ${
                   viewMode === 'week'
-                    ? 'bg-white text-slate-800 shadow-lg'
+                    ? 'bg-surface text-fg shadow-lg'
                     : 'text-white/70 hover:text-white hover:bg-white/10'
                 }`}
               >
@@ -290,7 +290,7 @@ export default function CalendarPage() {
                 onClick={() => setViewMode('day')}
                 className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 ${
                   viewMode === 'day'
-                    ? 'bg-white text-slate-800 shadow-lg'
+                    ? 'bg-surface text-fg shadow-lg'
                     : 'text-white/70 hover:text-white hover:bg-white/10'
                 }`}
               >
@@ -306,7 +306,7 @@ export default function CalendarPage() {
             {/* Day Headers */}
             <div className="grid grid-cols-7 gap-3 mb-4">
               {DAYS.map(day => (
-                <div key={day} className="text-center font-bold text-slate-700 py-3 text-sm uppercase tracking-wider">
+                <div key={day} className="text-center font-bold text-fg-muted py-3 text-sm uppercase tracking-wider">
                   {day}
                 </div>
               ))}
@@ -323,8 +323,8 @@ export default function CalendarPage() {
                     onClick={() => handleDayClick(date)}
                     className={`
                       min-h-[130px] rounded-xl p-3 transition-all duration-200 relative overflow-hidden
-                      ${date ? 'bg-white border-2 cursor-pointer shadow-sm hover:shadow-lg hover:scale-[1.02]' : 'bg-slate-50/50 border-2 border-transparent'}
-                      ${today ? 'border-blue-500 bg-gradient-to-br from-blue-50 to-sky-50 ring-2 ring-blue-200' : 'border-slate-200 hover:border-blue-400'}
+                      ${date ? 'bg-surface border-2 cursor-pointer shadow-sm hover:shadow-lg hover:scale-[1.02]' : 'bg-surface-muted/50 border-2 border-transparent'}
+                      ${today ? 'border-info bg-gradient-to-br from-info-soft to-info-soft ring-2 ring-info-line' : 'border-border hover:border-info'}
                     `}
                   >
                     {date && (
@@ -334,7 +334,7 @@ export default function CalendarPage() {
                           flex items-center justify-center w-8 h-8 rounded-full mb-2 font-bold text-sm
                           ${today
                             ? 'bg-gradient-to-r from-blue-600 to-sky-600 text-white shadow-md'
-                            : 'text-slate-700'
+                            : 'text-fg-muted'
                           }
                         `}>
                           {date.getDate()}
@@ -359,7 +359,7 @@ export default function CalendarPage() {
                             </div>
                           ))}
                           {dayAppointments.length > 2 && (
-                            <div className="text-xs text-blue-600 font-semibold text-center bg-blue-50 rounded-lg py-1">
+                            <div className="text-xs text-info-fg font-semibold text-center bg-info-soft rounded-lg py-1">
                               +{dayAppointments.length - 2} más
                             </div>
                           )}
@@ -368,7 +368,7 @@ export default function CalendarPage() {
                         {/* Indicator for days with events */}
                         {dayAppointments.length > 0 && (
                           <div className="absolute top-2 right-2">
-                            <div className="size-2 rounded-full bg-blue-500 animate-pulse" />
+                            <div className="size-2 rounded-full bg-info animate-pulse" />
                           </div>
                         )}
                       </>
@@ -384,15 +384,15 @@ export default function CalendarPage() {
           <div className="p-6">
             {/* Week Header */}
             <div className="grid grid-cols-8 gap-2 mb-2">
-              <div className="text-xs font-semibold text-slate-600 py-2"></div>
+              <div className="text-xs font-semibold text-fg-muted py-2"></div>
               {getWeekDays().map((date, index) => {
                 const today = isToday(date);
                 return (
-                  <div key={index} className={`text-center py-2 rounded-lg ${today ? 'bg-blue-100' : ''}`}>
-                    <div className="text-xs font-semibold text-slate-600 uppercase">
+                  <div key={index} className={`text-center py-2 rounded-lg ${today ? 'bg-info-muted' : ''}`}>
+                    <div className="text-xs font-semibold text-fg-muted uppercase">
                       {DAYS[date.getDay()]}
                     </div>
-                    <div className={`text-lg font-bold ${today ? 'text-blue-600' : 'text-slate-800'}`}>
+                    <div className={`text-lg font-bold ${today ? 'text-info-fg' : 'text-fg'}`}>
                       {date.getDate()}
                     </div>
                   </div>
@@ -401,10 +401,10 @@ export default function CalendarPage() {
             </div>
 
             {/* Time slots */}
-            <div className="border border-slate-200 rounded-lg overflow-hidden bg-white">
+            <div className="border border-border rounded-lg overflow-hidden bg-surface">
               {Array.from({ length: 14 }, (_, i) => i + 7).map(hour => (
-                <div key={hour} className="grid grid-cols-8 gap-2 border-b border-slate-100 last:border-b-0">
-                  <div className="text-xs font-semibold text-slate-600 py-3 px-2 bg-slate-50">
+                <div key={hour} className="grid grid-cols-8 gap-2 border-b border-border last:border-b-0">
+                  <div className="text-xs font-semibold text-fg-muted py-3 px-2 bg-surface-muted">
                     {hour.toString().padStart(2, '0')}:00
                   </div>
                   {getWeekDays().map((date, dayIndex) => {
@@ -418,7 +418,7 @@ export default function CalendarPage() {
                     return (
                       <div
                         key={dayIndex}
-                        className="min-h-[60px] p-1 border-l border-slate-100 hover:bg-blue-50 cursor-pointer transition relative"
+                        className="min-h-[60px] p-1 border-l border-border hover:bg-info-soft cursor-pointer transition relative"
                         onClick={() => {
                           setSelectedDate(new Date(date.setHours(hour, 0, 0, 0)));
                           setShowNewModal(true);
@@ -458,7 +458,7 @@ export default function CalendarPage() {
 
         {viewMode === 'day' && (
           <div className="p-6">
-            <div className="border border-slate-200 rounded-lg overflow-hidden bg-white max-w-4xl mx-auto">
+            <div className="border border-border rounded-lg overflow-hidden bg-surface max-w-4xl mx-auto">
               {/* Day appointments by hour */}
               {Array.from({ length: 14 }, (_, i) => i + 7).map(hour => {
                 const hourAppointments = getAppointmentsForTimeSlot(currentDate, hour);
@@ -469,12 +469,12 @@ export default function CalendarPage() {
                 });
 
                 return (
-                  <div key={hour} className="flex border-b border-slate-100 last:border-b-0 hover:bg-slate-50 transition">
-                    <div className="w-24 py-4 px-4 bg-slate-50 border-r border-slate-200 flex-shrink-0">
-                      <div className="text-sm font-bold text-slate-700">
+                  <div key={hour} className="flex border-b border-border last:border-b-0 hover:bg-surface-muted transition">
+                    <div className="w-24 py-4 px-4 bg-surface-muted border-r border-border flex-shrink-0">
+                      <div className="text-sm font-bold text-fg-muted">
                         {hour.toString().padStart(2, '0')}:00
                       </div>
-                      <div className="text-xs text-slate-500">
+                      <div className="text-xs text-fg-subtle">
                         {hour < 12 ? 'AM' : 'PM'}
                       </div>
                     </div>
@@ -490,7 +490,7 @@ export default function CalendarPage() {
                       }}
                     >
                       {appointmentsStartingHere.length === 0 ? (
-                        <div className="flex items-center justify-center h-full text-slate-400 text-sm">
+                        <div className="flex items-center justify-center h-full text-fg-subtle text-sm">
                           Click para agregar cita
                         </div>
                       ) : (
@@ -504,16 +504,16 @@ export default function CalendarPage() {
                               <div className="flex items-start justify-between gap-3">
                                 <div className="flex-1">
                                   <div className="font-bold text-base mb-1">{apt.title}</div>
-                                  <div className="text-sm text-slate-600 mb-2">
+                                  <div className="text-sm text-fg-muted mb-2">
                                     {new Date(apt.startsAt).toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' })}
                                     {' - '}
                                     {new Date(apt.endsAt).toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' })}
                                   </div>
                                   {apt.description && (
-                                    <p className="text-sm text-slate-600">{apt.description}</p>
+                                    <p className="text-sm text-fg-muted">{apt.description}</p>
                                   )}
                                   {apt.location && (
-                                    <div className="flex items-center gap-1.5 mt-2 text-xs text-slate-500">
+                                    <div className="flex items-center gap-1.5 mt-2 text-xs text-fg-subtle">
                                       <svg className="size-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -527,7 +527,7 @@ export default function CalendarPage() {
                                     {appointmentStatusLabels[apt.status]}
                                   </span>
                                   {apt.appointmentType && (
-                                    <span className="px-3 py-1 rounded-full text-xs font-semibold bg-blue-100 text-blue-800">
+                                    <span className="px-3 py-1 rounded-full text-xs font-semibold bg-info-muted text-info-fg">
                                       {appointmentTypeLabels[apt.appointmentType]}
                                     </span>
                                   )}

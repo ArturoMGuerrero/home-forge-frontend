@@ -86,8 +86,8 @@ export default function FollowUpTasksPage() {
   return (
     <div className="p-6">
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">Tareas de Seguimiento</h1>
-        <p className="text-sm text-gray-500 mt-1">
+        <h1 className="text-2xl font-bold text-fg">Tareas de Seguimiento</h1>
+        <p className="text-sm text-fg-subtle mt-1">
           Tareas automáticas creadas al cambiar el estado de los leads
         </p>
       </div>
@@ -132,7 +132,7 @@ export default function FollowUpTasksPage() {
       </div>
 
       {filteredTasks.length === 0 ? (
-        <div className="text-center py-12 text-gray-500">
+        <div className="text-center py-12 text-fg-subtle">
           No hay tareas {filter !== 'ALL' ? taskStatusLabels[filter] : ''}.
         </div>
       ) : (
@@ -145,46 +145,46 @@ export default function FollowUpTasksPage() {
             return (
               <div
                 key={task.id}
-                className={`bg-white rounded-lg border-2 p-4 ${
+                className={`bg-surface rounded-lg border-2 p-4 ${
                   isOverdue
-                    ? 'border-red-300 bg-red-50'
+                    ? 'border-danger-line bg-danger-soft'
                     : task.status === 'COMPLETED'
-                    ? 'border-green-200 bg-green-50'
-                    : 'border-gray-200'
+                    ? 'border-success-line bg-success-soft'
+                    : 'border-border'
                 }`}
               >
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
                     <div className="flex items-center gap-2">
-                      <h3 className="font-semibold text-gray-900">{task.title}</h3>
+                      <h3 className="font-semibold text-fg">{task.title}</h3>
                       <span
                         className={`inline-block px-2 py-0.5 rounded text-xs font-medium ${
                           task.priority === 'URGENT'
-                            ? 'bg-red-100 text-red-800'
+                            ? 'bg-danger-muted text-danger-fg'
                             : task.priority === 'HIGH'
-                            ? 'bg-orange-100 text-orange-800'
+                            ? 'bg-warning-muted text-warning-fg'
                             : task.priority === 'MEDIUM'
-                            ? 'bg-yellow-100 text-yellow-800'
-                            : 'bg-gray-100 text-gray-600'
+                            ? 'bg-warning-muted text-warning-fg'
+                            : 'bg-surface-sunken text-fg-muted'
                         }`}
                       >
                         {taskPriorityLabels[task.priority]}
                       </span>
-                      <span className="inline-block px-2 py-0.5 rounded text-xs bg-blue-100 text-blue-800">
+                      <span className="inline-block px-2 py-0.5 rounded text-xs bg-info-muted text-info-fg">
                         {taskTypeLabels[task.taskType]}
                       </span>
                     </div>
                     {task.description && (
-                      <p className="text-sm text-gray-600 mt-1">{task.description}</p>
+                      <p className="text-sm text-fg-muted mt-1">{task.description}</p>
                     )}
-                    <div className="text-xs text-gray-500 mt-2">
+                    <div className="text-xs text-fg-subtle mt-2">
                       Programada:{' '}
                       {new Date(task.scheduledFor).toLocaleString('es-MX', {
                         dateStyle: 'short',
                         timeStyle: 'short'
                       })}
                       {isOverdue && (
-                        <span className="ml-2 text-red-600 font-medium">
+                        <span className="ml-2 text-danger-fg font-medium">
                           ¡Vencida!
                         </span>
                       )}

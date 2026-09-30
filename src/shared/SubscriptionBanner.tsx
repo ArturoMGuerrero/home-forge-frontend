@@ -11,8 +11,8 @@ export function SubscriptionBanner({ restrictions }: Props) {
   const { bannerType, bannerMessage } = restrictions;
 
   const styles = {
-    warning: 'bg-gradient-to-r from-amber-600 to-orange-600 border-amber-700 text-white',
-    error: 'bg-gradient-to-r from-rose-600 to-pink-600 border-rose-700 text-white',
+    warning: 'bg-gradient-to-r from-amber-600 to-orange-600 border-warning text-white',
+    error: 'bg-gradient-to-r from-rose-600 to-pink-600 border-danger text-white',
     blocked: 'bg-gradient-to-r from-slate-800 to-slate-900 border-slate-700 text-white'
   };
 

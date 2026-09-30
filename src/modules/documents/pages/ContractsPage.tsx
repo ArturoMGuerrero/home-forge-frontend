@@ -48,14 +48,14 @@ export default function ContractsPage() {
 
   function getStatusColor(status: DocumentStatus): string {
     switch (status) {
-      case 'DRAFT': return 'bg-gray-100 text-gray-800';
-      case 'PENDING_SIGNATURE': return 'bg-yellow-100 text-yellow-800';
-      case 'PARTIALLY_SIGNED': return 'bg-blue-100 text-blue-800';
-      case 'SIGNED': return 'bg-green-100 text-green-800';
-      case 'COMPLETED': return 'bg-emerald-100 text-emerald-800';
-      case 'CANCELLED': return 'bg-red-100 text-red-800';
-      case 'EXPIRED': return 'bg-orange-100 text-orange-800';
-      default: return 'bg-gray-100 text-gray-800';
+      case 'DRAFT': return 'bg-surface-sunken text-fg';
+      case 'PENDING_SIGNATURE': return 'bg-warning-muted text-warning-fg';
+      case 'PARTIALLY_SIGNED': return 'bg-info-muted text-info-fg';
+      case 'SIGNED': return 'bg-success-muted text-success-fg';
+      case 'COMPLETED': return 'bg-success-muted text-success-fg';
+      case 'CANCELLED': return 'bg-danger-muted text-danger-fg';
+      case 'EXPIRED': return 'bg-warning-muted text-warning-fg';
+      default: return 'bg-surface-sunken text-fg';
     }
   }
 
@@ -68,7 +68,7 @@ export default function ContractsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
+    <div className="min-h-screen bg-app">
       <PageHeader
         title="Contratos y Documentos"
         subtitle="Gestiona plantillas, genera contratos y administra firmas electrónicas"
@@ -103,13 +103,13 @@ export default function ContractsPage() {
       <div className="p-4 lg:p-6">
         {filteredDocuments.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-20 text-center">
-            <div className="rounded-full bg-slate-100 p-6 mb-4">
-              <svg className="size-12 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="rounded-full bg-surface-sunken p-6 mb-4">
+              <svg className="size-12 text-fg-subtle" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
               </svg>
             </div>
-            <p className="text-slate-600 font-medium">No hay contratos {activeTab !== 'ALL' && documentStatusLabels[activeTab as DocumentStatus]}</p>
-            <p className="text-sm text-slate-500 mt-1">Crea tu primer contrato desde una plantilla</p>
+            <p className="text-fg-muted font-medium">No hay contratos {activeTab !== 'ALL' && documentStatusLabels[activeTab as DocumentStatus]}</p>
+            <p className="text-sm text-fg-subtle mt-1">Crea tu primer contrato desde una plantilla</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -117,16 +117,16 @@ export default function ContractsPage() {
               <Link
                 key={doc.id}
                 to={`/app/contratos/${doc.id}`}
-                className="bg-white rounded-xl border border-slate-200 p-5 hover:shadow-lg hover:border-indigo-300 transition-all"
+                className="bg-surface rounded-xl border border-border p-5 hover:shadow-lg hover:border-primary-line transition-all"
               >
                 <div className="flex items-start justify-between mb-3">
                   <div className="flex items-center gap-2">
-                    <div className="size-10 rounded-lg bg-indigo-100 flex items-center justify-center text-xl">
+                    <div className="size-10 rounded-lg bg-primary-muted flex items-center justify-center text-xl">
                       📄
                     </div>
                     <div className="flex-1 min-w-0">
-                      <h3 className="font-semibold text-slate-900 truncate">{doc.name}</h3>
-                      <p className="text-xs text-slate-500">{documentTypeLabels[doc.documentType]}</p>
+                      <h3 className="font-semibold text-fg truncate">{doc.name}</h3>
+                      <p className="text-xs text-fg-subtle">{documentTypeLabels[doc.documentType]}</p>
                     </div>
                   </div>
                 </div>
@@ -135,13 +135,13 @@ export default function ContractsPage() {
                   <span className={`inline-block px-2.5 py-1 rounded-full text-xs font-medium ${getStatusColor(doc.status)}`}>
                     {documentStatusLabels[doc.status]}
                   </span>
-                  <span className="text-xs text-slate-500">
+                  <span className="text-xs text-fg-subtle">
                     {new Date(doc.createdAt).toLocaleDateString('es-MX')}
                   </span>
                 </div>
 
                 {doc.version > 1 && (
-                  <div className="mt-2 text-xs text-slate-500">
+                  <div className="mt-2 text-xs text-fg-subtle">
                     Versión {doc.version}
                   </div>
                 )}

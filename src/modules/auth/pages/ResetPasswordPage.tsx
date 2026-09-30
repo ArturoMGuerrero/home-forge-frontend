@@ -51,7 +51,7 @@ export function ResetPasswordPage() {
   }
 
   return (
-    <div className="grid min-h-screen bg-slate-950 lg:grid-cols-[1.05fr_.95fr]">
+    <div className="grid min-h-screen bg-inverse lg:grid-cols-[1.05fr_.95fr]">
       <section className="relative hidden overflow-hidden p-12 text-white lg:flex lg:flex-col lg:justify-between">
         <div className="absolute inset-0 bg-gradient-to-br from-indigo-600/80 via-slate-950 to-cyan-500/40" />
         <div className="absolute -left-24 top-28 size-80 rounded-full border-[60px] border-white/5" />
@@ -59,22 +59,22 @@ export function ResetPasswordPage() {
         <div className="relative max-w-xl">
           <p className="mb-4 text-sm font-bold uppercase tracking-[.2em] text-cyan-300">Nueva contraseña</p>
           <h1 className="text-5xl font-bold leading-tight">Crea una contraseña segura para tu cuenta.</h1>
-          <p className="mt-5 text-lg text-slate-300">Asegúrate de que sea fácil de recordar pero difícil de adivinar.</p>
+          <p className="mt-5 text-lg text-border-strong">Asegúrate de que sea fácil de recordar pero difícil de adivinar.</p>
         </div>
       </section>
 
-      <section className="flex items-center justify-center bg-slate-50 px-5 py-10">
+      <section className="flex items-center justify-center bg-surface-muted px-5 py-10">
         <div className="w-full max-w-md">
           <div className="mb-8 lg:hidden">
             <div className="flex items-center gap-3">
               <img alt="HomeForge" className="size-12 rounded-xl object-cover" src="/favicon.png" />
-              <strong className="text-xl font-bold text-slate-950">HomeForge</strong>
+              <strong className="text-xl font-bold text-fg">HomeForge</strong>
             </div>
           </div>
 
-          <p className="mb-1 text-[11px] font-bold uppercase tracking-[0.16em] text-indigo-600">Nueva contraseña</p>
+          <p className="mb-1 text-[11px] font-bold uppercase tracking-[0.16em] text-primary-fg">Nueva contraseña</p>
           <h2 className="text-3xl font-bold">Restablecer contraseña</h2>
-          <p className="mt-2 text-sm text-slate-500">Ingresa tu nueva contraseña para completar el proceso de recuperación.</p>
+          <p className="mt-2 text-sm text-fg-subtle">Ingresa tu nueva contraseña para completar el proceso de recuperación.</p>
 
           <form className="mt-8 space-y-5" onSubmit={submit}>
             <Input
@@ -103,18 +103,18 @@ export function ResetPasswordPage() {
 
             {/* Validación visual */}
             {newPassword && confirmPassword && (
-              <div className="rounded-xl bg-slate-50 p-3 text-xs">
+              <div className="rounded-xl bg-surface-muted p-3 text-xs">
                 <div className="flex items-center gap-2">
                   {newPassword === confirmPassword ? (
                     <>
-                      <svg className="size-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <svg className="size-4 text-success-fg" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                       </svg>
-                      <span className="font-medium text-emerald-700">Las contraseñas coinciden</span>
+                      <span className="font-medium text-success-fg">Las contraseñas coinciden</span>
                     </>
                   ) : (
                     <>
-                      <svg className="size-4 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <svg className="size-4 text-warning-fg" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path
                           strokeLinecap="round"
                           strokeLinejoin="round"
@@ -122,18 +122,18 @@ export function ResetPasswordPage() {
                           d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
                         />
                       </svg>
-                      <span className="font-medium text-amber-700">Las contraseñas no coinciden</span>
+                      <span className="font-medium text-warning-fg">Las contraseñas no coinciden</span>
                     </>
                   )}
                 </div>
                 {newPassword.length < 8 && (
-                  <p className="mt-1 text-slate-600">La contraseña debe tener al menos 8 caracteres ({newPassword.length}/8)</p>
+                  <p className="mt-1 text-fg-muted">La contraseña debe tener al menos 8 caracteres ({newPassword.length}/8)</p>
                 )}
               </div>
             )}
 
             {error && (
-              <p className="rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-medium text-rose-700" role="alert">
+              <p className="rounded-xl border border-danger-line bg-danger-soft px-4 py-3 text-sm font-medium text-danger-fg" role="alert">
                 {error}
               </p>
             )}
@@ -149,9 +149,9 @@ export function ResetPasswordPage() {
             </Button>
           </form>
 
-          <p className="mt-6 text-center text-sm text-slate-500">
+          <p className="mt-6 text-center text-sm text-fg-subtle">
             ¿Problemas con el enlace?{' '}
-            <Link className="font-semibold text-indigo-600 hover:text-indigo-800" to="/recuperar-contraseña">
+            <Link className="font-semibold text-primary-fg hover:underline" to="/recuperar-contraseña">
               Solicitar uno nuevo
             </Link>
           </p>

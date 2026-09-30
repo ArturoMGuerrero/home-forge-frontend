@@ -82,8 +82,8 @@ export default function AgentAvailabilityPage() {
 
           {/* Título */}
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">Mi Disponibilidad</h1>
-            <p className="text-gray-600 mt-1">Configura tu horario disponible</p>
+            <h1 className="text-2xl font-bold text-fg">Mi Disponibilidad</h1>
+            <p className="text-fg-muted mt-1">Configura tu horario disponible</p>
           </div>
         </div>
 
@@ -103,18 +103,18 @@ export default function AgentAvailabilityPage() {
 
       <div className="grid gap-4">
         {[1, 2, 3, 4, 5, 6, 0].map(day => (
-          <div key={day} className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-            <h3 className="font-semibold text-gray-900 mb-3">{dayLabels[day]}</h3>
+          <div key={day} className="bg-surface rounded-lg shadow-sm border border-border p-4">
+            <h3 className="font-semibold text-fg mb-3">{dayLabels[day]}</h3>
             {groupedByDay[day] && groupedByDay[day].length > 0 ? (
               <div className="space-y-2">
                 {groupedByDay[day].map(avail => (
-                  <div key={avail.id} className="flex justify-between items-center p-3 bg-gray-50 rounded border">
+                  <div key={avail.id} className="flex justify-between items-center p-3 bg-surface-muted rounded border">
                     <div className="flex items-center gap-4">
-                      <span className="font-medium text-gray-900">
+                      <span className="font-medium text-fg">
                         {avail.startTime} - {avail.endTime}
                       </span>
                       <span className={`px-2 py-1 rounded text-xs ${
-                        avail.isAvailable ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                        avail.isAvailable ? 'bg-success-muted text-success-fg' : 'bg-danger-muted text-danger-fg'
                       }`}>
                         {avail.isAvailable ? 'Disponible' : 'No disponible'}
                       </span>
@@ -130,7 +130,7 @@ export default function AgentAvailabilityPage() {
                 ))}
               </div>
             ) : (
-              <p className="text-gray-500 text-sm">Sin horarios configurados</p>
+              <p className="text-fg-subtle text-sm">Sin horarios configurados</p>
             )}
           </div>
         ))}

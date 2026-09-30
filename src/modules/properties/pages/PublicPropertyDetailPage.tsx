@@ -27,31 +27,31 @@ export function PublicPropertyDetailPage() {
   const message = encodeURIComponent(`Hola, me interesa la propiedad ${property.title} (${property.code}) publicada en HomeForge.`);
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-950">
-      <header className="border-b border-slate-200 bg-white">
+    <div className="min-h-screen bg-surface-muted text-fg">
+      <header className="border-b border-border bg-surface">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-5 py-5">
           <Link className="flex items-center gap-3" to="/propiedades">
             <img alt="HomeForge" className="size-10 rounded-xl object-cover" src="/favicon.png" />
-            <div><strong className="block font-bold">HomeForge</strong><small className="text-slate-500">Propiedades</small></div>
+            <div><strong className="block font-bold">HomeForge</strong><small className="text-fg-subtle">Propiedades</small></div>
           </Link>
-          <Link className="text-sm font-semibold text-indigo-600" to="/propiedades">&lt;- Volver al catálogo</Link>
+          <Link className="text-sm font-semibold text-primary-fg" to="/propiedades">&lt;- Volver al catálogo</Link>
         </div>
       </header>
 
       <main className="mx-auto max-w-7xl px-5 py-10">
         <div className="mb-8">
           <div className="flex flex-wrap items-center gap-2">
-            <span className={`rounded-full px-3 py-1 text-xs font-bold ${property.listingType === 'RENT' ? 'bg-violet-100 text-violet-800' : 'bg-cyan-100 text-cyan-800'}`}>{listingLabel(property.listingType)}</span>
+            <span className={`rounded-full px-3 py-1 text-xs font-bold ${property.listingType === 'RENT' ? 'bg-accent-muted text-accent-fg' : 'bg-info-muted text-info-fg'}`}>{listingLabel(property.listingType)}</span>
             <span className={`rounded-full px-3 py-1 text-xs font-bold ${propertyStatusClass(property.status)}`}>{propertyStatusLabel(property.status)}</span>
-            <span className="rounded-full bg-slate-200 px-3 py-1 text-xs font-bold text-slate-700">{countryName(property.countryCode)}</span>
-            <span className="text-sm text-slate-500">{property.code}</span>
+            <span className="rounded-full bg-surface-strong px-3 py-1 text-xs font-bold text-fg-muted">{countryName(property.countryCode)}</span>
+            <span className="text-sm text-fg-subtle">{property.code}</span>
           </div>
           <h1 className="mt-4 max-w-4xl text-3xl font-bold sm:text-5xl">{property.title}</h1>
-          <p className="mt-3 text-base text-slate-500">{[property.address, property.city, property.stateCode, countryName(property.countryCode)].filter(Boolean).join(', ')}</p>
+          <p className="mt-3 text-base text-fg-subtle">{[property.address, property.city, property.stateCode, countryName(property.countryCode)].filter(Boolean).join(', ')}</p>
         </div>
 
         <section className="grid gap-4 lg:grid-cols-[1fr_280px]">
-          <div className="relative overflow-hidden rounded-3xl bg-slate-100">
+          <div className="relative overflow-hidden rounded-3xl bg-surface-sunken">
             <img alt={property.title} className="h-[320px] w-full object-cover sm:h-[520px]" src={currentImage} />
             {images.length > 1 && (
               <div className="absolute bottom-4 right-4 rounded-full bg-black/60 px-3 py-1.5 text-xs font-semibold text-white backdrop-blur-sm">
@@ -63,14 +63,14 @@ export function PublicPropertyDetailPage() {
             <div className="grid auto-rows-fr grid-cols-4 gap-3 lg:max-h-[520px] lg:grid-cols-2 lg:overflow-y-auto lg:pr-2">
               {images.map((image, index) => (
                 <button
-                  className={`group relative aspect-square overflow-hidden rounded-2xl border-2 transition-all ${activeImage === index ? 'border-indigo-600 ring-2 ring-indigo-200' : 'border-slate-200 hover:border-indigo-400'}`}
+                  className={`group relative aspect-square overflow-hidden rounded-2xl border-2 transition-all ${activeImage === index ? 'border-primary ring-2 ring-primary-line' : 'border-border hover:border-primary'}`}
                   key={image}
                   onClick={() => setActiveImage(index)}
                   type="button"
                 >
                   <img alt={`Vista ${index + 1}`} className={`size-full object-cover transition-all ${activeImage === index ? 'scale-100' : 'scale-105 opacity-80 group-hover:scale-100 group-hover:opacity-100'}`} src={image} />
                   {activeImage === index && (
-                    <div className="absolute inset-0 bg-indigo-600/20" />
+                    <div className="absolute inset-0 bg-primary/20" />
                   )}
                 </button>
               ))}
@@ -80,10 +80,10 @@ export function PublicPropertyDetailPage() {
 
         <div className="mt-10 grid gap-8 lg:grid-cols-[1fr_360px]">
           <div className="space-y-7">
-            <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
+            <section className="rounded-3xl border border-border bg-surface p-6 shadow-sm sm:p-8">
               <div className="flex flex-wrap items-end justify-between gap-4">
-                <div><span className="text-xs font-bold uppercase tracking-wider text-slate-400">Precio</span><strong className="mt-1 block text-3xl text-indigo-700">{formatApiPrice(property)}</strong></div>
-                <span className="text-sm font-semibold text-slate-500">{property.propertyType}</span>
+                <div><span className="text-xs font-bold uppercase tracking-wider text-fg-subtle">Precio</span><strong className="mt-1 block text-3xl text-primary-fg">{formatApiPrice(property)}</strong></div>
+                <span className="text-sm font-semibold text-fg-subtle">{property.propertyType}</span>
               </div>
               <div className="mt-7 grid grid-cols-2 gap-3 sm:grid-cols-5">
                 <Feature value={property.bedrooms} label="Recámaras" />
@@ -94,12 +94,12 @@ export function PublicPropertyDetailPage() {
               </div>
             </section>
 
-            <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
+            <section className="rounded-3xl border border-border bg-surface p-6 shadow-sm sm:p-8">
               <h2 className="text-2xl font-bold">Descripción completa</h2>
-              <p className="mt-5 whitespace-pre-line text-base leading-8 text-slate-600">{property.description || 'Solicita a la inmobiliaria la descripción completa y condiciones de esta propiedad.'}</p>
+              <p className="mt-5 whitespace-pre-line text-base leading-8 text-fg-muted">{property.description || 'Solicita a la inmobiliaria la descripción completa y condiciones de esta propiedad.'}</p>
             </section>
 
-            <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
+            <section className="rounded-3xl border border-border bg-surface p-6 shadow-sm sm:p-8">
               <h2 className="text-2xl font-bold">Ubicación</h2>
               <dl className="mt-5 grid gap-4 sm:grid-cols-2">
                 <Detail label="País" value={countryName(property.countryCode)} />
@@ -111,17 +111,17 @@ export function PublicPropertyDetailPage() {
           </div>
 
           <aside className="space-y-5 lg:sticky lg:top-6 lg:self-start">
-            <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-lg">
-              <span className="text-xs font-bold uppercase tracking-[.14em] text-slate-400">Inmobiliaria responsable</span>
+            <section className="rounded-3xl border border-border bg-surface p-6 shadow-lg">
+              <span className="text-xs font-bold uppercase tracking-[.14em] text-fg-subtle">Inmobiliaria responsable</span>
               <h2 className="mt-2 text-xl font-bold">{seller.companyName}</h2>
-              <p className="mt-2 text-sm leading-6 text-slate-500">Contacta directamente a la empresa que publicó esta propiedad.</p>
+              <p className="mt-2 text-sm leading-6 text-fg-subtle">Contacta directamente a la empresa que publicó esta propiedad.</p>
               <div className="mt-5 grid gap-3">
-                {phone && <a className="rounded-xl bg-emerald-600 px-4 py-3 text-center text-sm font-bold text-white hover:bg-emerald-700" href={`https://wa.me/${phone}?text=${message}`} rel="noreferrer" target="_blank">Preguntar por WhatsApp</a>}
-                {seller.email && <a className="rounded-xl border border-slate-200 px-4 py-3 text-center text-sm font-bold text-slate-700 hover:border-indigo-300 hover:text-indigo-700" href={`mailto:${seller.email}?subject=${encodeURIComponent(`Información sobre ${property.title}`)}`}>Enviar correo</a>}
-                <Link className="rounded-xl bg-indigo-50 px-4 py-3 text-center text-sm font-bold text-indigo-700 hover:bg-indigo-100" to={`/empresas/${seller.companyId}`}>Conocer la inmobiliaria</Link>
+                {phone && <a className="rounded-xl bg-success px-4 py-3 text-center text-sm font-bold text-white hover:bg-success-hover" href={`https://wa.me/${phone}?text=${message}`} rel="noreferrer" target="_blank">Preguntar por WhatsApp</a>}
+                {seller.email && <a className="rounded-xl border border-border px-4 py-3 text-center text-sm font-bold text-fg-muted hover:border-primary-line hover:text-primary-fg" href={`mailto:${seller.email}?subject=${encodeURIComponent(`Información sobre ${property.title}`)}`}>Enviar correo</a>}
+                <Link className="rounded-xl bg-primary-soft px-4 py-3 text-center text-sm font-bold text-primary-fg hover:bg-primary-muted" to={`/empresas/${seller.companyId}`}>Conocer la inmobiliaria</Link>
               </div>
             </section>
-            <p className="rounded-2xl bg-amber-50 p-4 text-xs leading-5 text-amber-800">Antes de realizar pagos, verifica documentación, identidad del asesor y condiciones de la operación directamente con la inmobiliaria.</p>
+            <p className="rounded-2xl bg-warning-soft p-4 text-xs leading-5 text-warning-fg">Antes de realizar pagos, verifica documentación, identidad del asesor y condiciones de la operación directamente con la inmobiliaria.</p>
           </aside>
         </div>
       </main>
@@ -130,13 +130,13 @@ export function PublicPropertyDetailPage() {
 }
 
 function Feature({ value, label }: { value?: number; label: string }) {
-  return <div className="rounded-xl bg-slate-50 px-3 py-4 text-center"><strong className="block text-lg">{value ?? '-'}</strong><span className="mt-1 block text-xs text-slate-500">{label}</span></div>;
+  return <div className="rounded-xl bg-surface-muted px-3 py-4 text-center"><strong className="block text-lg">{value ?? '-'}</strong><span className="mt-1 block text-xs text-fg-subtle">{label}</span></div>;
 }
 
 function Detail({ label, value }: { label: string; value: string }) {
-  return <div className="rounded-xl bg-slate-50 p-4"><dt className="text-xs font-bold uppercase tracking-wider text-slate-400">{label}</dt><dd className="mt-1 text-sm font-semibold text-slate-700">{value}</dd></div>;
+  return <div className="rounded-xl bg-surface-muted p-4"><dt className="text-xs font-bold uppercase tracking-wider text-fg-subtle">{label}</dt><dd className="mt-1 text-sm font-semibold text-fg-muted">{value}</dd></div>;
 }
 
 function PageMessage({ text }: { text: string }) {
-  return <div className="grid min-h-screen place-items-center bg-slate-50 px-5"><div className="text-center"><img alt="HomeForge" className="mx-auto size-16 rounded-2xl" src="/favicon.png" /><p className="mt-5 text-sm text-slate-500">{text}</p><Link className="mt-4 inline-block font-semibold text-indigo-600" to="/propiedades">Volver al catálogo</Link></div></div>;
+  return <div className="grid min-h-screen place-items-center bg-surface-muted px-5"><div className="text-center"><img alt="HomeForge" className="mx-auto size-16 rounded-2xl" src="/favicon.png" /><p className="mt-5 text-sm text-fg-subtle">{text}</p><Link className="mt-4 inline-block font-semibold text-primary-fg" to="/propiedades">Volver al catálogo</Link></div></div>;
 }

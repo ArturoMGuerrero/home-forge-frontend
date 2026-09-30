@@ -185,49 +185,49 @@ export function PropertyMap({ properties, onPropertyClick, selectedPropertyId }:
 
   if (error) {
     return (
-      <div className="rounded-2xl border border-rose-200 bg-rose-50 p-8 text-center">
+      <div className="rounded-2xl border border-danger-line bg-danger-soft p-8 text-center">
         <svg className="mx-auto mb-3 size-12 text-rose-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
         </svg>
-        <p className="text-sm font-medium text-rose-700">{error}</p>
+        <p className="text-sm font-medium text-danger-fg">{error}</p>
       </div>
     );
   }
 
   return (
     <div className="relative">
-      <div ref={mapRef} className="h-[600px] w-full rounded-2xl border border-slate-200 shadow-sm" />
+      <div ref={mapRef} className="h-[600px] w-full rounded-2xl border border-border shadow-sm" />
 
       {propertiesWithCoordinates.length === 0 && (
-        <div className="absolute inset-0 z-10 flex items-center justify-center rounded-2xl bg-white/95">
+        <div className="absolute inset-0 z-10 flex items-center justify-center rounded-2xl bg-surface/95">
           <div className="text-center">
-            <svg className="mx-auto mb-3 size-12 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="mx-auto mb-3 size-12 text-border-strong" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
             </svg>
-            <p className="text-sm font-medium text-slate-600">No hay propiedades con coordenadas</p>
-            <p className="mt-1 text-xs text-slate-500">Agrega latitud y longitud a las propiedades para verlas en el mapa</p>
+            <p className="text-sm font-medium text-fg-muted">No hay propiedades con coordenadas</p>
+            <p className="mt-1 text-xs text-fg-subtle">Agrega latitud y longitud a las propiedades para verlas en el mapa</p>
           </div>
         </div>
       )}
 
       {/* Leyenda */}
-      <div className="absolute bottom-4 left-4 z-10 rounded-lg border border-slate-200 bg-white p-3 shadow-lg">
+      <div className="absolute bottom-4 left-4 z-10 rounded-lg border border-border bg-surface p-3 shadow-lg">
         <div className="space-y-2 text-xs">
           <div className="flex items-center gap-2">
-            <div className="size-4 rounded-full bg-cyan-600 border-2 border-cyan-600"></div>
-            <span className="font-medium text-slate-700">Venta</span>
+            <div className="size-4 rounded-full bg-info border-2 border-info"></div>
+            <span className="font-medium text-fg-muted">Venta</span>
           </div>
           <div className="flex items-center gap-2">
-            <div className="size-4 rounded-full bg-violet-600 border-2 border-violet-600"></div>
-            <span className="font-medium text-slate-700">Renta</span>
+            <div className="size-4 rounded-full bg-accent border-2 border-accent"></div>
+            <span className="font-medium text-fg-muted">Renta</span>
           </div>
         </div>
       </div>
 
       {/* Contador */}
       {propertiesWithCoordinates.length > 0 && (
-        <div className="absolute bottom-4 right-4 z-10 rounded-lg border border-slate-200 bg-white px-3 py-2 shadow-lg">
-          <span className="text-xs font-semibold text-slate-700">
+        <div className="absolute bottom-4 right-4 z-10 rounded-lg border border-border bg-surface px-3 py-2 shadow-lg">
+          <span className="text-xs font-semibold text-fg-muted">
             {propertiesWithCoordinates.length} {propertiesWithCoordinates.length === 1 ? 'propiedad' : 'propiedades'}
           </span>
         </div>

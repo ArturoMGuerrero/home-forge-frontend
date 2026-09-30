@@ -36,23 +36,23 @@ export function PaymentSuccessPage() {
   }, [searchParams, navigate]);
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900 px-4">
+    <div className="min-h-screen flex items-center justify-center bg-surface-muted px-4">
       <div className="max-w-md w-full space-y-8 text-center">
         {/* Icono */}
         <div className="flex justify-center">
           {status === 'processing' && (
-            <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-600"></div>
+            <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-info"></div>
           )}
           {status === 'success' && (
-            <div className="rounded-full bg-green-100 dark:bg-green-900 p-4">
-              <svg className="h-16 w-16 text-green-600 dark:text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <div className="rounded-full bg-success-muted p-4">
+              <svg className="h-16 w-16 text-success-fg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
               </svg>
             </div>
           )}
           {status === 'error' && (
-            <div className="rounded-full bg-red-100 dark:bg-red-900 p-4">
-              <svg className="h-16 w-16 text-red-600 dark:text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <div className="rounded-full bg-danger-muted p-4">
+              <svg className="h-16 w-16 text-danger-fg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
               </svg>
             </div>
@@ -60,19 +60,19 @@ export function PaymentSuccessPage() {
         </div>
 
         {/* Título */}
-        <h2 className="text-3xl font-bold text-gray-900 dark:text-white">
+        <h2 className="text-3xl font-bold text-fg">
           {status === 'processing' && 'Procesando pago...'}
           {status === 'success' && '¡Pago exitoso!'}
           {status === 'error' && 'Error en el pago'}
         </h2>
 
         {/* Mensaje */}
-        <p className="text-gray-600 dark:text-gray-300">{message}</p>
+        <p className="text-fg-muted">{message}</p>
 
         {/* Botones */}
         <div className="space-y-3">
           {status === 'success' && (
-            <p className="text-sm text-gray-500 dark:text-gray-400">
+            <p className="text-sm text-fg-subtle">
               Serás redirigido al dashboard en unos segundos...
             </p>
           )}
@@ -80,7 +80,7 @@ export function PaymentSuccessPage() {
           {status === 'error' && (
             <button
               onClick={() => navigate('/app/planes')}
-              className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors"
+              className="w-full bg-info hover:bg-info-hover-hover text-white font-medium py-2 px-4 rounded-lg transition-colors"
             >
               Volver a intentar
             </button>
@@ -88,7 +88,7 @@ export function PaymentSuccessPage() {
 
           <button
             onClick={() => navigate('/app')}
-            className="w-full bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-900 dark:text-white font-medium py-2 px-4 rounded-lg transition-colors"
+            className="w-full bg-surface-strong hover:bg-border-strong text-fg font-medium py-2 px-4 rounded-lg transition-colors"
           >
             Ir al dashboard
           </button>
@@ -96,9 +96,9 @@ export function PaymentSuccessPage() {
 
         {/* Debug info (solo en desarrollo) */}
         {import.meta.env.DEV && (
-          <div className="mt-8 p-4 bg-gray-100 dark:bg-gray-800 rounded-lg text-left text-xs">
+          <div className="mt-8 p-4 bg-surface-sunken rounded-lg text-left text-xs">
             <p className="font-semibold mb-2">Debug Info:</p>
-            <pre className="text-gray-600 dark:text-gray-400 whitespace-pre-wrap">
+            <pre className="text-fg-muted whitespace-pre-wrap">
               {JSON.stringify(Object.fromEntries(searchParams), null, 2)}
             </pre>
           </div>

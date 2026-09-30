@@ -5,7 +5,7 @@ import toast from 'react-hot-toast';
 import { LeadList } from '../components/LeadList';
 import { PageHeader } from '../../../shared/ui/PageHeader';
 import { ExportButton } from '../../../shared/ExportButton';
-import { LeadItem, leadStatusLabels, listLeads } from '../api/leadsApi';
+import { LEADS_CHANGED_EVENT, LeadItem, leadStatusLabels, listLeads } from '../api/leadsApi';
 import { CreateLeadModal } from '../components/CreateLeadModal';
 import { ImportLeadsModal } from '../components/ImportLeadsModal';
 import { UpgradeModal } from '../../../shared/UpgradeModal';
@@ -59,8 +59,8 @@ export function LeadsPage() {
 
   useEffect(() => {
     load();
-    window.addEventListener('casaflow:leads', load);
-    return () => window.removeEventListener('casaflow:leads', load);
+    window.addEventListener(LEADS_CHANGED_EVENT, load);
+    return () => window.removeEventListener(LEADS_CHANGED_EVENT, load);
   }, []);
 
   const filteredLeads = leads.filter(lead => {

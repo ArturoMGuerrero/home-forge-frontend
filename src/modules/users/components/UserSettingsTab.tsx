@@ -3,8 +3,8 @@ import toast from 'react-hot-toast';
 import { getSession } from '../../auth';
 import { UserSettings, getUserSettings, updateUserSettings } from '../api/usersApi';
 
-const inputClass = 'w-full rounded-xl border border-slate-200 bg-white px-3.5 py-3 text-sm font-normal text-slate-900 outline-none transition focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100';
-const labelClass = 'grid gap-2 text-sm font-semibold text-slate-700';
+const inputClass = 'w-full rounded-xl border border-border bg-surface px-3.5 py-3 text-sm font-normal text-fg outline-none transition focus:border-primary focus:ring-2 focus:ring-primary-line';
+const labelClass = 'grid gap-2 text-sm font-semibold text-fg-muted';
 
 export function UserSettingsTab() {
   const session = getSession();
@@ -46,12 +46,12 @@ export function UserSettingsTab() {
     }
   }
 
-  if (loading) return <p className="rounded-2xl border border-slate-200 bg-white p-8 text-center text-sm text-slate-500">Cargando configuración...</p>;
-  if (!settings) return <p className="rounded-2xl border border-rose-200 bg-rose-50 p-7 text-sm text-rose-800">No fue posible cargar la configuración.</p>;
+  if (loading) return <p className="rounded-2xl border border-border bg-surface p-8 text-center text-sm text-fg-subtle">Cargando configuración...</p>;
+  if (!settings) return <p className="rounded-2xl border border-danger-line bg-danger-soft p-7 text-sm text-danger-fg">No fue posible cargar la configuración.</p>;
 
   return (
     <form onSubmit={submit} className="max-w-3xl space-y-6">
-      <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+      <section className="rounded-2xl border border-border bg-surface p-6 shadow-sm">
         <h2 className="text-lg font-bold">Preferencias generales</h2>
         <div className="mt-5 grid gap-4 sm:grid-cols-2">
           <label className={labelClass}>
@@ -107,20 +107,20 @@ export function UserSettingsTab() {
         </div>
       </section>
 
-      <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+      <section className="rounded-2xl border border-border bg-surface p-6 shadow-sm">
         <h2 className="text-lg font-bold">Notificaciones</h2>
-        <p className="mt-1 text-sm text-slate-600">Configura cómo y cuándo quieres recibir notificaciones.</p>
+        <p className="mt-1 text-sm text-fg-muted">Configura cómo y cuándo quieres recibir notificaciones.</p>
         <div className="mt-5 space-y-4">
           <label className="flex items-center gap-3">
             <input
               type="checkbox"
               checked={settings.emailNotifications}
               onChange={e => setSettings({ ...settings, emailNotifications: e.target.checked })}
-              className="size-5 rounded border-slate-300 text-indigo-600 focus:ring-2 focus:ring-indigo-100"
+              className="size-5 rounded border-border-strong text-primary-fg focus:ring-2 focus:ring-primary-line"
             />
             <div>
-              <p className="text-sm font-semibold text-slate-900">Notificaciones por correo</p>
-              <p className="text-xs text-slate-500">Recibe resúmenes y alertas importantes por email</p>
+              <p className="text-sm font-semibold text-fg">Notificaciones por correo</p>
+              <p className="text-xs text-fg-subtle">Recibe resúmenes y alertas importantes por email</p>
             </div>
           </label>
           <label className="flex items-center gap-3">
@@ -128,61 +128,61 @@ export function UserSettingsTab() {
               type="checkbox"
               checked={settings.pushNotifications}
               onChange={e => setSettings({ ...settings, pushNotifications: e.target.checked })}
-              className="size-5 rounded border-slate-300 text-indigo-600 focus:ring-2 focus:ring-indigo-100"
+              className="size-5 rounded border-border-strong text-primary-fg focus:ring-2 focus:ring-primary-line"
             />
             <div>
-              <p className="text-sm font-semibold text-slate-900">Notificaciones push</p>
-              <p className="text-xs text-slate-500">Alertas en tiempo real en tu navegador</p>
+              <p className="text-sm font-semibold text-fg">Notificaciones push</p>
+              <p className="text-xs text-fg-subtle">Alertas en tiempo real en tu navegador</p>
             </div>
           </label>
 
-          <div className="border-t border-slate-100 pt-4">
-            <p className="mb-3 text-xs font-bold uppercase tracking-wider text-slate-500">Eventos específicos</p>
+          <div className="border-t border-border pt-4">
+            <p className="mb-3 text-xs font-bold uppercase tracking-wider text-fg-subtle">Eventos específicos</p>
             <div className="space-y-3">
               <label className="flex items-center gap-3">
                 <input
                   type="checkbox"
                   checked={settings.notificationNewLead}
                   onChange={e => setSettings({ ...settings, notificationNewLead: e.target.checked })}
-                  className="size-4 rounded border-slate-300 text-indigo-600"
+                  className="size-4 rounded border-border-strong text-primary-fg"
                 />
-                <span className="text-sm text-slate-700">Nuevo lead asignado</span>
+                <span className="text-sm text-fg-muted">Nuevo lead asignado</span>
               </label>
               <label className="flex items-center gap-3">
                 <input
                   type="checkbox"
                   checked={settings.notificationLeadUpdate}
                   onChange={e => setSettings({ ...settings, notificationLeadUpdate: e.target.checked })}
-                  className="size-4 rounded border-slate-300 text-indigo-600"
+                  className="size-4 rounded border-border-strong text-primary-fg"
                 />
-                <span className="text-sm text-slate-700">Actualización de lead</span>
+                <span className="text-sm text-fg-muted">Actualización de lead</span>
               </label>
               <label className="flex items-center gap-3">
                 <input
                   type="checkbox"
                   checked={settings.notificationAppointment}
                   onChange={e => setSettings({ ...settings, notificationAppointment: e.target.checked })}
-                  className="size-4 rounded border-slate-300 text-indigo-600"
+                  className="size-4 rounded border-border-strong text-primary-fg"
                 />
-                <span className="text-sm text-slate-700">Recordatorio de citas</span>
+                <span className="text-sm text-fg-muted">Recordatorio de citas</span>
               </label>
               <label className="flex items-center gap-3">
                 <input
                   type="checkbox"
                   checked={settings.notificationTeamActivity}
                   onChange={e => setSettings({ ...settings, notificationTeamActivity: e.target.checked })}
-                  className="size-4 rounded border-slate-300 text-indigo-600"
+                  className="size-4 rounded border-border-strong text-primary-fg"
                 />
-                <span className="text-sm text-slate-700">Actividad del equipo</span>
+                <span className="text-sm text-fg-muted">Actividad del equipo</span>
               </label>
             </div>
           </div>
         </div>
       </section>
 
-      <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+      <section className="rounded-2xl border border-border bg-surface p-6 shadow-sm">
         <h2 className="text-lg font-bold">Firma de correo</h2>
-        <p className="mt-1 text-sm text-slate-600">Esta firma se agregará automáticamente a tus correos.</p>
+        <p className="mt-1 text-sm text-fg-muted">Esta firma se agregará automáticamente a tus correos.</p>
         <div className="mt-4">
           <textarea
             className={inputClass}
@@ -194,7 +194,7 @@ export function UserSettingsTab() {
         </div>
       </section>
 
-      <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+      <section className="rounded-2xl border border-border bg-surface p-6 shadow-sm">
         <h2 className="text-lg font-bold">Dashboard</h2>
         <div className="mt-4">
           <label className={labelClass}>
@@ -216,7 +216,7 @@ export function UserSettingsTab() {
         <button
           type="submit"
           disabled={saving}
-          className="rounded-xl bg-indigo-600 px-6 py-3 text-sm font-bold text-white hover:bg-indigo-700 disabled:opacity-60 disabled:cursor-not-allowed"
+          className="rounded-xl bg-primary px-6 py-3 text-sm font-bold text-white hover:bg-primary-hover disabled:opacity-60 disabled:cursor-not-allowed"
         >
           {saving ? 'Guardando...' : 'Guardar configuración'}
         </button>

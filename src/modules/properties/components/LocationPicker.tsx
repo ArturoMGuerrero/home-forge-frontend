@@ -230,18 +230,18 @@ export function LocationPicker({ latitude, longitude, onLocationChange, onClose 
 
   return (
     <div className="app-modal-backdrop fixed inset-0 z-50 flex items-center justify-center p-4">
-      <div className="w-full max-w-4xl rounded-2xl border border-slate-200 bg-white shadow-2xl">
+      <div className="w-full max-w-4xl rounded-2xl border border-border bg-surface shadow-2xl">
         {/* Header */}
-        <div className="border-b border-slate-200 p-6">
+        <div className="border-b border-border p-6">
           <div className="flex items-center justify-between">
             <div>
-              <h2 className="text-2xl font-bold text-slate-900">Seleccionar Ubicación</h2>
-              <p className="mt-1 text-sm text-slate-500">
+              <h2 className="text-2xl font-bold text-fg">Seleccionar Ubicación</h2>
+              <p className="mt-1 text-sm text-fg-subtle">
                 {error ? 'Ocurrió un error al cargar el mapa' : 'Arrastra el marcador o haz click en el mapa'}
               </p>
             </div>
             <button
-              className="rounded-lg p-2 text-slate-400 transition hover:bg-slate-100 hover:text-slate-600"
+              className="rounded-lg p-2 text-fg-subtle transition hover:bg-surface-sunken hover:text-fg-muted"
               onClick={onClose}
               type="button"
             >
@@ -255,11 +255,11 @@ export function LocationPicker({ latitude, longitude, onLocationChange, onClose 
           {!error && (
             <div className="mt-4 flex gap-2">
               <div className="relative flex-1">
-                <svg className="pointer-events-none absolute left-3 top-1/2 size-5 -translate-y-1/2 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="pointer-events-none absolute left-3 top-1/2 size-5 -translate-y-1/2 text-fg-subtle" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                 </svg>
                 <input
-                  className="w-full rounded-xl border border-slate-200 py-2.5 pl-10 pr-4 text-sm transition focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+                  className="w-full rounded-xl border border-border py-2.5 pl-10 pr-4 text-sm transition focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
                   placeholder="Buscar: Av. Reforma 500, CDMX..."
                   type="text"
                   value={searchQuery}
@@ -268,7 +268,7 @@ export function LocationPicker({ latitude, longitude, onLocationChange, onClose 
                 />
               </div>
               <button
-                className="rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-indigo-700 disabled:opacity-60"
+                className="rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-primary-hover disabled:opacity-60"
                 disabled={loading || !searchQuery.trim()}
                 onClick={handleSearch}
                 type="button"
@@ -276,7 +276,7 @@ export function LocationPicker({ latitude, longitude, onLocationChange, onClose 
                 Buscar
               </button>
               <button
-                className="rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
+                className="rounded-xl border border-border bg-surface px-4 py-2.5 text-sm font-semibold text-fg-muted transition hover:bg-surface-muted"
                 onClick={useMyLocation}
                 type="button"
               >
@@ -289,23 +289,23 @@ export function LocationPicker({ latitude, longitude, onLocationChange, onClose 
         {/* Mapa */}
         <div className="relative p-6">
           {loading && (
-            <div className="absolute inset-6 z-10 flex items-center justify-center rounded-xl bg-white">
+            <div className="absolute inset-6 z-10 flex items-center justify-center rounded-xl bg-surface">
               <div className="text-center">
-                <div className="mb-3 inline-block size-12 animate-spin rounded-full border-4 border-indigo-200 border-t-indigo-600"></div>
-                <p className="text-sm font-medium text-slate-600">Cargando mapa...</p>
+                <div className="mb-3 inline-block size-12 animate-spin rounded-full border-4 border-primary-line border-t-primary"></div>
+                <p className="text-sm font-medium text-fg-muted">Cargando mapa...</p>
               </div>
             </div>
           )}
 
           {error && (
-            <div className="rounded-xl border border-rose-200 bg-rose-50 p-8 text-center">
+            <div className="rounded-xl border border-danger-line bg-danger-soft p-8 text-center">
               <svg className="mx-auto mb-3 size-12 text-rose-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
               </svg>
-              <p className="text-sm font-semibold text-rose-700">{error}</p>
-              <p className="mt-2 text-xs text-rose-600">Verifica tu conexión a internet</p>
-              <div className="mt-4 rounded-lg border border-amber-200 bg-amber-50 p-3">
-                <p className="text-xs font-medium text-amber-800">
+              <p className="text-sm font-semibold text-danger-fg">{error}</p>
+              <p className="mt-2 text-xs text-danger-fg">Verifica tu conexión a internet</p>
+              <div className="mt-4 rounded-lg border border-warning-line bg-warning-soft p-3">
+                <p className="text-xs font-medium text-warning-fg">
                   💡 Puedes escribir las coordenadas manualmente en el formulario
                 </p>
               </div>
@@ -314,15 +314,15 @@ export function LocationPicker({ latitude, longitude, onLocationChange, onClose 
 
           {!error && (
             <>
-              <div ref={mapRef} className="h-[500px] w-full rounded-xl border border-slate-200" />
+              <div ref={mapRef} className="h-[500px] w-full rounded-xl border border-border" />
 
               {/* Coordenadas */}
-              <div className="mt-4 rounded-xl border border-indigo-100 bg-indigo-50 p-4">
+              <div className="mt-4 rounded-xl border border-primary-line bg-primary-soft p-4">
                 <div className="grid gap-3 sm:grid-cols-2">
                   <div>
-                    <label className="block text-xs font-semibold text-indigo-900">Latitud</label>
+                    <label className="block text-xs font-semibold text-primary-fg">Latitud</label>
                     <input
-                      className="mt-1 w-full rounded-lg border border-indigo-200 bg-white px-3 py-2 text-sm font-mono font-medium"
+                      className="mt-1 w-full rounded-lg border border-primary-line bg-surface px-3 py-2 text-sm font-mono font-medium"
                       type="number"
                       step="0.000001"
                       value={currentLat.toFixed(6)}
@@ -338,9 +338,9 @@ export function LocationPicker({ latitude, longitude, onLocationChange, onClose 
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-semibold text-indigo-900">Longitud</label>
+                    <label className="block text-xs font-semibold text-primary-fg">Longitud</label>
                     <input
-                      className="mt-1 w-full rounded-lg border border-indigo-200 bg-white px-3 py-2 text-sm font-mono font-medium"
+                      className="mt-1 w-full rounded-lg border border-primary-line bg-surface px-3 py-2 text-sm font-mono font-medium"
                       type="number"
                       step="0.000001"
                       value={currentLng.toFixed(6)}
@@ -362,20 +362,20 @@ export function LocationPicker({ latitude, longitude, onLocationChange, onClose 
         </div>
 
         {/* Footer */}
-        <div className="flex items-center justify-between border-t border-slate-200 p-6">
-          <p className="text-xs text-slate-500">
+        <div className="flex items-center justify-between border-t border-border p-6">
+          <p className="text-xs text-fg-subtle">
             💡 Arrastra el marcador 📍 o haz click en el mapa
           </p>
           <div className="flex gap-3">
             <button
-              className="rounded-xl border border-slate-200 px-4 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50"
+              className="rounded-xl border border-border px-4 py-2.5 text-sm font-semibold text-fg-muted hover:bg-surface-muted"
               onClick={onClose}
               type="button"
             >
               Cancelar
             </button>
             <button
-              className="rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-indigo-700 disabled:opacity-60"
+              className="rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-white hover:bg-primary-hover disabled:opacity-60"
               disabled={!!error}
               onClick={handleConfirm}
               type="button"

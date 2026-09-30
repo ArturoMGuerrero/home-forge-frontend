@@ -26,8 +26,8 @@ export function SubscriptionBadge() {
 
   if (loading) {
     return (
-      <div className="inline-flex items-center gap-2 rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-500">
-        <div className="size-2 animate-pulse rounded-full bg-slate-400" />
+      <div className="inline-flex items-center gap-2 rounded-full bg-surface-sunken px-3 py-1 text-xs font-semibold text-fg-subtle">
+        <div className="size-2 animate-pulse rounded-full bg-fg-subtle" />
         Cargando...
       </div>
     );
@@ -46,8 +46,8 @@ export function SubscriptionBadge() {
       {status.subscriptionStatus !== 'ACTIVE' && (
         <span className={`rounded-full px-2.5 py-0.5 text-xs font-semibold ${
           status.subscriptionStatus === 'EXPIRED' || status.subscriptionStatus === 'SUSPENDED' || status.subscriptionStatus === 'CANCELLED'
-            ? 'bg-rose-100 text-rose-700'
-            : 'bg-amber-100 text-amber-700'
+            ? 'bg-danger-muted text-danger-fg'
+            : 'bg-warning-muted text-warning-fg'
         }`}>
           {statusLabel}
         </span>
@@ -75,11 +75,11 @@ export function SubscriptionDetails() {
 
   if (loading) {
     return (
-      <div className="animate-pulse rounded-2xl border border-slate-200 bg-white p-6">
-        <div className="h-4 w-32 rounded bg-slate-200" />
+      <div className="animate-pulse rounded-2xl border border-border bg-surface p-6">
+        <div className="h-4 w-32 rounded bg-surface-strong" />
         <div className="mt-4 space-y-3">
-          <div className="h-3 w-full rounded bg-slate-100" />
-          <div className="h-3 w-3/4 rounded bg-slate-100" />
+          <div className="h-3 w-full rounded bg-surface-sunken" />
+          <div className="h-3 w-3/4 rounded bg-surface-sunken" />
         </div>
       </div>
     );
@@ -87,8 +87,8 @@ export function SubscriptionDetails() {
 
   if (!status) {
     return (
-      <div className="rounded-2xl border border-slate-200 bg-white p-6">
-        <p className="text-sm text-slate-500">No hay información de suscripción disponible.</p>
+      <div className="rounded-2xl border border-border bg-surface p-6">
+        <p className="text-sm text-fg-subtle">No hay información de suscripción disponible.</p>
       </div>
     );
   }
@@ -97,9 +97,9 @@ export function SubscriptionDetails() {
   const statusLabel = formatSubscriptionStatus(status.subscriptionStatus);
 
   return (
-    <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+    <div className="rounded-2xl border border-border bg-surface p-6 shadow-sm">
       <div className="mb-4 flex items-center justify-between">
-        <h3 className="font-semibold text-slate-900">Suscripción Actual</h3>
+        <h3 className="font-semibold text-fg">Suscripción Actual</h3>
         <span className={`rounded-full px-3 py-1 text-xs font-bold ${statusColor}`}>
           {statusLabel}
         </span>
@@ -107,14 +107,14 @@ export function SubscriptionDetails() {
 
       <div className="space-y-3">
         <div className="flex items-center justify-between">
-          <span className="text-sm text-slate-600">Plan</span>
-          <span className="text-sm font-semibold text-slate-900">{status.planCode}</span>
+          <span className="text-sm text-fg-muted">Plan</span>
+          <span className="text-sm font-semibold text-fg">{status.planCode}</span>
         </div>
 
         {status.nextBillingAt && (
           <div className="flex items-center justify-between">
-            <span className="text-sm text-slate-600">Próximo pago</span>
-            <span className="text-sm font-semibold text-slate-900">
+            <span className="text-sm text-fg-muted">Próximo pago</span>
+            <span className="text-sm font-semibold text-fg">
               {new Date(status.nextBillingAt).toLocaleDateString('es-MX', {
                 year: 'numeric',
                 month: 'short',
@@ -126,8 +126,8 @@ export function SubscriptionDetails() {
 
         {status.lastPaymentAt && (
           <div className="flex items-center justify-between">
-            <span className="text-sm text-slate-600">Último pago</span>
-            <span className="text-sm font-semibold text-slate-900">
+            <span className="text-sm text-fg-muted">Último pago</span>
+            <span className="text-sm font-semibold text-fg">
               {new Date(status.lastPaymentAt).toLocaleDateString('es-MX', {
                 year: 'numeric',
                 month: 'short',
@@ -139,8 +139,8 @@ export function SubscriptionDetails() {
 
         {status.paymentMethod && (
           <div className="flex items-center justify-between">
-            <span className="text-sm text-slate-600">Método de pago</span>
-            <span className="text-sm font-semibold capitalize text-slate-900">
+            <span className="text-sm text-fg-muted">Método de pago</span>
+            <span className="text-sm font-semibold capitalize text-fg">
               {status.paymentMethod}
             </span>
           </div>
@@ -148,8 +148,8 @@ export function SubscriptionDetails() {
       </div>
 
       {!status.hasActiveSubscription && status.subscriptionStatus === 'PENDING' && (
-        <div className="mt-4 rounded-xl bg-amber-50 p-3">
-          <p className="text-xs text-amber-800">
+        <div className="mt-4 rounded-xl bg-warning-soft p-3">
+          <p className="text-xs text-warning-fg">
             Tu pago está siendo procesado. Te notificaremos cuando se active tu suscripción.
           </p>
         </div>

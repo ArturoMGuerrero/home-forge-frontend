@@ -22,17 +22,17 @@ export function PropertyComparator({ properties, selectedIds, onClose }: Propert
 
   return (
     <div className="app-modal-backdrop fixed inset-0 z-50 overflow-auto p-4">
-      <div className="mx-auto min-h-full max-w-7xl rounded-2xl border border-slate-200 bg-white p-6 shadow-xl">
+      <div className="mx-auto min-h-full max-w-7xl rounded-2xl border border-border bg-surface p-6 shadow-xl">
         {/* Header */}
         <div className="mb-6 flex items-center justify-between">
           <div>
             <h2 className="text-2xl font-bold">Comparador de Propiedades</h2>
-            <p className="mt-1 text-sm text-slate-500">
+            <p className="mt-1 text-sm text-fg-subtle">
               Comparando {selectedProperties.length} {selectedProperties.length === 1 ? 'propiedad' : 'propiedades'}
             </p>
           </div>
           <button
-            className="rounded-lg p-2 text-slate-400 transition hover:bg-slate-100 hover:text-slate-600"
+            className="rounded-lg p-2 text-fg-subtle transition hover:bg-surface-sunken hover:text-fg-muted"
             onClick={onClose}
             type="button"
           >
@@ -46,8 +46,8 @@ export function PropertyComparator({ properties, selectedIds, onClose }: Propert
         <div className="overflow-x-auto">
           <table className="w-full border-collapse">
             <thead>
-              <tr className="border-b-2 border-slate-200">
-                <th className="sticky left-0 z-10 bg-white p-4 text-left text-xs font-bold uppercase tracking-wider text-slate-600">
+              <tr className="border-b-2 border-border">
+                <th className="sticky left-0 z-10 bg-surface p-4 text-left text-xs font-bold uppercase tracking-wider text-fg-muted">
                   Característica
                 </th>
                 {selectedProperties.map(property => (
@@ -60,13 +60,13 @@ export function PropertyComparator({ properties, selectedIds, onClose }: Propert
                           src={property.images[0].imageUrl.startsWith('http') ? property.images[0].imageUrl : `http://localhost:8080${property.images[0].imageUrl}`}
                         />
                       ) : (
-                        <div className="grid h-40 place-items-center rounded-xl bg-indigo-50 text-3xl font-bold text-indigo-700">
+                        <div className="grid h-40 place-items-center rounded-xl bg-primary-soft text-3xl font-bold text-primary-fg">
                           {property.propertyType.slice(0, 2)}
                         </div>
                       )}
                       <div>
-                        <h3 className="font-bold text-slate-900">{property.title}</h3>
-                        <p className="text-sm text-slate-500">{property.code}</p>
+                        <h3 className="font-bold text-fg">{property.title}</h3>
+                        <p className="text-sm text-fg-subtle">{property.code}</p>
                       </div>
                     </div>
                   </th>
@@ -121,9 +121,9 @@ export function PropertyComparator({ properties, selectedIds, onClose }: Propert
               />
 
               {/* Características */}
-              <tr className="border-t-2 border-slate-200">
-                <td className="sticky left-0 bg-slate-50 p-4" colSpan={selectedProperties.length + 1}>
-                  <span className="text-xs font-bold uppercase tracking-wider text-slate-600">Características</span>
+              <tr className="border-t-2 border-border">
+                <td className="sticky left-0 bg-surface-muted p-4" colSpan={selectedProperties.length + 1}>
+                  <span className="text-xs font-bold uppercase tracking-wider text-fg-muted">Características</span>
                 </td>
               </tr>
 
@@ -167,9 +167,9 @@ export function PropertyComparator({ properties, selectedIds, onClose }: Propert
               />
 
               {/* Publicación */}
-              <tr className="border-t-2 border-slate-200">
-                <td className="sticky left-0 bg-slate-50 p-4" colSpan={selectedProperties.length + 1}>
-                  <span className="text-xs font-bold uppercase tracking-wider text-slate-600">Publicación</span>
+              <tr className="border-t-2 border-border">
+                <td className="sticky left-0 bg-surface-muted p-4" colSpan={selectedProperties.length + 1}>
+                  <span className="text-xs font-bold uppercase tracking-wider text-fg-muted">Publicación</span>
                 </td>
               </tr>
 
@@ -194,7 +194,7 @@ export function PropertyComparator({ properties, selectedIds, onClose }: Propert
         {/* Footer */}
         <div className="mt-6 flex justify-end">
           <button
-            className="rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-indigo-700"
+            className="rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-primary-hover"
             onClick={onClose}
             type="button"
           >
@@ -233,18 +233,18 @@ function ComparisonRow({ label, values, highlight }: ComparisonRowProps) {
   }
 
   return (
-    <tr className="border-b border-slate-100 transition hover:bg-slate-50">
-      <td className="sticky left-0 bg-white p-4 text-sm font-semibold text-slate-700">
+    <tr className="border-b border-border transition hover:bg-surface-muted">
+      <td className="sticky left-0 bg-surface p-4 text-sm font-semibold text-fg-muted">
         {label}
       </td>
       {values.map((value, index) => (
         <td
           className={`p-4 text-center text-sm ${
             highlight && index === bestIndex
-              ? 'bg-emerald-50 font-bold text-emerald-700'
+              ? 'bg-success-soft font-bold text-success-fg'
               : highlight && index === worstIndex
-              ? 'bg-slate-100 text-slate-500'
-              : 'text-slate-900'
+              ? 'bg-surface-sunken text-fg-subtle'
+              : 'text-fg'
           }`}
           key={index}
         >

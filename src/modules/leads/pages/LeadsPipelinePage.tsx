@@ -47,7 +47,7 @@ function LeadCard({ lead, isDragging }: LeadCardProps) {
       style={style}
       {...attributes}
       {...listeners}
-      className="flex items-center gap-4 bg-white p-4 rounded-xl shadow-sm border border-slate-200 hover:shadow-md hover:border-indigo-300 transition-all cursor-grab active:cursor-grabbing"
+      className="flex items-center gap-4 bg-surface p-4 rounded-xl shadow-sm border border-border hover:shadow-md hover:border-primary-line transition-all cursor-grab active:cursor-grabbing"
     >
       {/* Avatar/Initials */}
       <div className="size-12 shrink-0 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-bold">
@@ -57,20 +57,20 @@ function LeadCard({ lead, isDragging }: LeadCardProps) {
       {/* Info */}
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2 mb-1">
-          <h3 className="font-semibold text-slate-900 truncate">
+          <h3 className="font-semibold text-fg truncate">
             {lead.firstName} {lead.lastName}
           </h3>
           {lead.score !== undefined && lead.score > 0 && (
             <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${
-              lead.score >= 70 ? 'bg-green-100 text-green-700' :
-              lead.score >= 40 ? 'bg-yellow-100 text-yellow-700' :
-              'bg-slate-100 text-slate-600'
+              lead.score >= 70 ? 'bg-success-muted text-success-fg' :
+              lead.score >= 40 ? 'bg-warning-muted text-warning-fg' :
+              'bg-surface-sunken text-fg-muted'
             }`}>
               {lead.score} pts
             </span>
           )}
         </div>
-        <div className="flex flex-wrap items-center gap-2 text-xs text-slate-600">
+        <div className="flex flex-wrap items-center gap-2 text-xs text-fg-muted">
           {lead.email && <span className="truncate">{lead.email}</span>}
           {lead.phoneE164 && <span>{lead.phoneE164}</span>}
           {lead.city && <span>• {lead.city}</span>}
@@ -80,15 +80,15 @@ function LeadCard({ lead, isDragging }: LeadCardProps) {
       {/* Budget & Priority */}
       <div className="text-right shrink-0">
         {lead.budgetMax && (
-          <div className="text-sm font-bold text-slate-900 mb-1">
+          <div className="text-sm font-bold text-fg mb-1">
             ${lead.budgetMax.toLocaleString()}
           </div>
         )}
         {lead.priority && (
           <span className={`inline-block px-2 py-0.5 rounded-full text-xs font-medium ${
-            lead.priority === 'HIGH' ? 'bg-red-100 text-red-700' :
-            lead.priority === 'MEDIUM' ? 'bg-yellow-100 text-yellow-700' :
-            'bg-slate-100 text-slate-600'
+            lead.priority === 'HIGH' ? 'bg-danger-muted text-danger-fg' :
+            lead.priority === 'MEDIUM' ? 'bg-warning-muted text-warning-fg' :
+            'bg-surface-sunken text-fg-muted'
           }`}>
             {lead.priority === 'HIGH' ? 'Alta' : lead.priority === 'MEDIUM' ? 'Media' : 'Baja'}
           </span>
@@ -167,13 +167,13 @@ export default function LeadsPipelinePage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="animate-pulse text-slate-500">Cargando pipeline...</div>
+        <div className="animate-pulse text-fg-subtle">Cargando pipeline...</div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
+    <div className="min-h-screen bg-app">
       <PageHeader
         title="Pipeline de Ventas"
         subtitle="Gestiona el estado de tus prospectos"
@@ -212,13 +212,13 @@ export default function LeadsPipelinePage() {
 
           {currentLeads.length === 0 && (
             <div className="flex flex-col items-center justify-center py-20 text-center">
-              <div className="rounded-full bg-slate-100 p-6 mb-4">
-                <svg className="size-12 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="rounded-full bg-surface-sunken p-6 mb-4">
+                <svg className="size-12 text-fg-subtle" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
                 </svg>
               </div>
-              <h3 className="text-lg font-semibold text-slate-700 mb-1">No hay leads en {leadStatusLabels[activeTab]}</h3>
-              <p className="text-sm text-slate-500">Arrastra leads desde otras etapas o crea uno nuevo</p>
+              <h3 className="text-lg font-semibold text-fg-muted mb-1">No hay leads en {leadStatusLabels[activeTab]}</h3>
+              <p className="text-sm text-fg-subtle">Arrastra leads desde otras etapas o crea uno nuevo</p>
             </div>
           )}
 

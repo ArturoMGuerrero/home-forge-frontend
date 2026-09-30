@@ -25,7 +25,7 @@ export function ForgotPasswordPage() {
   }
 
   return (
-    <div className="grid min-h-screen bg-slate-950 lg:grid-cols-[1.05fr_.95fr]">
+    <div className="grid min-h-screen bg-inverse lg:grid-cols-[1.05fr_.95fr]">
       <section className="relative hidden overflow-hidden p-12 text-white lg:flex lg:flex-col lg:justify-between">
         <div className="absolute inset-0 bg-gradient-to-br from-indigo-600/80 via-slate-950 to-cyan-500/40" />
         <div className="absolute -left-24 top-28 size-80 rounded-full border-[60px] border-white/5" />
@@ -33,20 +33,20 @@ export function ForgotPasswordPage() {
         <div className="relative max-w-xl">
           <p className="mb-4 text-sm font-bold uppercase tracking-[.2em] text-cyan-300">Recuperación de acceso</p>
           <h1 className="text-5xl font-bold leading-tight">Recupera el acceso a tu cuenta de forma segura.</h1>
-          <p className="mt-5 text-lg text-slate-300">Ingresa tu correo y tu nueva contraseña para restablecer el acceso.</p>
+          <p className="mt-5 text-lg text-border-strong">Ingresa tu correo y tu nueva contraseña para restablecer el acceso.</p>
         </div>
       </section>
 
-      <section className="flex items-center justify-center bg-slate-50 px-5 py-10">
+      <section className="flex items-center justify-center bg-surface-muted px-5 py-10">
         <div className="w-full max-w-md">
           <div className="mb-8 lg:hidden">
             <div className="flex items-center gap-3">
               <img alt="HomeForge" className="size-12 rounded-xl object-cover" src="/favicon.png" />
-              <strong className="text-xl font-bold text-slate-950">HomeForge</strong>
+              <strong className="text-xl font-bold text-fg">HomeForge</strong>
             </div>
           </div>
 
-          <Link className="mb-6 inline-flex items-center gap-2 text-sm font-semibold text-slate-600 transition hover:text-indigo-600" to="/login">
+          <Link className="mb-6 inline-flex items-center gap-2 text-sm font-semibold text-fg-muted transition hover:text-primary-fg" to="/login">
             <svg className="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
             </svg>
@@ -55,9 +55,9 @@ export function ForgotPasswordPage() {
 
           {!success ? (
             <>
-              <p className="mb-1 text-xs font-bold uppercase tracking-[0.16em] text-indigo-600">Recuperar contraseña</p>
+              <p className="mb-1 text-xs font-bold uppercase tracking-[0.16em] text-primary-fg">Recuperar contraseña</p>
               <h2 className="text-3xl font-bold">¿Olvidaste tu contraseña?</h2>
-              <p className="mt-2 text-sm text-slate-500">Ingresa tu correo electrónico y te enviaremos un enlace seguro para continuar.</p>
+              <p className="mt-2 text-sm text-fg-subtle">Ingresa tu correo electrónico y te enviaremos un enlace seguro para continuar.</p>
 
               <form className="mt-8 space-y-5" onSubmit={submit}>
                 <Input
@@ -82,23 +82,23 @@ export function ForgotPasswordPage() {
               </form>
             </>
           ) : (
-            <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-6">
+            <div className="rounded-2xl border border-success-line bg-success-soft p-6">
               <div className="mb-4 flex items-center gap-3">
-                <div className="grid size-12 shrink-0 place-items-center rounded-full bg-emerald-100">
-                  <svg className="size-6 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div className="grid size-12 shrink-0 place-items-center rounded-full bg-success-muted">
+                  <svg className="size-6 text-success-fg" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                   </svg>
                 </div>
                 <div>
-                  <h3 className="font-bold text-emerald-900">Revisa tu correo</h3>
-                  <p className="text-sm text-emerald-700">La solicitud fue procesada</p>
+                  <h3 className="font-bold text-success-fg">Revisa tu correo</h3>
+                  <p className="text-sm text-success-fg">La solicitud fue procesada</p>
                 </div>
               </div>
-              <p className="text-sm text-emerald-800">
+              <p className="text-sm text-success-fg">
                 Si existe una cuenta asociada, recibirás un enlace que será válido durante 30 minutos.
               </p>
               <Link
-                className="mt-4 block w-full rounded-xl bg-indigo-600 px-4 py-3 text-center text-sm font-semibold text-white transition hover:bg-indigo-700"
+                className="mt-4 block w-full rounded-xl bg-primary px-4 py-3 text-center text-sm font-semibold text-white transition hover:bg-primary-hover"
                 to="/login"
               >
                 Volver al inicio de sesión
@@ -106,9 +106,9 @@ export function ForgotPasswordPage() {
             </div>
           )}
 
-          <p className="mt-6 text-center text-sm text-slate-500">
+          <p className="mt-6 text-center text-sm text-fg-subtle">
             ¿Recordaste tu contraseña?{' '}
-            <Link className="font-semibold text-indigo-600 hover:text-indigo-800" to="/login">
+            <Link className="font-semibold text-primary-fg hover:underline" to="/login">
               Iniciar sesión
             </Link>
           </p>

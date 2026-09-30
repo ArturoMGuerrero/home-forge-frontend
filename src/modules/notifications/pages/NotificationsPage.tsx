@@ -71,32 +71,32 @@ export default function NotificationsPage() {
   function getStatusColor(status: NotificationStatus): string {
     switch (status) {
       case 'PENDING':
-        return 'bg-gray-100 text-gray-800';
+        return 'bg-surface-sunken text-fg';
       case 'SENT':
-        return 'bg-blue-100 text-blue-800';
+        return 'bg-info-muted text-info-fg';
       case 'DELIVERED':
-        return 'bg-green-100 text-green-800';
+        return 'bg-success-muted text-success-fg';
       case 'READ':
-        return 'bg-emerald-100 text-emerald-800';
+        return 'bg-success-muted text-success-fg';
       case 'FAILED':
-        return 'bg-red-100 text-red-800';
+        return 'bg-danger-muted text-danger-fg';
       case 'CANCELLED':
-        return 'bg-orange-100 text-orange-800';
+        return 'bg-warning-muted text-warning-fg';
       default:
-        return 'bg-gray-100 text-gray-800';
+        return 'bg-surface-sunken text-fg';
     }
   }
 
   function getPriorityColor(priority: string): string {
     switch (priority) {
       case 'URGENT':
-        return 'border-l-4 border-red-500';
+        return 'border-l-4 border-danger';
       case 'HIGH':
-        return 'border-l-4 border-orange-400';
+        return 'border-l-4 border-warning';
       case 'MEDIUM':
-        return 'border-l-4 border-blue-400';
+        return 'border-l-4 border-info';
       case 'LOW':
-        return 'border-l-4 border-gray-300';
+        return 'border-l-4 border-border-strong';
       default:
         return '';
     }
@@ -128,7 +128,7 @@ export default function NotificationsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
+    <div className="min-h-screen bg-app">
       <PageHeader
         title="Notificaciones"
         subtitle="Gestiona emails, WhatsApp, notificaciones push y SMS"
@@ -173,8 +173,8 @@ export default function NotificationsPage() {
       <div className="p-4 lg:p-6">
         {filteredNotifications.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-20 text-center">
-            <div className="rounded-full bg-slate-100 p-6 mb-4">
-              <svg className="size-12 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="rounded-full bg-surface-sunken p-6 mb-4">
+              <svg className="size-12 text-fg-subtle" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path
                   strokeLinecap="round"
                   strokeLinejoin="round"
@@ -183,10 +183,10 @@ export default function NotificationsPage() {
                 />
               </svg>
             </div>
-            <p className="text-slate-600 font-medium">
+            <p className="text-fg-muted font-medium">
               No hay notificaciones {activeTab !== 'ALL' && notificationStatusLabels[activeTab as NotificationStatus]}
             </p>
-            <p className="text-sm text-slate-500 mt-1">
+            <p className="text-sm text-fg-subtle mt-1">
               Crea tu primera notificación para comunicarte con tus prospectos
             </p>
           </div>
@@ -195,12 +195,12 @@ export default function NotificationsPage() {
             {filteredNotifications.map(notification => (
               <div
                 key={notification.id}
-                className={`bg-white rounded-xl border border-slate-200 p-4 hover:shadow-md transition-all ${getPriorityColor(
+                className={`bg-surface rounded-xl border border-border p-4 hover:shadow-md transition-all ${getPriorityColor(
                   notification.priority
                 )}`}
               >
                 <div className="flex items-start gap-4">
-                  <div className="size-10 rounded-lg bg-indigo-100 flex items-center justify-center text-xl flex-shrink-0">
+                  <div className="size-10 rounded-lg bg-primary-muted flex items-center justify-center text-xl flex-shrink-0">
                     {NOTIFICATION_ICONS[notification.notificationType]}
                   </div>
 
@@ -208,7 +208,7 @@ export default function NotificationsPage() {
                     <div className="flex items-start justify-between gap-2 mb-2">
                       <div className="flex-1">
                         <div className="flex items-center gap-2 mb-1">
-                          <h3 className="font-semibold text-slate-900">
+                          <h3 className="font-semibold text-fg">
                             {notification.subject || notificationTypeLabels[notification.notificationType]}
                           </h3>
                           <span
@@ -218,12 +218,12 @@ export default function NotificationsPage() {
                           >
                             {notificationStatusLabels[notification.status]}
                           </span>
-                          <span className="inline-block px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-700">
+                          <span className="inline-block px-2 py-0.5 rounded-full text-xs font-medium bg-surface-sunken text-fg-muted">
                             {notificationPriorityLabels[notification.priority]}
                           </span>
                         </div>
 
-                        <div className="flex items-center gap-3 text-sm text-slate-600 mb-2">
+                        <div className="flex items-center gap-3 text-sm text-fg-muted mb-2">
                           <span>
                             Para: <span className="font-medium">{notification.recipientName || notification.recipientEmail || notification.recipientPhone}</span>
                           </span>
@@ -231,7 +231,7 @@ export default function NotificationsPage() {
                           <span>{new Date(notification.createdAt).toLocaleString('es-MX')}</span>
                         </div>
 
-                        <p className="text-sm text-slate-600 line-clamp-2">{notification.content}</p>
+                        <p className="text-sm text-fg-muted line-clamp-2">{notification.content}</p>
                       </div>
 
                       {/* Botón de eliminar */}
@@ -250,7 +250,7 @@ export default function NotificationsPage() {
                     </div>
 
                     {notification.sentAt && (
-                      <div className="flex items-center gap-4 text-xs text-slate-500 mt-2">
+                      <div className="flex items-center gap-4 text-xs text-fg-subtle mt-2">
                         <span>Enviado: {new Date(notification.sentAt).toLocaleString('es-MX')}</span>
                         {notification.deliveredAt && (
                           <>
@@ -261,7 +261,7 @@ export default function NotificationsPage() {
                         {notification.readAt && (
                           <>
                             <span>•</span>
-                            <span className="text-green-600 font-medium">
+                            <span className="text-success-fg font-medium">
                               Leído: {new Date(notification.readAt).toLocaleString('es-MX')}
                             </span>
                           </>
@@ -270,7 +270,7 @@ export default function NotificationsPage() {
                     )}
 
                     {notification.status === 'FAILED' && notification.errorMessage && (
-                      <div className="mt-2 p-2 bg-red-50 border border-red-200 rounded text-xs text-red-700">
+                      <div className="mt-2 p-2 bg-danger-soft border border-danger-line rounded text-xs text-danger-fg">
                         <span className="font-semibold">Error:</span> {notification.errorMessage}
                       </div>
                     )}

@@ -1,6 +1,15 @@
 import { postJson } from '../../../shared/services/api';
 
-const SESSION_KEY = 'casaflow_session';
+const SESSION_KEY = 'homeforge_session';
+const LEGACY_SESSION_KEY = 'casaflow_session';
+
+// Conserva la sesión iniciada antes del cambio de nombre CasaFlow -> HomeForge.
+function migrateLegacySession() {
+  const legacy = localStorage.getItem(LEGACY_SESSION_KEY);
+  if (legacy === null) return;
+  if (localStorage.getItem(SESSION_KEY) === null) localStorage.setItem(SESSION_KEY, legacy);
+  localStorage.removeItem(LEGACY_SESSION_KEY);
+}
 
 export type Session = {
   userId: string;
@@ -49,6 +58,7 @@ export function updateSessionSubscription(planCode: Session['planCode'], userLim
 }
 
 export function getSession(): Session | null {
+  migrateLegacySession();
   const value = localStorage.getItem(SESSION_KEY);
   if (!value) return null;
 

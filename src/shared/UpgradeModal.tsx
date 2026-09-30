@@ -24,9 +24,9 @@ export function UpgradeModal({ isOpen, onClose, feature, level }: Props) {
       showCloseButton={false}
     >
       <div className="mb-4 flex items-center gap-3">
-        <div className={`grid size-12 place-items-center rounded-full ${level === 'BLOCKED' ? 'bg-slate-700/50' : 'bg-amber-600/20'}`}>
+        <div className={`grid size-12 place-items-center rounded-full ${level === 'BLOCKED' ? 'bg-inverse-hover' : 'bg-warning/20'}`}>
           {level === 'BLOCKED' ? (
-            <svg className="size-6 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="size-6 text-fg-subtle" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
             </svg>
           ) : (
@@ -39,11 +39,11 @@ export function UpgradeModal({ isOpen, onClose, feature, level }: Props) {
           <h3 className="font-bold text-white">
             {level === 'BLOCKED' ? 'Función Bloqueada' : 'LÍMITE ALCANZADO'}
           </h3>
-          <p className="text-sm text-slate-400">Renueva para continuar</p>
+          <p className="text-sm text-fg-subtle">Renueva para continuar</p>
         </div>
       </div>
 
-      <p className="mb-6 text-sm text-slate-300">
+      <p className="mb-6 text-sm text-border-strong">
         {level === 'BLOCKED' ? (
           <>
             No puedes <strong className="text-white">{feature}</strong> porque tu cuenta está suspendida.
@@ -58,14 +58,14 @@ export function UpgradeModal({ isOpen, onClose, feature, level }: Props) {
 
       <div className="space-y-3">
         <button
-          className="w-full rounded-xl bg-amber-600 px-4 py-3 text-sm font-semibold text-white transition hover:bg-amber-700"
+          className="w-full rounded-xl bg-warning px-4 py-3 text-sm font-semibold text-white transition hover:bg-warning-hover"
           onClick={handleUpgrade}
           type="button"
         >
           Comparar planes
         </button>
         <button
-          className="w-full rounded-xl border border-slate-600/50 px-4 py-3 text-sm font-semibold text-slate-300 transition hover:bg-slate-700/50"
+          className="w-full rounded-xl border border-slate-600/50 px-4 py-3 text-sm font-semibold text-border-strong transition hover:bg-inverse-hover"
           onClick={onClose}
           type="button"
         >
@@ -74,7 +74,7 @@ export function UpgradeModal({ isOpen, onClose, feature, level }: Props) {
       </div>
 
       {level === 'LIMITED' && (
-        <div className="mt-4 rounded-xl bg-amber-600/10 border border-amber-600/20 p-3">
+        <div className="mt-4 rounded-xl bg-warning/10 border border-warning/20 p-3">
           <p className="text-xs text-amber-300">
             💡 Aún puedes ver y editar tus datos existentes. Solo está bloqueada la creación de nuevo contenido.
           </p>

@@ -52,10 +52,10 @@ export function DashboardPage() {
     return (
       <div aria-label="Cargando tu panel" className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4" role="status">
         {[0, 1, 2, 3].map(item => (
-          <div className="h-36 animate-pulse rounded-2xl border border-slate-200 bg-white p-5 shadow-sm" key={item}>
-            <div className="size-10 rounded-xl bg-slate-200" />
-            <div className="mt-4 h-3 w-24 rounded bg-slate-200" />
-            <div className="mt-3 h-7 w-32 rounded bg-slate-200" />
+          <div className="h-36 animate-pulse rounded-2xl border border-border bg-surface p-5 shadow-sm" key={item}>
+            <div className="size-10 rounded-xl bg-surface-strong" />
+            <div className="mt-4 h-3 w-24 rounded bg-surface-strong" />
+            <div className="mt-3 h-7 w-32 rounded bg-surface-strong" />
           </div>
         ))}
         <span className="sr-only">Cargando tu panel...</span>
@@ -65,10 +65,10 @@ export function DashboardPage() {
 
   if (loadError || !metrics) {
     return (
-      <div className="rounded-3xl border border-rose-200 bg-rose-50 p-10 text-center text-rose-800" role="alert">
+      <div className="rounded-3xl border border-danger-line bg-danger-soft p-10 text-center text-danger-fg" role="alert">
         <Icon className="mx-auto size-8" name="alert" />
         <h1 className="mt-3 text-lg font-bold">No pudimos cargar tu panel</h1>
-        <p className="mt-1 text-sm text-rose-700">Revisa tu conexión e inténtalo nuevamente.</p>
+        <p className="mt-1 text-sm text-danger-fg">Revisa tu conexión e inténtalo nuevamente.</p>
         <Button className="mt-5" onClick={loadDashboard} variant="danger">
           Reintentar
         </Button>
@@ -93,13 +93,13 @@ export function DashboardPage() {
       {/* Header */}
       <header className="mb-8 flex flex-wrap items-end justify-between gap-5">
         <div>
-          <p className="mb-1 text-[11px] font-bold uppercase tracking-[0.16em] text-indigo-600">
+          <p className="mb-1 text-[11px] font-bold uppercase tracking-[0.16em] text-primary-fg">
             Panel ejecutivo
           </p>
           <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">
             Bienvenido de vuelta
           </h1>
-          <p className="mt-2 text-sm text-slate-500">
+          <p className="mt-2 text-sm text-fg-subtle">
             Resumen de tu operación • Últimos 30 días
           </p>
         </div>
@@ -122,7 +122,7 @@ export function DashboardPage() {
       <section className="mb-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <KpiCard
           icon="currency"
-          iconColor="bg-indigo-600"
+          iconColor="bg-primary"
           label="Valor vendido"
           value={money.format(metrics.soldValue)}
           sublabel={`${metrics.soldProperties} propiedades vendidas`}
@@ -131,7 +131,7 @@ export function DashboardPage() {
 
         <KpiCard
           icon="workflow"
-          iconColor="bg-cyan-600"
+          iconColor="bg-info"
           label="Leads activos"
           value={metrics.openLeads.toString()}
           sublabel={`${metrics.closedLeads} cerrados este mes`}
@@ -140,7 +140,7 @@ export function DashboardPage() {
 
         <KpiCard
           icon="finance"
-          iconColor="bg-violet-600"
+          iconColor="bg-accent"
           label="Tasa de cierre"
           value={`${metrics.leadToClosedRate.toFixed(1)}%`}
           sublabel={`${metrics.closedLeads} de ${metrics.totalLeads} leads`}
@@ -149,7 +149,7 @@ export function DashboardPage() {
 
         <KpiCard
           icon="alert"
-          iconColor={metrics.dueFollowUps > 0 ? 'bg-rose-600' : 'bg-emerald-600'}
+          iconColor={metrics.dueFollowUps > 0 ? 'bg-danger' : 'bg-success'}
           label="Urgente hoy"
           value={metrics.dueFollowUps.toString()}
           sublabel={metrics.dueFollowUps > 0 ? 'seguimientos vencidos' : 'todo al día'}
@@ -158,14 +158,14 @@ export function DashboardPage() {
       </section>
 
       {/* Gráfica de Tendencia */}
-      <section className="mb-6 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+      <section className="mb-6 rounded-2xl border border-border bg-surface p-6 shadow-sm">
         <div className="mb-4 flex items-start justify-between">
           <div>
             <h2 className="text-lg font-bold">Tendencia de Ventas</h2>
-            <p className="text-sm text-slate-500">Valor vendido en los últimos 30 días</p>
+            <p className="text-sm text-fg-subtle">Valor vendido en los últimos 30 días</p>
           </div>
           <Link
-            className="text-sm font-semibold text-indigo-600 hover:text-indigo-700"
+            className="text-sm font-semibold text-primary-fg hover:underline"
             to="/app/reportes"
           >
             Ver más →
@@ -182,16 +182,16 @@ export function DashboardPage() {
 
       {/* Seguimientos Urgentes */}
       {metrics.dueFollowUps > 0 && (
-        <section className="mb-6 rounded-2xl border border-rose-200 bg-gradient-to-br from-rose-50 to-orange-50 p-6 shadow-sm">
+        <section className="mb-6 rounded-2xl border border-danger-line bg-gradient-to-br from-danger-soft to-warning-soft p-6 shadow-sm">
           <div className="mb-4 flex items-center gap-3">
-            <span className="grid size-10 place-items-center rounded-xl bg-rose-600 text-white">
+            <span className="grid size-10 place-items-center rounded-xl bg-danger text-white">
               <Icon className="size-5" name="alert" />
             </span>
             <div>
-              <h2 className="text-lg font-bold text-rose-900">
+              <h2 className="text-lg font-bold text-danger-fg">
                 {metrics.dueFollowUps} seguimiento{metrics.dueFollowUps > 1 ? 's' : ''} vencido{metrics.dueFollowUps > 1 ? 's' : ''}
               </h2>
-              <p className="text-sm text-rose-700">Requieren tu atención inmediata</p>
+              <p className="text-sm text-danger-fg">Requieren tu atención inmediata</p>
             </div>
           </div>
 
@@ -200,17 +200,17 @@ export function DashboardPage() {
               <Link
                 key={lead.id}
                 to={`/app/prospectos/${lead.id}`}
-                className="flex items-center justify-between gap-3 rounded-xl border border-rose-200 bg-white px-4 py-3 hover:border-rose-300 hover:bg-rose-50"
+                className="flex items-center justify-between gap-3 rounded-xl border border-danger-line bg-surface px-4 py-3 hover:border-danger-line hover:bg-danger-soft"
               >
                 <div className="flex items-center gap-3">
-                  <span className="grid size-10 place-items-center rounded-full bg-rose-100 text-xs font-bold text-rose-700">
+                  <span className="grid size-10 place-items-center rounded-full bg-danger-muted text-xs font-bold text-danger-fg">
                     {lead.firstName[0]}{lead.lastName[0]}
                   </span>
                   <div className="min-w-0">
-                    <strong className="block truncate text-sm text-rose-900">
+                    <strong className="block truncate text-sm text-danger-fg">
                       {lead.firstName} {lead.lastName}
                     </strong>
-                    <span className="text-xs text-rose-600">
+                    <span className="text-xs text-danger-fg">
                       {lead.nextFollowUpAt
                         ? `Vencido hace ${Math.floor((now.getTime() - new Date(lead.nextFollowUpAt).getTime()) / (1000 * 60 * 60 * 24))} días`
                         : 'Sin fecha'
@@ -218,7 +218,7 @@ export function DashboardPage() {
                     </span>
                   </div>
                 </div>
-                <Icon className="size-4 shrink-0 text-rose-600" name="arrow" />
+                <Icon className="size-4 shrink-0 text-danger-fg" name="arrow" />
               </Link>
             ))}
           </div>
@@ -233,12 +233,12 @@ export function DashboardPage() {
 
       {/* Todo al día - Mensaje positivo */}
       {metrics.dueFollowUps === 0 && (
-        <section className="mb-6 rounded-2xl border border-emerald-200 bg-gradient-to-br from-emerald-50 to-cyan-50 p-6 text-center shadow-sm">
-          <div className="mx-auto mb-3 grid size-16 place-items-center rounded-full bg-emerald-600 text-white">
+        <section className="mb-6 rounded-2xl border border-success-line bg-gradient-to-br from-success-soft to-info-soft p-6 text-center shadow-sm">
+          <div className="mx-auto mb-3 grid size-16 place-items-center rounded-full bg-success text-white">
             <Icon className="size-8" name="workflow" />
           </div>
-          <h2 className="text-xl font-bold text-emerald-900">Todo al día</h2>
-          <p className="mt-2 text-sm text-emerald-700">
+          <h2 className="text-xl font-bold text-success-fg">Todo al día</h2>
+          <p className="mt-2 text-sm text-success-fg">
             No tienes seguimientos vencidos. Excelente trabajo manteniendo tu pipeline organizado.
           </p>
           <div className="mt-4 flex justify-center gap-3">
@@ -298,9 +298,9 @@ type KpiCardProps = {
 
 function KpiCard({ icon, iconColor, label, value, sublabel, trend }: KpiCardProps) {
   const trendColors = {
-    up: 'text-emerald-600',
-    down: 'text-rose-600',
-    neutral: 'text-slate-500'
+    up: 'text-success-fg',
+    down: 'text-danger-fg',
+    neutral: 'text-fg-subtle'
   };
 
   const trendLabels = {
@@ -310,7 +310,7 @@ function KpiCard({ icon, iconColor, label, value, sublabel, trend }: KpiCardProp
   };
 
   return (
-    <article className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm hover:shadow-md transition-shadow">
+    <article className="rounded-2xl border border-border bg-surface p-5 shadow-sm hover:shadow-md transition-shadow">
       <div className="mb-4 flex items-center justify-between">
         <span className={`grid size-10 place-items-center rounded-xl text-white ${iconColor}`}>
           <Icon className="size-5" name={icon} />
@@ -319,9 +319,9 @@ function KpiCard({ icon, iconColor, label, value, sublabel, trend }: KpiCardProp
           <span className="sr-only">{trendLabels[trend]}</span>
         </span>
       </div>
-      <span className="text-sm text-slate-500">{label}</span>
+      <span className="text-sm text-fg-subtle">{label}</span>
       <strong className="mt-1 block text-2xl font-bold tracking-tight">{value}</strong>
-      <small className="mt-2 block text-xs font-medium text-slate-500">{sublabel}</small>
+      <small className="mt-2 block text-xs font-medium text-fg-subtle">{sublabel}</small>
     </article>
   );
 }
@@ -337,9 +337,9 @@ type QuickAccessCardProps = {
 
 function QuickAccessCard({ icon, title, description, link, color }: QuickAccessCardProps) {
   const colors = {
-    indigo: 'border-indigo-200 bg-indigo-50 text-indigo-600 hover:bg-indigo-100',
-    cyan: 'border-cyan-200 bg-cyan-50 text-cyan-600 hover:bg-cyan-100',
-    violet: 'border-violet-200 bg-violet-50 text-violet-600 hover:bg-violet-100'
+    indigo: 'border-primary-line bg-primary-soft text-primary-fg hover:bg-primary-muted',
+    cyan: 'border-info-line bg-info-soft text-info-fg hover:bg-info-muted',
+    violet: 'border-accent-line bg-accent-soft text-accent-fg hover:bg-accent-muted'
   };
 
   return (

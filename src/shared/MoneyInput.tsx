@@ -52,7 +52,7 @@ export function MoneyInput({ className = '', currency, onBlur, onChange, value, 
         type="text"
         value={displayValue}
       />
-      {currency && <span className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-xs font-bold text-slate-500">{currency}</span>}
+      {currency && <span className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-xs font-bold text-fg-subtle">{currency}</span>}
     </div>
   );
 }

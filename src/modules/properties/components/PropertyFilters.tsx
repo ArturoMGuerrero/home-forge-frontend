@@ -61,14 +61,14 @@ export function PropertyFilters({ filters, onChange, resultCount, totalCount }: 
     filters.publishedOnly;
 
   return (
-    <div className="space-y-4 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+    <div className="space-y-4 rounded-2xl border border-border bg-surface p-5 shadow-sm">
       {/* Búsqueda principal */}
       <div className="relative">
-        <svg className="pointer-events-none absolute left-3.5 top-1/2 size-5 -translate-y-1/2 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <svg className="pointer-events-none absolute left-3.5 top-1/2 size-5 -translate-y-1/2 text-fg-subtle" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
         </svg>
         <input
-          className="w-full rounded-xl border border-slate-200 py-2.5 pl-11 pr-4 text-sm transition focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+          className="w-full rounded-xl border border-border py-2.5 pl-11 pr-4 text-sm transition focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
           onChange={e => updateFilter('searchQuery', e.target.value)}
           placeholder="Buscar por código, título o ciudad..."
           type="text"
@@ -76,7 +76,7 @@ export function PropertyFilters({ filters, onChange, resultCount, totalCount }: 
         />
         {filters.searchQuery && (
           <button
-            className="absolute right-3 top-1/2 -translate-y-1/2 rounded-lg p-1 text-slate-400 transition hover:bg-slate-100 hover:text-slate-600"
+            className="absolute right-3 top-1/2 -translate-y-1/2 rounded-lg p-1 text-fg-subtle transition hover:bg-surface-sunken hover:text-fg-muted"
             onClick={() => updateFilter('searchQuery', '')}
             type="button"
           >
@@ -90,9 +90,9 @@ export function PropertyFilters({ filters, onChange, resultCount, totalCount }: 
       {/* Filtros básicos */}
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         <div>
-          <label className="mb-1.5 block text-xs font-semibold text-slate-600">Estado</label>
+          <label className="mb-1.5 block text-xs font-semibold text-fg-muted">Estado</label>
           <select
-            className="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm transition focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+            className="w-full rounded-xl border border-border px-3 py-2 text-sm transition focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
             onChange={e => updateFilter('statusFilter', e.target.value)}
             value={filters.statusFilter}
           >
@@ -106,9 +106,9 @@ export function PropertyFilters({ filters, onChange, resultCount, totalCount }: 
         </div>
 
         <div>
-          <label className="mb-1.5 block text-xs font-semibold text-slate-600">Operación</label>
+          <label className="mb-1.5 block text-xs font-semibold text-fg-muted">Operación</label>
           <select
-            className="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm transition focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+            className="w-full rounded-xl border border-border px-3 py-2 text-sm transition focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
             onChange={e => updateFilter('listingTypeFilter', e.target.value)}
             value={filters.listingTypeFilter}
           >
@@ -119,9 +119,9 @@ export function PropertyFilters({ filters, onChange, resultCount, totalCount }: 
         </div>
 
         <div>
-          <label className="mb-1.5 block text-xs font-semibold text-slate-600">Tipo</label>
+          <label className="mb-1.5 block text-xs font-semibold text-fg-muted">Tipo</label>
           <select
-            className="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm transition focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+            className="w-full rounded-xl border border-border px-3 py-2 text-sm transition focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
             onChange={e => updateFilter('propertyTypeFilter', e.target.value)}
             value={filters.propertyTypeFilter}
           >
@@ -137,7 +137,7 @@ export function PropertyFilters({ filters, onChange, resultCount, totalCount }: 
 
         <div className="flex items-end">
           <button
-            className="w-full rounded-xl border-2 border-indigo-200 bg-indigo-50 px-3 py-2 text-sm font-semibold text-indigo-700 transition hover:bg-indigo-100"
+            className="w-full rounded-xl border-2 border-primary-line bg-primary-soft px-3 py-2 text-sm font-semibold text-primary-fg transition hover:bg-primary-muted"
             onClick={() => setShowAdvanced(!showAdvanced)}
             type="button"
           >
@@ -148,15 +148,15 @@ export function PropertyFilters({ filters, onChange, resultCount, totalCount }: 
 
       {/* Filtros avanzados */}
       {showAdvanced && (
-        <div className="space-y-4 rounded-xl border border-indigo-100 bg-indigo-50/50 p-4">
-          <p className="text-xs font-bold uppercase tracking-wider text-indigo-700">Filtros avanzados</p>
+        <div className="space-y-4 rounded-xl border border-primary-line bg-primary-soft/50 p-4">
+          <p className="text-xs font-bold uppercase tracking-wider text-primary-fg">Filtros avanzados</p>
 
           {/* Rango de precio */}
           <div className="grid gap-3 sm:grid-cols-2">
             <div>
-              <label className="mb-1.5 block text-xs font-semibold text-slate-600">Precio mínimo (MXN)</label>
+              <label className="mb-1.5 block text-xs font-semibold text-fg-muted">Precio mínimo (MXN)</label>
               <input
-                className="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm transition focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+                className="w-full rounded-xl border border-border px-3 py-2 text-sm transition focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
                 min="0"
                 placeholder="$ 0"
                 type="number"
@@ -165,9 +165,9 @@ export function PropertyFilters({ filters, onChange, resultCount, totalCount }: 
               />
             </div>
             <div>
-              <label className="mb-1.5 block text-xs font-semibold text-slate-600">Precio máximo (MXN)</label>
+              <label className="mb-1.5 block text-xs font-semibold text-fg-muted">Precio máximo (MXN)</label>
               <input
-                className="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm transition focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+                className="w-full rounded-xl border border-border px-3 py-2 text-sm transition focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
                 min="0"
                 placeholder="$ 10,000,000"
                 type="number"
@@ -180,9 +180,9 @@ export function PropertyFilters({ filters, onChange, resultCount, totalCount }: 
           {/* Rango de recámaras */}
           <div className="grid gap-3 sm:grid-cols-2">
             <div>
-              <label className="mb-1.5 block text-xs font-semibold text-slate-600">Recámaras mínimas</label>
+              <label className="mb-1.5 block text-xs font-semibold text-fg-muted">Recámaras mínimas</label>
               <input
-                className="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm transition focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+                className="w-full rounded-xl border border-border px-3 py-2 text-sm transition focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
                 min="0"
                 max="20"
                 placeholder="0"
@@ -192,9 +192,9 @@ export function PropertyFilters({ filters, onChange, resultCount, totalCount }: 
               />
             </div>
             <div>
-              <label className="mb-1.5 block text-xs font-semibold text-slate-600">Recámaras máximas</label>
+              <label className="mb-1.5 block text-xs font-semibold text-fg-muted">Recámaras máximas</label>
               <input
-                className="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm transition focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+                className="w-full rounded-xl border border-border px-3 py-2 text-sm transition focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
                 min="0"
                 max="20"
                 placeholder="10"
@@ -208,9 +208,9 @@ export function PropertyFilters({ filters, onChange, resultCount, totalCount }: 
           {/* Rango de baños */}
           <div className="grid gap-3 sm:grid-cols-2">
             <div>
-              <label className="mb-1.5 block text-xs font-semibold text-slate-600">Baños mínimos</label>
+              <label className="mb-1.5 block text-xs font-semibold text-fg-muted">Baños mínimos</label>
               <input
-                className="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm transition focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+                className="w-full rounded-xl border border-border px-3 py-2 text-sm transition focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
                 min="0"
                 max="20"
                 step="0.5"
@@ -221,9 +221,9 @@ export function PropertyFilters({ filters, onChange, resultCount, totalCount }: 
               />
             </div>
             <div>
-              <label className="mb-1.5 block text-xs font-semibold text-slate-600">Baños máximos</label>
+              <label className="mb-1.5 block text-xs font-semibold text-fg-muted">Baños máximos</label>
               <input
-                className="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm transition focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+                className="w-full rounded-xl border border-border px-3 py-2 text-sm transition focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
                 min="0"
                 max="20"
                 step="0.5"
@@ -238,9 +238,9 @@ export function PropertyFilters({ filters, onChange, resultCount, totalCount }: 
           {/* Rango de superficie */}
           <div className="grid gap-3 sm:grid-cols-2">
             <div>
-              <label className="mb-1.5 block text-xs font-semibold text-slate-600">Superficie mínima (m²)</label>
+              <label className="mb-1.5 block text-xs font-semibold text-fg-muted">Superficie mínima (m²)</label>
               <input
-                className="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm transition focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+                className="w-full rounded-xl border border-border px-3 py-2 text-sm transition focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
                 min="0"
                 placeholder="0"
                 type="number"
@@ -249,9 +249,9 @@ export function PropertyFilters({ filters, onChange, resultCount, totalCount }: 
               />
             </div>
             <div>
-              <label className="mb-1.5 block text-xs font-semibold text-slate-600">Superficie máxima (m²)</label>
+              <label className="mb-1.5 block text-xs font-semibold text-fg-muted">Superficie máxima (m²)</label>
               <input
-                className="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm transition focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+                className="w-full rounded-xl border border-border px-3 py-2 text-sm transition focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
                 min="0"
                 placeholder="1000"
                 type="number"
@@ -262,10 +262,10 @@ export function PropertyFilters({ filters, onChange, resultCount, totalCount }: 
           </div>
 
           {/* Solo publicadas */}
-          <label className="flex items-center gap-2 text-sm text-slate-700">
+          <label className="flex items-center gap-2 text-sm text-fg-muted">
             <input
               checked={filters.publishedOnly}
-              className="size-4 rounded border-slate-300 text-indigo-600 focus:ring-2 focus:ring-indigo-500/20"
+              className="size-4 rounded border-border-strong text-primary-fg focus:ring-2 focus:ring-primary/20"
               type="checkbox"
               onChange={e => updateFilter('publishedOnly', e.target.checked)}
             />
@@ -276,12 +276,12 @@ export function PropertyFilters({ filters, onChange, resultCount, totalCount }: 
 
       {/* Contador de resultados */}
       {hasActiveFilters && (
-        <div className="flex items-center justify-between rounded-lg bg-indigo-50 px-4 py-2.5 text-xs">
-          <span className="font-medium text-indigo-900">
+        <div className="flex items-center justify-between rounded-lg bg-primary-soft px-4 py-2.5 text-xs">
+          <span className="font-medium text-primary-fg">
             {resultCount} de {totalCount} {resultCount === 1 ? 'propiedad encontrada' : 'propiedades encontradas'}
           </span>
           <button
-            className="font-semibold text-indigo-600 transition hover:text-indigo-700"
+            className="font-semibold text-primary-fg transition hover:text-primary-fg"
             onClick={clearFilters}
             type="button"
           >

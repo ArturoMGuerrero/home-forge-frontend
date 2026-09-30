@@ -148,14 +148,14 @@ export function QuickPropertyModal({ isOpen, onClose, onSuccess }: QuickProperty
 
         {/* Precio */}
         <div>
-          <label className="block text-sm font-semibold text-slate-700 mb-2">
+          <label className="block text-sm font-semibold text-fg-muted mb-2">
             Precio *
           </label>
           <MoneyInput
             currency={form.currencyCode}
             onChange={value => update('price', value)}
             value={form.price}
-            className="w-full px-3.5 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm"
+            className="w-full px-3.5 py-3 border border-border rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent text-sm"
             required
           />
         </div>
@@ -184,7 +184,7 @@ export function QuickPropertyModal({ isOpen, onClose, onSuccess }: QuickProperty
         </Alert>
 
         {/* Botones */}
-        <div className="flex gap-3 pt-4 border-t border-slate-200">
+        <div className="flex gap-3 pt-4 border-t border-border">
           <Button
             type="button"
             onClick={handleClose}

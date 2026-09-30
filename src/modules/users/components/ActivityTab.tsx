@@ -19,14 +19,14 @@ const ACTIVITY_ICONS: Record<string, string> = {
 };
 
 const CATEGORY_COLORS: Record<string, string> = {
-  AUTH: 'bg-blue-100 text-blue-700',
-  USER_MANAGEMENT: 'bg-purple-100 text-purple-700',
-  LEAD_MANAGEMENT: 'bg-green-100 text-green-700',
-  PROPERTY_MANAGEMENT: 'bg-orange-100 text-orange-700',
-  DOCUMENT_MANAGEMENT: 'bg-yellow-100 text-yellow-700',
-  AGENDA: 'bg-pink-100 text-pink-700',
-  TEAM_MANAGEMENT: 'bg-indigo-100 text-indigo-700',
-  REPORTS: 'bg-cyan-100 text-cyan-700'
+  AUTH: 'bg-info-muted text-info-fg',
+  USER_MANAGEMENT: 'bg-accent-muted text-accent-fg',
+  LEAD_MANAGEMENT: 'bg-success-muted text-success-fg',
+  PROPERTY_MANAGEMENT: 'bg-warning-muted text-warning-fg',
+  DOCUMENT_MANAGEMENT: 'bg-warning-muted text-warning-fg',
+  AGENDA: 'bg-danger-muted text-danger-fg',
+  TEAM_MANAGEMENT: 'bg-primary-muted text-primary-fg',
+  REPORTS: 'bg-info-muted text-info-fg'
 };
 
 export function ActivityTab() {
@@ -60,7 +60,7 @@ export function ActivityTab() {
       )
     : activities;
 
-  if (loading) return <p className="rounded-2xl border border-slate-200 bg-white p-8 text-center text-sm text-slate-500">Cargando actividad...</p>;
+  if (loading) return <p className="rounded-2xl border border-border bg-surface p-8 text-center text-sm text-fg-subtle">Cargando actividad...</p>;
 
   return (
     <div className="grid gap-6">
@@ -70,10 +70,10 @@ export function ActivityTab() {
           placeholder="Buscar actividad..."
           value={filter}
           onChange={e => setFilter(e.target.value)}
-          className="flex-1 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100"
+          className="flex-1 rounded-xl border border-border bg-surface px-4 py-2.5 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary-line"
         />
         <select
-          className="rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm outline-none focus:border-indigo-400"
+          className="rounded-xl border border-border bg-surface px-4 py-2.5 text-sm outline-none focus:border-primary"
           onChange={e => setFilter(e.target.value)}
         >
           <option value="">Todas las categorías</option>
@@ -88,13 +88,13 @@ export function ActivityTab() {
         </select>
       </div>
 
-      <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-        <div className="border-b border-slate-200 px-5 py-4">
+      <div className="overflow-hidden rounded-2xl border border-border bg-surface shadow-sm">
+        <div className="border-b border-border px-5 py-4">
           <h2 className="font-bold">Registro de actividad ({filteredActivities.length})</h2>
         </div>
-        <div className="divide-y divide-slate-100">
+        <div className="divide-y divide-border">
           {filteredActivities.length === 0 ? (
-            <div className="p-12 text-center text-sm text-slate-500">
+            <div className="p-12 text-center text-sm text-fg-subtle">
               No hay actividad para mostrar.
             </div>
           ) : (
@@ -110,17 +110,17 @@ export function ActivityTab() {
           <button
             onClick={() => setPage(Math.max(0, page - 1))}
             disabled={page === 0}
-            className="rounded-lg px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-100 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="rounded-lg px-4 py-2 text-sm font-semibold text-fg-muted hover:bg-surface-sunken disabled:opacity-50 disabled:cursor-not-allowed"
           >
             Anterior
           </button>
-          <span className="text-sm text-slate-600">
+          <span className="text-sm text-fg-muted">
             Página {page + 1} de {totalPages}
           </span>
           <button
             onClick={() => setPage(Math.min(totalPages - 1, page + 1))}
             disabled={page >= totalPages - 1}
-            className="rounded-lg px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-100 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="rounded-lg px-4 py-2 text-sm font-semibold text-fg-muted hover:bg-surface-sunken disabled:opacity-50 disabled:cursor-not-allowed"
           >
             Siguiente
           </button>
@@ -132,22 +132,22 @@ export function ActivityTab() {
 
 function ActivityRow({ activity }: { activity: UserActivity }) {
   const icon = ACTIVITY_ICONS[activity.activityType] || '📌';
-  const categoryColor = CATEGORY_COLORS[activity.activityCategory] || 'bg-slate-100 text-slate-700';
+  const categoryColor = CATEGORY_COLORS[activity.activityCategory] || 'bg-surface-sunken text-fg-muted';
   const date = new Date(activity.createdAt);
   const timeAgo = formatTimeAgo(date);
 
   return (
     <div className="flex items-start gap-4 px-5 py-4">
-      <span className="grid size-10 shrink-0 place-items-center rounded-full bg-slate-100 text-lg">
+      <span className="grid size-10 shrink-0 place-items-center rounded-full bg-surface-sunken text-lg">
         {icon}
       </span>
       <div className="flex-1 min-w-0">
-        <p className="text-sm font-medium text-slate-900">{activity.descriptionEs}</p>
+        <p className="text-sm font-medium text-fg">{activity.descriptionEs}</p>
         <div className="mt-1 flex items-center gap-2">
           <span className={`rounded-full px-2 py-0.5 text-xs font-semibold ${categoryColor}`}>
             {formatCategory(activity.activityCategory)}
           </span>
-          <span className="text-xs text-slate-500">{timeAgo}</span>
+          <span className="text-xs text-fg-subtle">{timeAgo}</span>
         </div>
       </div>
     </div>

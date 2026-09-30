@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useOutletContext } from 'react-router-dom';
 import toast from 'react-hot-toast';
-import { LeadItem, leadStatusLabels, listLeads } from '../api/leadsApi';
+import { LEADS_CHANGED_EVENT, LeadItem, leadStatusLabels, listLeads } from '../api/leadsApi';
 import { CreateLeadModal } from './CreateLeadModal';
 import { ExportButton } from '../../../shared/ExportButton';
 import { exportToExcel, formatCurrency, formatDate } from '../../../shared/excelExport';
@@ -10,21 +10,21 @@ import { UpgradeModal } from '../../../shared/UpgradeModal';
 import { SubscriptionRestrictions } from '../../../shared/subscriptionRestrictions';
 
 const statusClass: Record<string, string> = {
-  QUALIFIED: 'bg-violet-100 text-violet-800',
-  CONTACTED: 'bg-amber-100 text-amber-800',
-  NEW: 'bg-cyan-100 text-cyan-800',
-  TOUR_SCHEDULED: 'bg-indigo-100 text-indigo-800',
-  TOUR_COMPLETED: 'bg-emerald-100 text-emerald-800',
-  OFFER_MADE: 'bg-purple-100 text-purple-800',
-  UNDER_CONTRACT: 'bg-blue-100 text-blue-800',
-  CLOSED: 'bg-green-100 text-green-800',
-  LOST: 'bg-slate-100 text-slate-600'
+  QUALIFIED: 'bg-accent-muted text-accent-fg',
+  CONTACTED: 'bg-warning-muted text-warning-fg',
+  NEW: 'bg-info-muted text-info-fg',
+  TOUR_SCHEDULED: 'bg-primary-muted text-primary-fg',
+  TOUR_COMPLETED: 'bg-success-muted text-success-fg',
+  OFFER_MADE: 'bg-accent-muted text-accent-fg',
+  UNDER_CONTRACT: 'bg-info-muted text-info-fg',
+  CLOSED: 'bg-success-muted text-success-fg',
+  LOST: 'bg-surface-sunken text-fg-muted'
 };
 
 const priorityClass: Record<string, string> = {
-  HIGH: 'bg-rose-100 text-rose-700',
-  MEDIUM: 'bg-amber-100 text-amber-700',
-  LOW: 'bg-slate-100 text-slate-600'
+  HIGH: 'bg-danger-muted text-danger-fg',
+  MEDIUM: 'bg-warning-muted text-warning-fg',
+  LOW: 'bg-surface-sunken text-fg-muted'
 };
 
 const priorityLabels: Record<string, string> = {
@@ -107,8 +107,8 @@ export function LeadList({
   useEffect(() => {
     if (!leadsFromProps) {
       load();
-      window.addEventListener('casaflow:leads', load);
-      return () => window.removeEventListener('casaflow:leads', load);
+      window.addEventListener(LEADS_CHANGED_EVENT, load);
+      return () => window.removeEventListener(LEADS_CHANGED_EVENT, load);
     }
   }, [leadsFromProps]);
 
@@ -165,13 +165,13 @@ export function LeadList({
     <section className="min-w-0 p-4 lg:p-6">
       {!expanded && (
         <div className="mb-5 flex items-center justify-between gap-4">
-          <div><p className="mb-1 text-[11px] font-bold uppercase tracking-[0.16em] text-indigo-600">{t('crm')}</p><h2 className="text-xl font-bold">{t('recentLeads')}</h2></div>
+          <div><p className="mb-1 text-[11px] font-bold uppercase tracking-[0.16em] text-primary-fg">{t('crm')}</p><h2 className="text-xl font-bold">{t('recentLeads')}</h2></div>
           <div className="flex gap-3">
             <button
               className={`shrink-0 rounded-xl px-3.5 py-2.5 text-sm font-semibold shadow-sm transition focus:outline-none focus:ring-2 focus:ring-offset-2 ${
                 restrictions.canCreate
-                  ? 'bg-indigo-600 text-white hover:bg-indigo-700 focus:ring-indigo-500'
-                  : 'bg-slate-200 text-slate-500 cursor-not-allowed'
+                  ? 'bg-primary text-white hover:bg-primary-hover focus:ring-primary'
+                  : 'bg-surface-strong text-fg-subtle cursor-not-allowed'
               }`}
               onClick={handleCreateLead}
               type="button"
@@ -186,11 +186,11 @@ export function LeadList({
         <div className="mb-5 space-y-4">
           {/* Búsqueda */}
           <div className="relative">
-            <svg className="pointer-events-none absolute left-3.5 top-1/2 size-5 -translate-y-1/2 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="pointer-events-none absolute left-3.5 top-1/2 size-5 -translate-y-1/2 text-fg-subtle" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
             </svg>
             <input
-              className="w-full rounded-xl border border-slate-200 py-2.5 pl-11 pr-4 text-sm transition focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+              className="w-full rounded-xl border border-border py-2.5 pl-11 pr-4 text-sm transition focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
               onChange={e => setSearchQuery(e.target.value)}
               placeholder="Buscar por nombre, email o teléfono..."
               type="text"
@@ -198,7 +198,7 @@ export function LeadList({
             />
             {searchQuery && (
               <button
-                className="absolute right-3 top-1/2 -translate-y-1/2 rounded-lg p-1 text-slate-400 transition hover:bg-slate-100 hover:text-slate-600"
+                className="absolute right-3 top-1/2 -translate-y-1/2 rounded-lg p-1 text-fg-subtle transition hover:bg-surface-sunken hover:text-fg-muted"
                 onClick={() => setSearchQuery('')}
                 type="button"
               >
@@ -211,10 +211,10 @@ export function LeadList({
 
           {/* Filtros de Estado */}
           <div>
-            <p className="mb-2 text-xs font-semibold text-slate-600">Estado</p>
+            <p className="mb-2 text-xs font-semibold text-fg-muted">Estado</p>
             <div className="flex flex-wrap gap-2">
               <button
-                className={`rounded-full px-3 py-1.5 text-xs font-semibold transition ${statusFilter === 'ALL' ? 'bg-indigo-600 text-white' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'}`}
+                className={`rounded-full px-3 py-1.5 text-xs font-semibold transition ${statusFilter === 'ALL' ? 'bg-primary text-white' : 'bg-surface-sunken text-fg-muted hover:bg-surface-strong'}`}
                 onClick={() => setStatusFilter('ALL')}
                 type="button"
               >
@@ -222,7 +222,7 @@ export function LeadList({
               </button>
               {(Object.keys(leadStatusLabels) as LeadItem['status'][]).map(status => (
                 <button
-                  className={`rounded-full px-3 py-1.5 text-xs font-semibold transition ${statusFilter === status ? statusClass[status] : 'bg-slate-100 text-slate-700 hover:bg-slate-200'}`}
+                  className={`rounded-full px-3 py-1.5 text-xs font-semibold transition ${statusFilter === status ? statusClass[status] : 'bg-surface-sunken text-fg-muted hover:bg-surface-strong'}`}
                   key={status}
                   onClick={() => setStatusFilter(status)}
                   type="button"
@@ -235,31 +235,31 @@ export function LeadList({
 
           {/* Filtros de Prioridad */}
           <div>
-            <p className="mb-2 text-xs font-semibold text-slate-600">Prioridad</p>
+            <p className="mb-2 text-xs font-semibold text-fg-muted">Prioridad</p>
             <div className="flex flex-wrap gap-2">
               <button
-                className={`rounded-full px-3 py-1.5 text-xs font-semibold transition ${priorityFilter === 'ALL' ? 'bg-indigo-600 text-white' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'}`}
+                className={`rounded-full px-3 py-1.5 text-xs font-semibold transition ${priorityFilter === 'ALL' ? 'bg-primary text-white' : 'bg-surface-sunken text-fg-muted hover:bg-surface-strong'}`}
                 onClick={() => setPriorityFilter('ALL')}
                 type="button"
               >
                 Todas
               </button>
               <button
-                className={`rounded-full px-3 py-1.5 text-xs font-semibold transition ${priorityFilter === 'HIGH' ? priorityClass.HIGH : 'bg-slate-100 text-slate-700 hover:bg-slate-200'}`}
+                className={`rounded-full px-3 py-1.5 text-xs font-semibold transition ${priorityFilter === 'HIGH' ? priorityClass.HIGH : 'bg-surface-sunken text-fg-muted hover:bg-surface-strong'}`}
                 onClick={() => setPriorityFilter('HIGH')}
                 type="button"
               >
                 ⚡ Alta
               </button>
               <button
-                className={`rounded-full px-3 py-1.5 text-xs font-semibold transition ${priorityFilter === 'MEDIUM' ? priorityClass.MEDIUM : 'bg-slate-100 text-slate-700 hover:bg-slate-200'}`}
+                className={`rounded-full px-3 py-1.5 text-xs font-semibold transition ${priorityFilter === 'MEDIUM' ? priorityClass.MEDIUM : 'bg-surface-sunken text-fg-muted hover:bg-surface-strong'}`}
                 onClick={() => setPriorityFilter('MEDIUM')}
                 type="button"
               >
                 🎯 Media
               </button>
               <button
-                className={`rounded-full px-3 py-1.5 text-xs font-semibold transition ${priorityFilter === 'LOW' ? priorityClass.LOW : 'bg-slate-100 text-slate-700 hover:bg-slate-200'}`}
+                className={`rounded-full px-3 py-1.5 text-xs font-semibold transition ${priorityFilter === 'LOW' ? priorityClass.LOW : 'bg-surface-sunken text-fg-muted hover:bg-surface-strong'}`}
                 onClick={() => setPriorityFilter('LOW')}
                 type="button"
               >
@@ -270,12 +270,12 @@ export function LeadList({
 
           {/* Contador de resultados */}
           {(searchQuery || statusFilter !== 'ALL' || priorityFilter !== 'ALL') && (
-            <div className="flex items-center justify-between rounded-lg bg-indigo-50 px-4 py-2.5 text-xs">
-              <span className="font-medium text-indigo-900">
+            <div className="flex items-center justify-between rounded-lg bg-primary-soft px-4 py-2.5 text-xs">
+              <span className="font-medium text-primary-fg">
                 {filteredLeads.length} {filteredLeads.length === 1 ? 'prospecto encontrado' : 'prospectos encontrados'}
               </span>
               <button
-                className="font-semibold text-indigo-600 transition hover:text-indigo-700"
+                className="font-semibold text-primary-fg transition hover:text-primary-fg"
                 onClick={() => {
                   setSearchQuery('');
                   setStatusFilter('ALL');
@@ -291,14 +291,14 @@ export function LeadList({
       )}
 
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-        {leads.length === 0 && <p className="py-10 text-center text-sm text-slate-500 col-span-full">{t('noLeads')}</p>}
+        {leads.length === 0 && <p className="py-10 text-center text-sm text-fg-subtle col-span-full">{t('noLeads')}</p>}
         {filteredLeads.length === 0 && leads.length > 0 && (
           <div className="py-12 text-center col-span-full">
-            <svg className="mx-auto mb-3 size-12 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="mx-auto mb-3 size-12 text-border-strong" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
             </svg>
-            <p className="text-sm font-medium text-slate-600">No se encontraron prospectos</p>
-            <p className="mt-1 text-xs text-slate-500">Intenta ajustar los filtros de búsqueda</p>
+            <p className="text-sm font-medium text-fg-muted">No se encontraron prospectos</p>
+            <p className="mt-1 text-xs text-fg-subtle">Intenta ajustar los filtros de búsqueda</p>
           </div>
         )}
         {filteredLeads.slice(0, expanded ? undefined : 5).map(lead => {
@@ -307,45 +307,45 @@ export function LeadList({
 
           return (
             <article
-              className="group flex flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition-all hover:border-indigo-400 hover:shadow-xl hover:shadow-indigo-500/10"
+              className="group flex flex-col overflow-hidden rounded-2xl border border-border bg-surface shadow-sm transition-all hover:border-primary hover:shadow-xl hover:shadow-indigo-500/10"
               key={lead.id}
             >
               {/* Header compacto */}
               <div className="flex items-start gap-3 p-5">
                 <div className="relative flex-shrink-0">
-                  <div className="grid size-14 place-items-center rounded-xl bg-indigo-50 text-sm font-bold text-indigo-600">
+                  <div className="grid size-14 place-items-center rounded-xl bg-primary-soft text-sm font-bold text-primary-fg">
                     {lead.firstName[0]}{lead.lastName[0]}
                   </div>
                   {lead.priority === 'HIGH' && (
-                    <div className="absolute -right-1 -top-1 flex size-5 items-center justify-center rounded-full bg-rose-500 ring-2 ring-white">
+                    <div className="absolute -right-1 -top-1 flex size-5 items-center justify-center rounded-full bg-danger ring-2 ring-surface">
                       <span aria-label="Prioridad alta" className="text-xs" role="img">⚡</span>
                     </div>
                   )}
                 </div>
 
                 <div className="min-w-0 flex-1">
-                  <h3 className="font-bold text-slate-900 group-hover:text-indigo-600 transition mb-1.5 truncate">
+                  <h3 className="font-bold text-fg group-hover:text-primary-fg transition mb-1.5 truncate">
                     {lead.firstName} {lead.lastName}
                   </h3>
                   <div className="flex items-center gap-1.5">
                     <span className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-bold ${
-                      lead.status === 'QUALIFIED' ? 'bg-violet-100 border border-violet-200 text-violet-700' :
-                      lead.status === 'CONTACTED' ? 'bg-amber-100 border border-amber-200 text-amber-700' :
-                      lead.status === 'NEW' ? 'bg-cyan-100 border border-cyan-200 text-cyan-700' :
-                      lead.status === 'TOUR_SCHEDULED' ? 'bg-indigo-100 border border-indigo-200 text-indigo-700' :
-                      lead.status === 'TOUR_COMPLETED' ? 'bg-emerald-100 border border-emerald-200 text-emerald-700' :
-                      lead.status === 'OFFER_MADE' ? 'bg-purple-100 border border-purple-200 text-purple-700' :
-                      lead.status === 'UNDER_CONTRACT' ? 'bg-blue-100 border border-blue-200 text-blue-700' :
-                      lead.status === 'CLOSED' ? 'bg-green-100 border border-green-200 text-green-700' :
-                      'bg-slate-100 border border-slate-200 text-slate-700'
+                      lead.status === 'QUALIFIED' ? 'bg-accent-muted border border-accent-line text-accent-fg' :
+                      lead.status === 'CONTACTED' ? 'bg-warning-muted border border-warning-line text-warning-fg' :
+                      lead.status === 'NEW' ? 'bg-info-muted border border-info-line text-info-fg' :
+                      lead.status === 'TOUR_SCHEDULED' ? 'bg-primary-muted border border-primary-line text-primary-fg' :
+                      lead.status === 'TOUR_COMPLETED' ? 'bg-success-muted border border-success-line text-success-fg' :
+                      lead.status === 'OFFER_MADE' ? 'bg-accent-muted border border-accent-line text-accent-fg' :
+                      lead.status === 'UNDER_CONTRACT' ? 'bg-info-muted border border-info-line text-info-fg' :
+                      lead.status === 'CLOSED' ? 'bg-success-muted border border-success-line text-success-fg' :
+                      'bg-surface-sunken border border-border text-fg-muted'
                     }`}>
                       {leadStatusLabels[lead.status]}
                     </span>
                     {lead.score !== undefined && lead.score > 0 && (
                       <span className={`text-xs font-bold px-1.5 py-0.5 rounded ${
-                        lead.score >= 70 ? 'bg-emerald-100 text-emerald-700' :
-                        lead.score >= 40 ? 'bg-amber-100 text-amber-700' :
-                        'bg-slate-100 text-slate-500'
+                        lead.score >= 70 ? 'bg-success-muted text-success-fg' :
+                        lead.score >= 40 ? 'bg-warning-muted text-warning-fg' :
+                        'bg-surface-sunken text-fg-subtle'
                       }`}>
                         {lead.score}
                       </span>
@@ -357,23 +357,23 @@ export function LeadList({
               {/* Información compacta */}
               <div className="px-5 pb-4 space-y-2.5 text-sm">
                 {phone && (
-                  <div className="flex items-center gap-2 text-slate-700">
-                    <svg className="size-4 text-indigo-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <div className="flex items-center gap-2 text-fg-muted">
+                    <svg className="size-4 text-primary flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
                     </svg>
                     <span className="truncate font-medium">{phone}</span>
                   </div>
                 )}
                 {lead.email && (
-                  <div className="flex items-center gap-2 text-slate-700">
-                    <svg className="size-4 text-purple-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <div className="flex items-center gap-2 text-fg-muted">
+                    <svg className="size-4 text-accent flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                     </svg>
                     <span className="truncate font-medium text-xs">{lead.email}</span>
                   </div>
                 )}
                 {budget && (
-                  <div className="flex items-center gap-2 text-emerald-700 font-bold">
+                  <div className="flex items-center gap-2 text-success-fg font-bold">
                     <svg className="size-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
@@ -381,7 +381,7 @@ export function LeadList({
                   </div>
                 )}
                 {lead.city && (
-                  <div className="flex items-center gap-2 text-slate-600">
+                  <div className="flex items-center gap-2 text-fg-muted">
                     <svg className="size-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -393,12 +393,12 @@ export function LeadList({
 
               {/* Próximo seguimiento compacto */}
               {lead.nextFollowUpAt && (
-                <div className="flex items-center gap-2 bg-amber-50 px-5 py-2.5 border-t border-amber-100">
-                  <svg className="size-4 text-amber-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div className="flex items-center gap-2 bg-warning-soft px-5 py-2.5 border-t border-warning-line">
+                  <svg className="size-4 text-warning-fg flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
                   <div className="min-w-0 flex-1">
-                    <p className="text-xs text-amber-600 font-medium truncate">
+                    <p className="text-xs text-warning-fg font-medium truncate">
                       {new Date(lead.nextFollowUpAt).toLocaleDateString('es-MX', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}
                     </p>
                   </div>
@@ -408,7 +408,7 @@ export function LeadList({
               {/* Botón de acción */}
               <div className="p-5 pt-3 mt-auto">
                 <Link to={`/app/prospectos/${lead.id}`}>
-                  <button className="w-full inline-flex items-center justify-center gap-1.5 rounded-xl bg-indigo-600 px-3 py-2 text-xs font-semibold text-white shadow-sm shadow-indigo-600/30 transition-all hover:bg-indigo-700 hover:shadow-md hover:shadow-indigo-600/40">
+                  <button className="w-full inline-flex items-center justify-center gap-1.5 rounded-xl bg-primary px-3 py-2 text-xs font-semibold text-white shadow-sm shadow-indigo-600/30 transition-all hover:bg-primary-hover hover:shadow-md hover:shadow-indigo-600/40">
                     <svg className="size-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />

@@ -20,8 +20,8 @@ import { MoneyInput } from '../../../shared/MoneyInput';
 import { ConfirmModal } from '../../../shared/ConfirmModal';
 import { SubscriptionRestrictions } from '../../../shared/subscriptionRestrictions';
 
-const inputClass = 'w-full rounded-xl border border-slate-200 bg-white px-3.5 py-3 text-sm font-normal text-slate-900 outline-none transition focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100';
-const labelClass = 'grid gap-2 text-sm font-semibold text-slate-700';
+const inputClass = 'w-full rounded-xl border border-border bg-surface px-3.5 py-3 text-sm font-normal text-fg outline-none transition focus:border-primary focus:ring-2 focus:ring-primary-line';
+const labelClass = 'grid gap-2 text-sm font-semibold text-fg-muted';
 
 const activityLabels: Record<LeadActivityType, string> = {
   CALL: 'Llamada',
@@ -174,32 +174,32 @@ export function LeadDetailPage() {
     }
   }
 
-  if (loading) return <p className="rounded-2xl border border-slate-200 bg-white p-8 text-center text-sm text-slate-500">Cargando prospecto...</p>;
-  if (!lead) return <p className="rounded-2xl bg-rose-50 p-6 text-sm text-rose-700">Prospecto no encontrado.</p>;
+  if (loading) return <p className="rounded-2xl border border-border bg-surface p-8 text-center text-sm text-fg-subtle">Cargando prospecto...</p>;
+  if (!lead) return <p className="rounded-2xl bg-danger-soft p-6 text-sm text-danger-fg">Prospecto no encontrado.</p>;
 
   return (
     <>
       {/* Modal de confirmación de eliminación */}
       {showDeleteModal && (
         <div className="app-modal-backdrop fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div className="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-6 shadow-xl">
+          <div className="w-full max-w-md rounded-2xl border border-border bg-surface p-6 shadow-xl">
             <div className="mb-4 flex items-center gap-3">
-              <div className="grid size-12 place-items-center rounded-full bg-rose-100">
-                <svg className="size-6 text-rose-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="grid size-12 place-items-center rounded-full bg-danger-muted">
+                <svg className="size-6 text-danger-fg" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                 </svg>
               </div>
               <div>
-                <h3 className="font-bold text-slate-900">¿Eliminar prospecto?</h3>
-                <p className="text-sm text-slate-500">Esta acción no se puede deshacer</p>
+                <h3 className="font-bold text-fg">¿Eliminar prospecto?</h3>
+                <p className="text-sm text-fg-subtle">Esta acción no se puede deshacer</p>
               </div>
             </div>
-            <p className="mb-6 text-sm text-slate-600">
+            <p className="mb-6 text-sm text-fg-muted">
               Se eliminará <strong>{lead.firstName} {lead.lastName}</strong> y todo su historial de actividades. Las asignaciones de propiedades también se eliminarán.
             </p>
             <div className="flex gap-3">
               <button
-                className="flex-1 rounded-xl border border-slate-200 px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
+                className="flex-1 rounded-xl border border-border px-4 py-2.5 text-sm font-semibold text-fg-muted transition hover:bg-surface-muted"
                 disabled={deleting}
                 onClick={() => setShowDeleteModal(false)}
                 type="button"
@@ -207,7 +207,7 @@ export function LeadDetailPage() {
                 Cancelar
               </button>
               <button
-                className="flex-1 rounded-xl bg-rose-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-rose-700 disabled:cursor-not-allowed disabled:opacity-60"
+                className="flex-1 rounded-xl bg-danger px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-danger-hover disabled:cursor-not-allowed disabled:opacity-60"
                 disabled={deleting}
                 onClick={handleDelete}
                 type="button"
@@ -221,16 +221,16 @@ export function LeadDetailPage() {
 
       <header className="mb-8 flex flex-wrap items-end justify-between gap-4">
         <div>
-          <Link className="text-sm font-semibold text-indigo-600" to="/app/prospectos">&lt;- Volver a prospectos</Link>
-          <p className="mb-1 mt-5 text-[11px] font-bold uppercase tracking-[0.16em] text-indigo-600">Ficha CRM</p>
+          <Link className="text-sm font-semibold text-primary-fg" to="/app/prospectos">&lt;- Volver a prospectos</Link>
+          <p className="mb-1 mt-5 text-[11px] font-bold uppercase tracking-[0.16em] text-primary-fg">Ficha CRM</p>
           <h1 className="text-3xl font-bold">{lead.firstName} {lead.lastName}</h1>
-          <p className="mt-2 text-sm text-slate-500">Actualiza sus necesidades y registra cada contacto para mantener clara la siguiente acción.</p>
+          <p className="mt-2 text-sm text-fg-subtle">Actualiza sus necesidades y registra cada contacto para mantener clara la siguiente acción.</p>
         </div>
         <div className="flex flex-wrap gap-2">
-          {lead.phoneE164 && <a className="rounded-xl bg-emerald-600 px-4 py-2.5 text-sm font-bold text-white hover:bg-emerald-700" href={`https://wa.me/${lead.phoneE164.replace(/\D/g, '')}`} rel="noreferrer" target="_blank">WhatsApp</a>}
-          {lead.email && <a className="rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-bold text-slate-700 hover:border-indigo-300" href={`mailto:${lead.email}`}>Correo</a>}
+          {lead.phoneE164 && <a className="rounded-xl bg-success px-4 py-2.5 text-sm font-bold text-white hover:bg-success-hover" href={`https://wa.me/${lead.phoneE164.replace(/\D/g, '')}`} rel="noreferrer" target="_blank">WhatsApp</a>}
+          {lead.email && <a className="rounded-xl border border-border bg-surface px-4 py-2.5 text-sm font-bold text-fg-muted hover:border-primary-line" href={`mailto:${lead.email}`}>Correo</a>}
           <button
-            className="rounded-xl border border-rose-200 bg-rose-50 px-4 py-2.5 text-sm font-bold text-rose-700 transition hover:bg-rose-100"
+            className="rounded-xl border border-danger-line bg-danger-soft px-4 py-2.5 text-sm font-bold text-danger-fg transition hover:bg-danger-muted"
             onClick={() => setShowDeleteModal(true)}
             type="button"
           >
@@ -241,7 +241,7 @@ export function LeadDetailPage() {
 
       <div className="grid gap-7 xl:grid-cols-[1fr_420px]">
         <form className="space-y-6" onSubmit={saveProfile}>
-          <section className="grid gap-5 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:grid-cols-2 sm:p-6">
+          <section className="grid gap-5 rounded-2xl border border-border bg-surface p-5 shadow-sm sm:grid-cols-2 sm:p-6">
             <div className="sm:col-span-2"><h2 className="text-lg font-bold">Datos y control comercial</h2></div>
             <label className={labelClass}>Nombre<input className={inputClass} onChange={event => update('firstName', event.target.value)} required value={lead.firstName} /></label>
             <label className={labelClass}>Apellido<input className={inputClass} onChange={event => update('lastName', event.target.value)} required value={lead.lastName} /></label>
@@ -265,7 +265,7 @@ export function LeadDetailPage() {
             <label className={labelClass}>Asesor responsable<input className={inputClass} maxLength={180} onChange={event => update('assignedTo', event.target.value)} value={lead.assignedTo ?? ''} /></label>
           </section>
 
-          <section className="grid gap-5 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:grid-cols-2 sm:p-6">
+          <section className="grid gap-5 rounded-2xl border border-border bg-surface p-5 shadow-sm sm:grid-cols-2 sm:p-6">
             <div className="sm:col-span-2"><h2 className="text-lg font-bold">Necesidades inmobiliarias</h2></div>
             <label className={labelClass}>Busca
               <select className={inputClass} onChange={event => update('listingType', event.target.value)} value={lead.listingType ?? ''}>
@@ -293,14 +293,14 @@ export function LeadDetailPage() {
             <label className={`${labelClass} sm:col-span-2`}>Notas generales<textarea className={`${inputClass} min-h-32 resize-y`} maxLength={5000} onChange={event => update('notes', event.target.value)} value={lead.notes ?? ''} /></label>
           </section>
 
-          <button className="rounded-xl bg-indigo-600 px-5 py-3 text-sm font-bold text-white disabled:opacity-60" disabled={saving || !restrictions.canEdit} type="submit">
+          <button className="rounded-xl bg-primary px-5 py-3 text-sm font-bold text-white disabled:opacity-60" disabled={saving || !restrictions.canEdit} type="submit">
             {!restrictions.canEdit ? '🔒 Edición bloqueada' : saving ? 'Guardando...' : 'Guardar información del prospecto'}
           </button>
         </form>
 
         <aside className="space-y-6">
-          <form className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm" onSubmit={saveActivity}>
-            <p className="text-xs font-bold uppercase tracking-[.16em] text-indigo-600">Nuevo seguimiento</p>
+          <form className="rounded-2xl border border-border bg-surface p-5 shadow-sm" onSubmit={saveActivity}>
+            <p className="text-xs font-bold uppercase tracking-[.16em] text-primary-fg">Nuevo seguimiento</p>
             <h2 className="mt-1 text-xl font-bold">Registrar actividad</h2>
             <div className="mt-5 grid gap-4">
               <label className={labelClass}>Tipo
@@ -310,26 +310,26 @@ export function LeadDetailPage() {
               </label>
               <label className={labelClass}>Resultado o nota<textarea className={`${inputClass} min-h-28 resize-y`} onChange={event => setActivity(current => ({ ...current, notes: event.target.value }))} placeholder="Qué se habló, qué necesita y cuál fue el acuerdo." required value={activity.notes} /></label>
               <label className={labelClass}>Siguiente contacto<input className={inputClass} onChange={event => setActivity(current => ({ ...current, nextFollowUpAt: event.target.value }))} type="datetime-local" value={activity.nextFollowUpAt} /></label>
-              <button className="rounded-xl bg-slate-950 px-4 py-3 text-sm font-bold text-white disabled:opacity-60" disabled={savingActivity} type="submit">{savingActivity ? 'Registrando...' : 'Agregar a la línea de tiempo'}</button>
+              <button className="rounded-xl bg-inverse px-4 py-3 text-sm font-bold text-white disabled:opacity-60" disabled={savingActivity} type="submit">{savingActivity ? 'Registrando...' : 'Agregar a la línea de tiempo'}</button>
             </div>
           </form>
 
-          <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+          <section className="rounded-2xl border border-border bg-surface p-5 shadow-sm">
             <div className="mb-5">
-              <p className="text-xs font-bold uppercase tracking-[.16em] text-indigo-600">Historial</p>
+              <p className="text-xs font-bold uppercase tracking-[.16em] text-primary-fg">Historial</p>
               <h2 className="mt-1 text-xl font-bold">Línea de tiempo</h2>
             </div>
-            {activities.length === 0 && <p className="py-8 text-center text-sm text-slate-500">Todavía no hay actividades registradas.</p>}
+            {activities.length === 0 && <p className="py-8 text-center text-sm text-fg-subtle">Todavía no hay actividades registradas.</p>}
             <div className="space-y-5">
               {activities.map(item => (
-                <article className="group relative border-l-2 border-indigo-100 pl-5" key={item.id}>
-                  <span className="absolute -left-[7px] top-1 size-3 rounded-full bg-indigo-600" />
+                <article className="group relative border-l-2 border-primary-line pl-5" key={item.id}>
+                  <span className="absolute -left-[7px] top-1 size-3 rounded-full bg-primary" />
                   <div className="flex flex-wrap items-center justify-between gap-2">
                     <strong className="text-sm">{activityLabels[item.activityType]}</strong>
                     <div className="flex items-center gap-2">
-                      <time className="text-xs text-slate-400">{new Date(item.occurredAt).toLocaleString('es-MX')}</time>
+                      <time className="text-xs text-fg-subtle">{new Date(item.occurredAt).toLocaleString('es-MX')}</time>
                       <button
-                        className="opacity-0 transition group-hover:opacity-100 rounded-lg p-1.5 hover:bg-rose-50 text-slate-400 hover:text-rose-600"
+                        className="opacity-0 transition group-hover:opacity-100 rounded-lg p-1.5 hover:bg-danger-soft text-fg-subtle hover:text-danger-fg"
                         onClick={() => setActivityToDelete(item.id)}
                         title="Eliminar actividad"
                         type="button"
@@ -340,10 +340,10 @@ export function LeadDetailPage() {
                       </button>
                     </div>
                   </div>
-                  <p className="mt-2 whitespace-pre-line text-sm leading-6 text-slate-600">{item.notes}</p>
+                  <p className="mt-2 whitespace-pre-line text-sm leading-6 text-fg-muted">{item.notes}</p>
                   <div className="mt-2 flex flex-wrap gap-2">
                     {item.durationMinutes && (
-                      <span className="inline-flex items-center gap-1 rounded-lg bg-gray-100 px-2 py-1 text-xs font-medium text-gray-700">
+                      <span className="inline-flex items-center gap-1 rounded-lg bg-surface-sunken px-2 py-1 text-xs font-medium text-fg-muted">
                         <svg className="size-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
@@ -352,10 +352,10 @@ export function LeadDetailPage() {
                     )}
                     {item.outcome && (
                       <span className={`inline-flex items-center gap-1 rounded-lg px-2 py-1 text-xs font-medium ${
-                        item.outcome === 'SUCCESS' ? 'bg-green-100 text-green-800' :
-                        item.outcome === 'SCHEDULED' ? 'bg-blue-100 text-blue-800' :
-                        item.outcome === 'NO_ANSWER' ? 'bg-yellow-100 text-yellow-800' :
-                        'bg-gray-100 text-gray-700'
+                        item.outcome === 'SUCCESS' ? 'bg-success-muted text-success-fg' :
+                        item.outcome === 'SCHEDULED' ? 'bg-info-muted text-info-fg' :
+                        item.outcome === 'NO_ANSWER' ? 'bg-warning-muted text-warning-fg' :
+                        'bg-surface-sunken text-fg-muted'
                       }`}>
                         {item.outcome === 'SUCCESS' ? '✓ Exitoso' :
                          item.outcome === 'SCHEDULED' ? '📅 Agendado' :
@@ -364,12 +364,12 @@ export function LeadDetailPage() {
                       </span>
                     )}
                     {item.propertyId && (
-                      <span className="inline-flex items-center gap-1 rounded-lg bg-purple-100 px-2 py-1 text-xs font-medium text-purple-800">
+                      <span className="inline-flex items-center gap-1 rounded-lg bg-accent-muted px-2 py-1 text-xs font-medium text-accent-fg">
                         🏠 Propiedad vinculada
                       </span>
                     )}
                   </div>
-                  {item.nextFollowUpAt && <p className="mt-2 rounded-lg bg-indigo-50 px-3 py-2 text-xs font-semibold text-indigo-700">Siguiente contacto: {new Date(item.nextFollowUpAt).toLocaleString('es-MX')}</p>}
+                  {item.nextFollowUpAt && <p className="mt-2 rounded-lg bg-primary-soft px-3 py-2 text-xs font-semibold text-primary-fg">Siguiente contacto: {new Date(item.nextFollowUpAt).toLocaleString('es-MX')}</p>}
                 </article>
               ))}
             </div>

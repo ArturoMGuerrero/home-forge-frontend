@@ -49,7 +49,7 @@ export function RegisterPage() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-950 lg:grid lg:grid-cols-[.82fr_1.18fr]">
+    <div className="min-h-screen bg-inverse lg:grid lg:grid-cols-[.82fr_1.18fr]">
       <section className="relative hidden overflow-hidden p-12 text-white lg:flex lg:flex-col lg:justify-between">
         <div className="absolute inset-0 bg-gradient-to-br from-indigo-600 via-slate-950 to-cyan-500/50" />
         <div className="absolute -right-24 top-32 size-80 rounded-full border-[58px] border-white/5" />
@@ -67,32 +67,32 @@ export function RegisterPage() {
               'Centraliza la operación de tu equipo'
             ].map(item => (
               <div className="flex items-center gap-3" key={item}>
-                <span className="grid size-7 place-items-center rounded-full bg-cyan-300 font-bold text-slate-950">✓</span>
+                <span className="grid size-7 place-items-center rounded-full bg-info-line font-bold text-fg">✓</span>
                 {item}
               </div>
             ))}
           </div>
         </div>
 
-        <p className="relative text-xs text-slate-400">Sin tarjeta de crédito. Configuración en minutos.</p>
+        <p className="relative text-xs text-fg-subtle">Sin tarjeta de crédito. Configuración en minutos.</p>
       </section>
 
-      <section className="flex items-center justify-center bg-slate-50 px-5 py-10 sm:px-8 lg:py-14">
+      <section className="flex items-center justify-center bg-surface-muted px-5 py-10 sm:px-8 lg:py-14">
         <div className="w-full max-w-2xl">
           <div className="mb-8 flex items-center justify-between">
             <Link className="flex items-center gap-3 lg:hidden" to="/">
               <img alt="HomeForge" className="size-11 rounded-xl object-cover" src="/favicon.png" />
               <strong className="text-lg font-bold">HomeForge</strong>
             </Link>
-            <p className="ml-auto text-sm text-slate-500">
+            <p className="ml-auto text-sm text-fg-subtle">
               ¿Ya tienes cuenta?{' '}
-              <Link className="font-semibold text-indigo-600 hover:text-indigo-800" to="/login">Inicia sesión</Link>
+              <Link className="font-semibold text-primary-fg hover:underline" to="/login">Inicia sesión</Link>
             </p>
           </div>
 
-          <p className="mb-1 text-xs font-bold uppercase tracking-[0.16em] text-indigo-600">Crea tu espacio de trabajo</p>
-          <h2 className="text-3xl font-bold text-slate-950 sm:text-4xl">Comienza con HomeForge</h2>
-          <p className="mt-2 text-sm text-slate-500">Registra tu empresa y la cuenta del administrador principal.</p>
+          <p className="mb-1 text-xs font-bold uppercase tracking-[0.16em] text-primary-fg">Crea tu espacio de trabajo</p>
+          <h2 className="text-3xl font-bold text-fg sm:text-4xl">Comienza con HomeForge</h2>
+          <p className="mt-2 text-sm text-fg-subtle">Registra tu empresa y la cuenta del administrador principal.</p>
 
           <form className="mt-8 grid gap-5 sm:grid-cols-2" onSubmit={submit}>
             <Input autoComplete="name" label="Nombre completo" onChange={event => setName(event.target.value)} placeholder="Jorge Martínez" required value={name} />
@@ -111,7 +111,7 @@ export function RegisterPage() {
             </Button>
           </form>
 
-          <p className="mt-5 text-center text-xs text-slate-400">Tu empresa y usuario administrador se guardarán de forma segura.</p>
+          <p className="mt-5 text-center text-xs text-fg-subtle">Tu empresa y usuario administrador se guardarán de forma segura.</p>
         </div>
       </section>
     </div>

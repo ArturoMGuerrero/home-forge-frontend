@@ -132,23 +132,23 @@ export default function NewAppointmentModal({ defaultDate, appointment, onClose,
     >
       <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Título *</label>
+            <label className="block text-sm font-medium text-fg-muted mb-1">Título *</label>
             <input
               type="text"
               required
               value={formData.title}
               onChange={e => setFormData({ ...formData, title: e.target.value })}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+              className="w-full px-3 py-2 border border-border-strong rounded-lg focus:ring-2 focus:ring-info"
               placeholder="Ej: Visita a casa en Las Lomas"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Descripción</label>
+            <label className="block text-sm font-medium text-fg-muted mb-1">Descripción</label>
             <textarea
               value={formData.description}
               onChange={e => setFormData({ ...formData, description: e.target.value })}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+              className="w-full px-3 py-2 border border-border-strong rounded-lg focus:ring-2 focus:ring-info"
               rows={3}
               placeholder="Detalles adicionales de la cita..."
             />
@@ -156,12 +156,12 @@ export default function NewAppointmentModal({ defaultDate, appointment, onClose,
 
           <div className="grid gap-4 sm:grid-cols-2">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Tipo de Cita *</label>
+              <label className="block text-sm font-medium text-fg-muted mb-1">Tipo de Cita *</label>
               <select
                 required
                 value={formData.appointmentType}
                 onChange={e => setFormData({ ...formData, appointmentType: e.target.value as AppointmentType })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-border-strong rounded-lg focus:ring-2 focus:ring-info"
               >
                 {Object.entries(appointmentTypeLabels).map(([key, label]) => (
                   <option key={key} value={key}>{label}</option>
@@ -170,12 +170,12 @@ export default function NewAppointmentModal({ defaultDate, appointment, onClose,
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Tipo de Ubicación *</label>
+              <label className="block text-sm font-medium text-fg-muted mb-1">Tipo de Ubicación *</label>
               <select
                 required
                 value={formData.locationType}
                 onChange={e => setFormData({ ...formData, locationType: e.target.value as LocationType })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-border-strong rounded-lg focus:ring-2 focus:ring-info"
               >
                 {Object.entries(locationTypeLabels).map(([key, label]) => (
                   <option key={key} value={key}>{label}</option>
@@ -185,24 +185,24 @@ export default function NewAppointmentModal({ defaultDate, appointment, onClose,
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Fecha *</label>
+            <label className="block text-sm font-medium text-fg-muted mb-1">Fecha *</label>
             <input
               type="date"
               required
               value={formData.date}
               onChange={e => setFormData({ ...formData, date: e.target.value })}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+              className="w-full px-3 py-2 border border-border-strong rounded-lg focus:ring-2 focus:ring-info"
             />
           </div>
 
           <div className="grid gap-4 sm:grid-cols-2">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Hora de Inicio *</label>
+              <label className="block text-sm font-medium text-fg-muted mb-1">Hora de Inicio *</label>
               <select
                 required
                 value={formData.startTime}
                 onChange={e => setFormData({ ...formData, startTime: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-border-strong rounded-lg focus:ring-2 focus:ring-info"
               >
                 {timeSlots.map(slot => (
                   <option key={slot} value={slot}>{slot}</option>
@@ -211,12 +211,12 @@ export default function NewAppointmentModal({ defaultDate, appointment, onClose,
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Hora de Fin *</label>
+              <label className="block text-sm font-medium text-fg-muted mb-1">Hora de Fin *</label>
               <select
                 required
                 value={formData.endTime}
                 onChange={e => setFormData({ ...formData, endTime: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-border-strong rounded-lg focus:ring-2 focus:ring-info"
               >
                 {timeSlots.map(slot => (
                   <option key={slot} value={slot}>{slot}</option>
@@ -227,12 +227,12 @@ export default function NewAppointmentModal({ defaultDate, appointment, onClose,
 
           {formData.locationType === LocationType.IN_PERSON && (
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Dirección</label>
+              <label className="block text-sm font-medium text-fg-muted mb-1">Dirección</label>
               <input
                 type="text"
                 value={formData.locationAddress}
                 onChange={e => setFormData({ ...formData, locationAddress: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-border-strong rounded-lg focus:ring-2 focus:ring-info"
                 placeholder="Ej: Av. Principal 123, Col. Centro"
               />
             </div>
@@ -240,23 +240,23 @@ export default function NewAppointmentModal({ defaultDate, appointment, onClose,
 
           {formData.locationType === LocationType.VIRTUAL && (
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">URL de Reunión</label>
+              <label className="block text-sm font-medium text-fg-muted mb-1">URL de Reunión</label>
               <input
                 type="url"
                 value={formData.virtualMeetingUrl}
                 onChange={e => setFormData({ ...formData, virtualMeetingUrl: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-border-strong rounded-lg focus:ring-2 focus:ring-info"
                 placeholder="https://meet.google.com/..."
               />
             </div>
           )}
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Recordatorio</label>
+            <label className="block text-sm font-medium text-fg-muted mb-1">Recordatorio</label>
             <select
               value={formData.reminderMinutes}
               onChange={e => setFormData({ ...formData, reminderMinutes: Number(e.target.value) })}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+              className="w-full px-3 py-2 border border-border-strong rounded-lg focus:ring-2 focus:ring-info"
             >
               <option value={0}>Sin recordatorio</option>
               <option value={15}>15 minutos antes</option>
@@ -267,27 +267,27 @@ export default function NewAppointmentModal({ defaultDate, appointment, onClose,
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Notas</label>
+            <label className="block text-sm font-medium text-fg-muted mb-1">Notas</label>
             <textarea
               value={formData.notes}
               onChange={e => setFormData({ ...formData, notes: e.target.value })}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+              className="w-full px-3 py-2 border border-border-strong rounded-lg focus:ring-2 focus:ring-info"
               rows={3}
               placeholder="Notas internas..."
             />
           </div>
 
-          <div className="flex justify-end gap-3 pt-6 border-t border-slate-200">
+          <div className="flex justify-end gap-3 pt-6 border-t border-border">
             <button
               type="button"
               onClick={onClose}
-              className="px-6 py-2.5 border border-slate-200 rounded-xl text-sm font-semibold text-slate-700 hover:bg-slate-50 transition"
+              className="px-6 py-2.5 border border-border rounded-xl text-sm font-semibold text-fg-muted hover:bg-surface-muted transition"
             >
               Cancelar
             </button>
             <button
               type="submit"
-              className="px-6 py-2.5 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-xl text-sm font-semibold shadow-lg hover:shadow-xl transition"
+              className="px-6 py-2.5 bg-primary text-white rounded-xl text-sm font-semibold shadow-lg hover:shadow-xl transition"
             >
               {appointment ? 'Guardar cambios' : 'Crear cita'}
             </button>
