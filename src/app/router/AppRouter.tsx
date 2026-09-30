@@ -88,6 +88,8 @@ export function AppRouter() {
           <Route path="configuracion/empresa" element={<CompanyProfileSettingsPage />} />
           <Route path="configuracion/asignacion" element={<AssignmentRulesPage />} />
           <Route path="configuracion/catalogos/:catalogName" element={<CatalogPage />} />
+          {/* Rutas internas desconocidas regresan al panel en vez de salir al sitio público. */}
+          <Route path="*" element={<Navigate to="/app" replace />} />
         </Route>
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>

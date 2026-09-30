@@ -1,192 +1,150 @@
-import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { FormEvent, useEffect, useState } from 'react';
+import toast from 'react-hot-toast';
+import { getSession } from '../../auth';
 import { listAvailability, createAvailability, deleteAvailability, AgentAvailability, dayLabels } from '../api/availabilityApi';
-import { Modal, Button, Select, Input } from '../../../shared/ui';
+import { ConfirmModal } from '../../../shared/ConfirmModal';
+import { Icon } from '../../../shared/Icon';
+import { Badge, Button, Card, Input, Modal, PageHeader, Select } from '../../../shared/ui';
+
+const WEEK_ORDER = [1, 2, 3, 4, 5, 6, 0];
+const FORM_ID = 'availability-form';
 
 export default function AgentAvailabilityPage() {
-  const navigate = useNavigate();
+  const session = getSession();
+  // Antes se leían claves 'userId'/'companyId' de localStorage que nadie escribe; la sesión es la fuente correcta.
+  const userId = session?.userId ?? '';
+  const companyId = session?.companyId ?? '';
   const [availabilities, setAvailabilities] = useState<AgentAvailability[]>([]);
   const [showAddForm, setShowAddForm] = useState(false);
-  const userId = localStorage.getItem('userId') || '';
-  const companyId = localStorage.getItem('companyId') || '';
-
-  const [formData, setFormData] = useState({
-    dayOfWeek: 1,
-    startTime: '09:00',
-    endTime: '17:00'
-  });
+  const [saving, setSaving] = useState(false);
+  const [toDelete, setToDelete] = useState<string | null>(null);
+  const [deleting, setDeleting] = useState(false);
+  const [formData, setFormData] = useState({ dayOfWeek: 1, startTime: '09:00', endTime: '17:00' });
 
   const loadAvailabilities = async () => {
+    if (!userId) return;
     try {
-      const data = await listAvailability({ userId });
-      setAvailabilities(data);
+      setAvailabilities(await listAvailability({ userId }));
     } catch (error) {
-      console.error('Error loading availabilities:', error);
+      toast.error(error instanceof Error ? error.message : 'No fue posible cargar tu disponibilidad.');
     }
   };
 
   useEffect(() => {
     loadAvailabilities();
-  }, []);
+  }, [userId]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
+    if (formData.endTime <= formData.startTime) {
+      toast.error('La hora de fin debe ser posterior a la de inicio.');
+      return;
+    }
+    setSaving(true);
     try {
-      await createAvailability({
-        companyId,
-        userId,
-        ...formData
-      });
+      await createAvailability({ companyId, userId, ...formData });
       setShowAddForm(false);
       setFormData({ dayOfWeek: 1, startTime: '09:00', endTime: '17:00' });
+      toast.success('Horario agregado.');
       loadAvailabilities();
     } catch (error) {
-      console.error('Error creating availability:', error);
-      alert('Error al crear disponibilidad');
+      toast.error(error instanceof Error ? error.message : 'Error al crear disponibilidad');
+    } finally {
+      setSaving(false);
     }
   };
 
-  const handleDelete = async (id: string) => {
-    if (!confirm('¿Eliminar esta disponibilidad?')) return;
+  const confirmDelete = async () => {
+    if (!toDelete) return;
+    setDeleting(true);
     try {
-      await deleteAvailability(id);
-      loadAvailabilities();
+      await deleteAvailability(toDelete);
+      setAvailabilities(current => current.filter(item => item.id !== toDelete));
+      toast.success('Horario eliminado.');
+      setToDelete(null);
     } catch (error) {
-      console.error('Error deleting availability:', error);
-      alert('Error al eliminar disponibilidad');
+      toast.error(error instanceof Error ? error.message : 'Error al eliminar disponibilidad');
+    } finally {
+      setDeleting(false);
     }
   };
 
   const groupedByDay = availabilities.reduce((acc, avail) => {
-    if (!acc[avail.dayOfWeek]) acc[avail.dayOfWeek] = [];
-    acc[avail.dayOfWeek].push(avail);
+    (acc[avail.dayOfWeek] ??= []).push(avail);
     return acc;
   }, {} as Record<number, AgentAvailability[]>);
 
   return (
-    <div className="p-6">
-      <div className="mb-6 flex items-center justify-between">
-        <div className="flex items-center gap-6">
-          {/* Botón de volver */}
-          <Button
-            onClick={() => navigate(-1)}
-            variant="tertiary"
-            icon={
-              <svg className="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-              </svg>
-            }
-          >
-            Volver
-          </Button>
+    <>
+      <PageHeader
+        actions={<Button icon={<Icon className="size-4" name="plus" />} onClick={() => setShowAddForm(true)}>Agregar horario</Button>}
+        backLink={{ to: '/app/calendario', label: 'Calendario' }}
+        subtitle="Configura los horarios en los que puedes recibir citas."
+        title="Mi disponibilidad"
+      />
 
-          {/* Título */}
-          <div>
-            <h1 className="text-2xl font-bold text-fg">Mi Disponibilidad</h1>
-            <p className="text-fg-muted mt-1">Configura tu horario disponible</p>
-          </div>
-        </div>
-
-        {/* Botón agregar */}
-        <Button
-          onClick={() => setShowAddForm(true)}
-          variant="primary"
-          icon={
-            <svg className="size-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-            </svg>
-          }
-        >
-          Agregar Horario
-        </Button>
-      </div>
-
-      <div className="grid gap-4">
-        {[1, 2, 3, 4, 5, 6, 0].map(day => (
-          <div key={day} className="bg-surface rounded-lg shadow-sm border border-border p-4">
-            <h3 className="font-semibold text-fg mb-3">{dayLabels[day]}</h3>
-            {groupedByDay[day] && groupedByDay[day].length > 0 ? (
-              <div className="space-y-2">
-                {groupedByDay[day].map(avail => (
-                  <div key={avail.id} className="flex justify-between items-center p-3 bg-surface-muted rounded border">
-                    <div className="flex items-center gap-4">
-                      <span className="font-medium text-fg">
-                        {avail.startTime} - {avail.endTime}
-                      </span>
-                      <span className={`px-2 py-1 rounded text-xs ${
-                        avail.isAvailable ? 'bg-success-muted text-success-fg' : 'bg-danger-muted text-danger-fg'
-                      }`}>
-                        {avail.isAvailable ? 'Disponible' : 'No disponible'}
-                      </span>
-                    </div>
-                    <Button
-                      onClick={() => handleDelete(avail.id)}
-                      variant="danger-ghost"
-                      size="sm"
+      <Card noPadding truncate>
+        <ul className="divide-y divide-border">
+          {WEEK_ORDER.map(day => (
+            <li className="flex flex-col gap-3 px-5 py-4 sm:flex-row sm:items-center" key={day}>
+              <h3 className="w-32 shrink-0 font-semibold text-fg">{dayLabels[day]}</h3>
+              <div className="flex flex-1 flex-wrap gap-2">
+                {groupedByDay[day]?.length ? groupedByDay[day].map(avail => (
+                  <span className="inline-flex items-center gap-2 rounded-lg border border-border bg-surface-muted py-1 pl-3 pr-1 text-sm" key={avail.id}>
+                    <span className="font-medium tabular-nums text-fg">{avail.startTime} – {avail.endTime}</span>
+                    {!avail.isAvailable && <Badge variant="error">No disponible</Badge>}
+                    <button
+                      aria-label={`Eliminar horario ${avail.startTime} a ${avail.endTime}`}
+                      className="grid size-6 place-items-center rounded-md text-fg-subtle transition hover:bg-danger-soft hover:text-danger-fg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                      onClick={() => setToDelete(avail.id)}
+                      type="button"
                     >
-                      Eliminar
-                    </Button>
-                  </div>
-                ))}
+                      <svg aria-hidden="true" className="size-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+                    </button>
+                  </span>
+                )) : (
+                  <span className="text-sm text-fg-subtle">Sin horarios configurados</span>
+                )}
               </div>
-            ) : (
-              <p className="text-fg-subtle text-sm">Sin horarios configurados</p>
-            )}
-          </div>
-        ))}
-      </div>
+            </li>
+          ))}
+        </ul>
+      </Card>
 
       <Modal
+        footer={
+          <>
+            <Button onClick={() => setShowAddForm(false)} variant="tertiary">Cancelar</Button>
+            <Button form={FORM_ID} loading={saving} type="submit">Guardar</Button>
+          </>
+        }
         isOpen={showAddForm}
+        maxWidth="md"
         onClose={() => setShowAddForm(false)}
-        title="Agregar Horario"
+        title="Agregar horario"
       >
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form className="space-y-4" id={FORM_ID} onSubmit={handleSubmit}>
           <Select
-            label="Día de la Semana"
-            value={formData.dayOfWeek}
+            label="Día de la semana"
             onChange={e => setFormData({ ...formData, dayOfWeek: Number(e.target.value) })}
-          >
-            {Object.entries(dayLabels).map(([value, label]) => (
-              <option key={value} value={value}>{label}</option>
-            ))}
-          </Select>
-
+            options={WEEK_ORDER.map(day => ({ value: String(day), label: dayLabels[day] }))}
+            value={String(formData.dayOfWeek)}
+          />
           <div className="grid grid-cols-2 gap-4">
-            <Input
-              type="time"
-              label="Hora Inicio"
-              required
-              value={formData.startTime}
-              onChange={e => setFormData({ ...formData, startTime: e.target.value })}
-            />
-
-            <Input
-              type="time"
-              label="Hora Fin"
-              required
-              value={formData.endTime}
-              onChange={e => setFormData({ ...formData, endTime: e.target.value })}
-            />
-          </div>
-
-          <div className="flex justify-end gap-3 pt-4">
-            <Button
-              type="button"
-              onClick={() => setShowAddForm(false)}
-              variant="tertiary"
-            >
-              Cancelar
-            </Button>
-            <Button
-              type="submit"
-              variant="primary"
-            >
-              Guardar
-            </Button>
+            <Input label="Hora inicio" onChange={e => setFormData({ ...formData, startTime: e.target.value })} required type="time" value={formData.startTime} />
+            <Input label="Hora fin" onChange={e => setFormData({ ...formData, endTime: e.target.value })} required type="time" value={formData.endTime} />
           </div>
         </form>
       </Modal>
-    </div>
+
+      <ConfirmModal
+        isOpen={toDelete !== null}
+        loading={deleting}
+        message="Se quitará este horario de tu disponibilidad."
+        onCancel={() => setToDelete(null)}
+        onConfirm={confirmDelete}
+        title="¿Eliminar horario?"
+      />
+    </>
   );
 }
