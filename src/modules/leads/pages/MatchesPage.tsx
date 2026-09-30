@@ -8,6 +8,7 @@ import { loadOperationsContext } from '../../../shared/operationsContext';
 import { SubscriptionRestrictions } from '../../../shared/subscriptionRestrictions';
 import { Badge, Button, Card, EmptyState, PageHeader, SearchInput, Select, Textarea } from '../../../shared/ui';
 import { Icon } from '../../../shared/Icon';
+import { LeadsNav } from '../components/LeadsNav';
 
 const matchStatusOptions = [
   { value: 'SUGGESTED', label: 'Sugerida' },
@@ -98,10 +99,11 @@ export function MatchesPage() {
   return (
     <>
       <PageHeader
-        eyebrow="Comercial"
         subtitle="Recomienda inmuebles y registra el nivel de interés de cada prospecto."
-        title="Prospecto y propiedad"
-      />
+        title="Asignaciones de propiedades"
+      >
+        <LeadsNav />
+      </PageHeader>
 
       <Card className="mb-6">
         <form onSubmit={submit}>
