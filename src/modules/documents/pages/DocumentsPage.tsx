@@ -10,8 +10,38 @@ import { UploadDocumentModal } from '../components/UploadDocumentModal';
 import { ExportButton } from '../../../shared/ExportButton';
 import { exportToExcel, formatDate } from '../../../shared/excelExport';
 import { SubscriptionRestrictions } from '../../../shared/subscriptionRestrictions';
-import { PageHeader } from '../../../shared/ui/PageHeader';
-import { Button } from '../../../shared/ui';
+import { ConfirmModal } from '../../../shared/ConfirmModal';
+import { Icon } from '../../../shared/Icon';
+import { Badge, BadgeVariant, Button, buttonClasses, Card, EmptyState, PageHeader, SearchInput, Select } from '../../../shared/ui';
+
+const documentTypeOptions = [
+  { value: 'IDENTIFICATION', label: 'Identificación' },
+  { value: 'PROOF_OF_ADDRESS', label: 'Comprobante de domicilio' },
+  { value: 'PROOF_OF_INCOME', label: 'Comprobante de ingresos' },
+  { value: 'CONTRACT', label: 'Contrato' },
+  { value: 'PROPERTY_DEED', label: 'Escritura' },
+  { value: 'OTHER', label: 'Otro' }
+];
+const documentTypeLabels: Record<string, string> = Object.fromEntries(documentTypeOptions.map(option => [option.value, option.label]));
+const documentStatusOptions = [
+  { value: 'PENDING', label: 'Pendiente' },
+  { value: 'RECEIVED', label: 'Recibido' },
+  { value: 'VALIDATED', label: 'Validado' },
+  { value: 'REJECTED', label: 'Rechazado' }
+];
+const documentStatusStyles: Record<string, { label: string; variant: BadgeVariant }> = {
+  PENDING: { label: 'Pendiente', variant: 'warning' },
+  RECEIVED: { label: 'Recibido', variant: 'info' },
+  VALIDATED: { label: 'Validado', variant: 'info' },
+  APPROVED: { label: 'Aprobado', variant: 'success' },
+  REJECTED: { label: 'Rechazado', variant: 'error' }
+};
+const entityOptions = [
+  { value: 'ALL', label: 'Cualquier relación' },
+  { value: 'LEAD', label: 'Prospectos' },
+  { value: 'PROPERTY', label: 'Propiedades' },
+  { value: 'NONE', label: 'Sin vincular' }
+];
 
 function sizeLabel(size?: number) {
   if (!size) return '-';
@@ -30,6 +60,8 @@ export function DocumentsPage() {
   const [typeFilter, setTypeFilter] = useState<string>('ALL');
   const [statusFilter, setStatusFilter] = useState<string>('ALL');
   const [entityFilter, setEntityFilter] = useState<string>('ALL');
+  const [documentToDelete, setDocumentToDelete] = useState<StoredDocument | null>(null);
+  const [deleting, setDeleting] = useState(false);
 
   useEffect(() => { Promise.all([listDocuments(), loadOperationsContext()]).then(([items, [leadItems, propertyItems]]) => { setDocuments(items); setLeads(leadItems); setProperties(propertyItems); }).catch(e => toast.error(e.message)); }, []);
 
@@ -82,276 +114,158 @@ export function DocumentsPage() {
     setDocuments(current => [doc, ...current]);
   }
 
-  async function remove(id: string) {
-    await deleteDocument(id);
-    setDocuments(current => current.filter(item => item.id !== id));
+  async function confirmRemove() {
+    if (!documentToDelete) return;
+    setDeleting(true);
+    try {
+      await deleteDocument(documentToDelete.id);
+      setDocuments(current => current.filter(item => item.id !== documentToDelete.id));
+      toast.success('Documento eliminado.');
+      setDocumentToDelete(null);
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : 'No fue posible eliminar el documento.');
+    } finally {
+      setDeleting(false);
+    }
+  }
+
+  const hasFilters = Boolean(searchQuery) || typeFilter !== 'ALL' || statusFilter !== 'ALL' || entityFilter !== 'ALL';
+
+  function clearFilters() {
+    setSearchQuery('');
+    setTypeFilter('ALL');
+    setStatusFilter('ALL');
+    setEntityFilter('ALL');
   }
 
   return (
-    <div className="min-h-screen bg-app">
+    <>
       {previewDocument && <DocumentPreviewModal document={previewDocument} onClose={() => setPreviewDocument(undefined)} />}
 
       <UploadDocumentModal
         isOpen={uploadModalOpen}
+        leads={leads}
         onClose={() => setUploadModalOpen(false)}
         onDocumentUploaded={handleDocumentUploaded}
-        leads={leads}
         properties={properties}
         restrictions={restrictions}
       />
 
       <PageHeader
-        title="Documentos"
-        subtitle="Gestiona archivos relacionados con prospectos y propiedades"
-        badge={{ value: documents.length, label: 'documentos' }}
         actions={
-          <div className="flex gap-3">
+          <>
             {documents.length > 0 && <ExportButton onExport={handleExport} variant="secondary" />}
-            <Button
-              variant="primary"
-              onClick={() => setUploadModalOpen(true)}
-              icon={
-                <svg className="size-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                </svg>
-              }
-            >
-              Subir documento
-            </Button>
-          </div>
+            <Button icon={<Icon className="size-4" name="plus" />} onClick={() => setUploadModalOpen(true)}>Subir documento</Button>
+          </>
         }
+        badge={{ value: documents.length, label: 'documentos' }}
+        subtitle="Gestiona archivos relacionados con prospectos y propiedades"
+        title="Documentos"
       />
 
-      <div className="p-4 lg:p-6">
-        {/* Búsqueda y Filtros */}
-        {documents.length > 0 && (
-          <div className="mb-6 space-y-4 rounded-2xl border border-border bg-surface p-5 shadow-sm">
-      {/* Búsqueda */}
-      <div className="relative">
-        <svg className="pointer-events-none absolute left-3.5 top-1/2 size-5 -translate-y-1/2 text-fg-subtle" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-        </svg>
-        <input
-          className="w-full rounded-xl border border-border py-2.5 pl-11 pr-4 text-sm transition focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
-          onChange={e => setSearchQuery(e.target.value)}
-          placeholder="Buscar por nombre de archivo..."
-          type="text"
-          value={searchQuery}
-        />
-        {searchQuery && (
-          <button
-            className="absolute right-3 top-1/2 -translate-y-1/2 rounded-lg p-1 text-fg-subtle transition hover:bg-surface-sunken hover:text-fg-muted"
-            onClick={() => setSearchQuery('')}
-            type="button"
-          >
-            <svg className="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          </button>
-        )}
-      </div>
-
-      {/* Filtros */}
-      <div className="grid gap-3 sm:grid-cols-3">
-        {/* Filtro por Tipo */}
-        <div>
-          <label className="mb-1.5 block text-xs font-semibold text-fg-muted">Tipo de documento</label>
-          <select
-            className="w-full rounded-xl border border-border px-3 py-2 text-sm transition focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
-            onChange={e => setTypeFilter(e.target.value)}
-            value={typeFilter}
-          >
-            <option value="ALL">Todos</option>
-            <option value="IDENTIFICATION">Identificación</option>
-            <option value="PROOF_OF_ADDRESS">Comprobante de domicilio</option>
-            <option value="PROOF_OF_INCOME">Comprobante de ingresos</option>
-            <option value="CONTRACT">Contrato</option>
-            <option value="PROPERTY_DEED">Escritura</option>
-            <option value="OTHER">Otro</option>
-          </select>
-        </div>
-
-        {/* Filtro por Estado */}
-        <div>
-          <label className="mb-1.5 block text-xs font-semibold text-fg-muted">Estado</label>
-          <select
-            className="w-full rounded-xl border border-border px-3 py-2 text-sm transition focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
-            onChange={e => setStatusFilter(e.target.value)}
-            value={statusFilter}
-          >
-            <option value="ALL">Todos</option>
-            <option value="PENDING">Pendiente</option>
-            <option value="RECEIVED">Recibido</option>
-            <option value="VALIDATED">Validado</option>
-            <option value="REJECTED">Rechazado</option>
-          </select>
-        </div>
-
-        {/* Filtro por Entidad */}
-        <div>
-          <label className="mb-1.5 block text-xs font-semibold text-fg-muted">Relacionado con</label>
-          <select
-            className="w-full rounded-xl border border-border px-3 py-2 text-sm transition focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
-            onChange={e => setEntityFilter(e.target.value)}
-            value={entityFilter}
-          >
-            <option value="ALL">Todos</option>
-            <option value="LEAD">Prospectos</option>
-            <option value="PROPERTY">Propiedades</option>
-            <option value="NONE">Sin vincular</option>
-          </select>
-        </div>
-      </div>
-
-      {/* Contador de resultados */}
-      {(searchQuery || typeFilter !== 'ALL' || statusFilter !== 'ALL' || entityFilter !== 'ALL') && (
-        <div className="flex items-center justify-between rounded-lg bg-primary-soft px-4 py-2.5 text-xs">
-          <span className="font-medium text-primary-fg">
-            {filteredDocuments.length} {filteredDocuments.length === 1 ? 'documento encontrado' : 'documentos encontrados'}
-          </span>
-          <button
-            className="font-semibold text-primary-fg transition hover:text-primary-fg"
-            onClick={() => {
-              setSearchQuery('');
-              setTypeFilter('ALL');
-              setStatusFilter('ALL');
-              setEntityFilter('ALL');
-            }}
-            type="button"
-          >
-            Limpiar filtros
-          </button>
-        </div>
+      {documents.length > 0 && (
+        <Card className="mb-6 space-y-4 p-4 sm:p-5">
+          <div className="flex flex-col gap-3 lg:flex-row">
+            <SearchInput
+              aria-label="Buscar documentos"
+              containerClassName="lg:flex-1"
+              onChange={e => setSearchQuery(e.target.value)}
+              onClear={() => setSearchQuery('')}
+              placeholder="Buscar por nombre de archivo..."
+              value={searchQuery}
+            />
+            <div className="grid gap-3 sm:grid-cols-3 lg:flex-[1.3]">
+              <Select aria-label="Tipo de documento" onChange={e => setTypeFilter(e.target.value)} options={[{ value: 'ALL', label: 'Todos los tipos' }, ...documentTypeOptions]} value={typeFilter} />
+              <Select aria-label="Estado" onChange={e => setStatusFilter(e.target.value)} options={[{ value: 'ALL', label: 'Todos los estados' }, ...documentStatusOptions]} value={statusFilter} />
+              <Select aria-label="Relacionado con" onChange={e => setEntityFilter(e.target.value)} options={entityOptions} value={entityFilter} />
+            </div>
+          </div>
+          {hasFilters && (
+            <div className="flex items-center justify-between gap-3 border-t border-border pt-3 text-sm">
+              <span className="text-fg-subtle">
+                <strong className="font-semibold text-fg">{filteredDocuments.length}</strong> {filteredDocuments.length === 1 ? 'documento encontrado' : 'documentos encontrados'}
+              </span>
+              <Button onClick={clearFilters} size="sm" variant="ghost">Limpiar filtros</Button>
+            </div>
+          )}
+        </Card>
       )}
-          </div>
-        )}
 
-        {/* Estado vacío cuando no hay resultados */}
-        {filteredDocuments.length === 0 && documents.length > 0 && (
-          <div className="py-12 text-center">
-            <svg className="mx-auto mb-3 size-12 text-border-strong" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-            </svg>
-            <p className="text-sm font-medium text-fg-muted">No se encontraron documentos</p>
-            <p className="mt-1 text-xs text-fg-subtle">Intenta ajustar los filtros de búsqueda</p>
-          </div>
-        )}
+      {documents.length === 0 && (
+        <Card className="border-dashed">
+          <EmptyState
+            actionLabel="Subir documento"
+            description="Guarda identificaciones, comprobantes y contratos vinculados a tus prospectos y propiedades."
+            icon={<Icon name="document" />}
+            onAction={() => setUploadModalOpen(true)}
+            title="No hay documentos guardados"
+          />
+        </Card>
+      )}
 
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-        {filteredDocuments.map(item => (
-          <article className="group overflow-hidden rounded-2xl border border-border bg-surface shadow-sm transition-all hover:border-primary hover:shadow-xl hover:shadow-indigo-500/10 flex flex-col" key={item.id}>
-            {/* Header */}
-            <div className="flex items-start gap-4 p-5">
-              {/* Icono del documento */}
-              <div className="flex size-12 shrink-0 items-center justify-center rounded-xl bg-primary-soft text-primary-fg">
-                <svg className="size-6" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                </svg>
-              </div>
+      {documents.length > 0 && filteredDocuments.length === 0 && (
+        <EmptyState
+          actions={<Button onClick={clearFilters} variant="tertiary">Limpiar filtros</Button>}
+          description="Intenta ajustar los filtros de búsqueda."
+          title="No se encontraron documentos"
+        />
+      )}
 
-              {/* Información del documento */}
-              <div className="min-w-0 flex-1">
-                <div className="flex items-start justify-between gap-3">
-                  <div className="min-w-0 flex-1">
-                    <h3 className="truncate text-base font-bold text-fg group-hover:text-primary-fg transition">
-                      {item.fileName}
-                    </h3>
-                    <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
-                      <span className="inline-flex items-center gap-1 rounded-full bg-primary-muted border border-primary-line px-2.5 py-0.5 text-xs font-bold text-primary-fg">
-                        {item.documentType}
-                      </span>
-                      <span className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-bold ${
-                        item.status === 'APPROVED' ? 'bg-success-muted border border-success-line text-success-fg' :
-                        item.status === 'REJECTED' ? 'bg-danger-muted border border-danger-line text-danger-fg' :
-                        item.status === 'VALIDATED' ? 'bg-info-muted border border-info-line text-info-fg' :
-                        item.status === 'RECEIVED' ? 'bg-info-muted border border-info-line text-info-fg' :
-                        'bg-warning-muted border border-warning-line text-warning-fg'
-                      }`}>
-                        {item.status === 'APPROVED' ? 'Aprobado' :
-                         item.status === 'REJECTED' ? 'Rechazado' :
-                         item.status === 'VALIDATED' ? 'Validado' :
-                         item.status === 'RECEIVED' ? 'Recibido' : 'Pendiente'}
-                      </span>
-                      <span className="text-xs font-medium text-fg-subtle">
-                        {new Date(item.createdAt).toLocaleDateString('es-MX', { day: 'numeric', month: 'short', year: 'numeric' })}
-                      </span>
-                    </div>
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
+        {filteredDocuments.map(item => {
+          const status = documentStatusStyles[item.status] ?? documentStatusStyles.PENDING;
+          return (
+            <Card className="flex flex-col" key={item.id} noPadding>
+              <div className="flex items-start gap-3.5 p-5">
+                <div className="grid size-11 shrink-0 place-items-center rounded-xl bg-primary-soft text-primary-fg">
+                  <Icon className="size-5" name="document" />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-start justify-between gap-3">
+                    <h3 className="truncate text-sm font-semibold text-fg" title={item.fileName}>{item.fileName}</h3>
+                    <span className="shrink-0 text-xs text-fg-subtle">{sizeLabel(item.fileSize)}</span>
                   </div>
-                  <div className="flex flex-col items-end gap-1">
-                    <span className="text-sm font-bold text-fg-muted">{sizeLabel(item.fileSize)}</span>
+                  <div className="mt-2 flex flex-wrap items-center gap-1.5">
+                    <Badge variant="primary">{documentTypeLabels[item.documentType] ?? item.documentType}</Badge>
+                    <Badge dot variant={status.variant}>{status.label}</Badge>
                   </div>
+                  <p className="mt-2 text-xs text-fg-subtle">
+                    {new Date(item.createdAt).toLocaleDateString('es-MX', { day: 'numeric', month: 'short', year: 'numeric' })}
+                  </p>
                 </div>
               </div>
-            </div>
 
-            {/* Relacionado con */}
-            {(item.leadName || item.propertyTitle) && (
-              <div className="border-t border-border bg-surface-muted px-5 py-2">
-                <div className="flex items-center gap-2 text-xs">
-                  <svg className="size-3.5 text-primary shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+              {(item.leadName || item.propertyTitle || item.notes) && (
+                <div className="space-y-1 border-t border-border bg-surface-muted px-5 py-2.5 text-xs">
+                  {(item.leadName || item.propertyTitle) && (
+                    <p className="truncate text-fg-subtle">Relacionado con <span className="font-medium text-fg">{item.leadName || item.propertyTitle}</span></p>
+                  )}
+                  {item.notes && <p className="line-clamp-1 text-fg-muted">{item.notes}</p>}
+                </div>
+              )}
+
+              <div className="mt-auto flex gap-2 border-t border-border p-3">
+                <Button className="flex-1" onClick={() => setPreviewDocument(item)} size="sm" variant="secondary">Vista previa</Button>
+                <a className={buttonClasses({ variant: 'tertiary', size: 'sm', className: 'flex-1' })} href={documentDownloadUrl(item.id)}>Descargar</a>
+                <Button aria-label={`Eliminar ${item.fileName}`} onClick={() => setDocumentToDelete(item)} size="sm" variant="danger-ghost">
+                  <svg aria-hidden="true" className="size-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                   </svg>
-                  <span className="text-fg-muted font-medium">Relacionado con:</span>
-                  <span className="font-bold text-fg truncate">{item.leadName || item.propertyTitle}</span>
-                </div>
+                </Button>
               </div>
-            )}
-
-            {/* Notas */}
-            {item.notes && (
-              <div className="border-t border-border bg-surface px-5 py-2">
-                <p className="text-xs text-fg-muted line-clamp-1">{item.notes}</p>
-              </div>
-            )}
-
-            {/* Acciones */}
-            <div className="flex flex-col gap-2 border-t border-border bg-surface px-5 py-3 mt-auto">
-              <button
-                className="inline-flex items-center justify-center gap-1.5 rounded-xl bg-primary px-3 py-2 text-xs font-semibold text-white shadow-sm shadow-indigo-600/30 transition-all hover:bg-primary-hover hover:shadow-md hover:shadow-indigo-600/40"
-                onClick={() => setPreviewDocument(item)}
-              >
-                <svg className="size-3.5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                </svg>
-                Vista previa
-              </button>
-              <a
-                className="inline-flex items-center justify-center gap-1.5 rounded-xl border-2 border-border bg-surface px-3 py-2 text-xs font-semibold text-fg-muted transition-all hover:bg-surface-muted hover:border-border-strong"
-                href={documentDownloadUrl(item.id)}
-              >
-                <svg className="size-3.5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                </svg>
-                Descargar
-              </a>
-              <button
-                className="inline-flex items-center justify-center gap-1.5 rounded-xl border-2 border-danger-line bg-surface px-3 py-2 text-xs font-semibold text-danger-fg transition-all hover:bg-danger-soft hover:border-danger-line"
-                onClick={() => remove(item.id)}
-              >
-                <svg className="size-3.5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                </svg>
-                Eliminar
-              </button>
-            </div>
-          </article>
-        ))}
-
-        {/* Estado vacío */}
-        {documents.length === 0 && filteredDocuments.length === 0 && (
-          <div className="flex flex-col items-center justify-center rounded-2xl border-2 border-dashed border-border bg-surface-muted py-16">
-            <div className="rounded-full bg-primary-muted p-4">
-              <svg className="size-12 text-primary-fg" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-              </svg>
-            </div>
-            <p className="mt-4 text-base font-semibold text-fg-muted">No hay documentos guardados</p>
-            <p className="mt-1 text-sm text-fg-subtle">Haz clic en "Subir documento" para comenzar</p>
-          </div>
-        )}
-        </div>
+            </Card>
+          );
+        })}
       </div>
-    </div>
+
+      <ConfirmModal
+        isOpen={documentToDelete !== null}
+        loading={deleting}
+        message={<>Se eliminará <strong className="text-fg">{documentToDelete?.fileName}</strong>. Esta acción no se puede deshacer.</>}
+        onCancel={() => setDocumentToDelete(null)}
+        onConfirm={confirmRemove}
+        title="¿Eliminar documento?"
+      />
+    </>
   );
 }
