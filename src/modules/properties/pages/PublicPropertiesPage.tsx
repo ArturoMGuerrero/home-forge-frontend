@@ -10,9 +10,11 @@ import {
   propertyStatusLabel,
   PublicPropertyListing
 } from '../api/propertyApi';
+import { Alert, Badge, Button, buttonClasses, Card, EmptyState, LoadingState, Select, Tabs } from '../../../shared/ui';
+import { Icon } from '../../../shared/Icon';
+import { PublicHeader } from '../components/PublicHeader';
 
 const fallbackImage = 'https://images.unsplash.com/photo-1564013799919-ab600027ffc6?auto=format&fit=crop&w=1200&q=80';
-const selectClass = 'w-full rounded-xl border border-slate-600/50 bg-inverse-hover px-4 py-3.5 text-sm font-medium text-white outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/20 hover:border-slate-500 backdrop-blur-sm';
 
 export function PublicPropertiesPage() {
   const [listings, setListings] = useState<PublicPropertyListing[]>([]);
@@ -65,151 +67,107 @@ export function PublicPropertiesPage() {
     setCity('ALL');
   }
 
+  const hasFilters = filter !== 'ALL' || country !== 'ALL' || state !== 'ALL' || city !== 'ALL';
+
   return (
     <div className="min-h-screen bg-app">
-      <header className="border-b border-border/50 bg-surface/80 backdrop-blur-xl sticky top-0 z-50">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-5 py-4">
-          <Link className="flex items-center gap-3 group" to="/">
-            <div className="size-12 rounded-2xl bg-gradient-to-br from-indigo-600 to-purple-600 p-2.5 shadow-lg shadow-indigo-500/30 group-hover:shadow-indigo-500/50 transition-all">
-              <img alt="HomeForge" className="w-full h-full object-contain" src="/favicon.png" />
-            </div>
-            <div>
-              <strong className="block font-bold text-lg text-primary">HomeForge</strong>
-              <small className="text-fg-subtle text-xs">Encuentra tu hogar ideal</small>
-            </div>
-          </Link>
-          <Link className="rounded-xl border-2 border-primary bg-primary px-4 py-2.5 text-sm font-bold text-white hover:bg-primary-hover hover:border-primary-hover transition-all shadow-lg shadow-indigo-600/30" to="/login">
-            Acceso administradores
-          </Link>
-        </div>
-      </header>
+      <PublicHeader />
 
-      <section className="relative overflow-hidden bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 px-5 py-24">
-        {/* Patrón de fondo */}
-        <div className="absolute inset-0 opacity-10">
-          <div className="absolute inset-0" style={{backgroundImage: 'radial-gradient(circle at 2px 2px, white 1px, transparent 0)', backgroundSize: '40px 40px'}} />
-        </div>
-
-        {/* Glows de fondo */}
-        <div className="absolute top-0 left-1/4 w-96 h-96 bg-primary/20 rounded-full blur-3xl" />
-        <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-accent/20 rounded-full blur-3xl" />
-
+      <section className="relative overflow-hidden bg-slate-950 px-5 pb-28 pt-16 sm:pt-20">
+        <div aria-hidden="true" className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_left,rgb(79_70_229/0.45),transparent_55%),radial-gradient(ellipse_at_bottom_right,rgb(16_185_129/0.18),transparent_50%)]" />
         <div className="relative mx-auto max-w-7xl">
-          <div className="inline-flex items-center gap-2 rounded-full bg-white/10 border border-white/20 px-4 py-2 mb-6 backdrop-blur-sm">
-            <span className="size-2 bg-success rounded-full animate-pulse" />
-            <span className="text-xs font-semibold text-emerald-300 uppercase tracking-wider">Encuentra tu próximo espacio</span>
-          </div>
-
-          <h1 className="max-w-4xl text-5xl font-bold sm:text-7xl text-white leading-tight">
-            Propiedades para <span className="bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent">comprar</span> o <span className="bg-gradient-to-r from-emerald-400 to-cyan-400 bg-clip-text text-transparent">rentar</span>.
+          <span className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-emerald-300">
+            <span className="size-1.5 rounded-full bg-emerald-400" />
+            Encuentra tu próximo espacio
+          </span>
+          <h1 className="mt-5 max-w-3xl text-4xl font-bold leading-tight tracking-tight text-white sm:text-6xl">
+            Propiedades para <span className="text-indigo-300">comprar</span> o <span className="text-emerald-300">rentar</span>.
           </h1>
-
-          <p className="mt-6 max-w-2xl text-lg text-border-strong leading-relaxed">
+          <p className="mt-5 max-w-2xl text-lg text-slate-300">
             Busca por país, estado y ciudad, y contacta directamente a la inmobiliaria que publica cada propiedad.
           </p>
-
-          <div className="mt-8 flex flex-wrap gap-4">
-            <div className="flex items-center gap-2 text-sm text-fg-subtle">
-              <svg className="size-5 text-emerald-400" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-              </svg>
-              <span>{visible.length} propiedades disponibles</span>
-            </div>
-            <div className="flex items-center gap-2 text-sm text-fg-subtle">
-              <svg className="size-5 text-indigo-400" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd" />
-              </svg>
-              <span>Múltiples ubicaciones</span>
-            </div>
-          </div>
         </div>
       </section>
 
-      <main className="mx-auto max-w-7xl px-5 py-12">
-        <section className="mb-10 rounded-3xl border border-slate-700/50 bg-overlay backdrop-blur-xl p-6 sm:p-8 shadow-xl shadow-black/20">
-          <div className="mb-6 flex flex-wrap items-start justify-between gap-4">
-            <div>
-              <div className="inline-flex items-center gap-2 rounded-full bg-primary/20 border border-primary/30 px-3 py-1 mb-2">
-                <svg className="size-4 text-indigo-400" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clipRule="evenodd" />
-                </svg>
-                <span className="text-xs font-bold uppercase tracking-wider text-indigo-300">Buscar por ubicación</span>
-              </div>
-              <h2 className="text-2xl font-bold text-white">Encuentra propiedades cerca de ti</h2>
-            </div>
-            <button className="inline-flex items-center gap-2 rounded-xl bg-inverse-hover border border-slate-600/50 px-4 py-2.5 text-sm font-semibold text-border-strong hover:bg-inverse-hover hover:text-white transition-all" onClick={clearFilters} type="button">
-              <svg className="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              </svg>
-              Limpiar filtros
-            </button>
+      <main className="mx-auto max-w-7xl px-5 pb-16">
+        <Card className="relative -mt-16 mb-10">
+          <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
+            <h2 className="text-lg font-semibold text-fg">Buscar por ubicación</h2>
+            {hasFilters && <Button onClick={clearFilters} size="sm" variant="ghost">Limpiar filtros</Button>}
           </div>
-          <div className="grid gap-5 sm:grid-cols-3">
-            <label className="grid gap-2.5 text-sm font-bold text-border-strong">
-              <span className="flex items-center gap-2">
-                <svg className="size-4 text-indigo-400" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM4.332 8.027a6.012 6.012 0 011.912-2.706C6.512 5.73 6.974 6 7.5 6A1.5 1.5 0 019 7.5V8a2 2 0 004 0 2 2 0 011.523-1.943A5.977 5.977 0 0116 10c0 .34-.028.675-.083 1H15a2 2 0 00-2 2v2.197A5.973 5.973 0 0110 16v-2a2 2 0 00-2-2 2 2 0 01-2-2 2 2 0 00-1.668-1.973z" clipRule="evenodd" />
-                </svg>
-                País
-              </span>
-              <select className={selectClass} onChange={event => selectCountry(event.target.value)} value={country}>
-                <option value="ALL">Todos los países</option>
-                {countries.map(code => <option key={code} value={code}>{countryName(code)}</option>)}
-              </select>
-            </label>
-            <label className="grid gap-2 text-sm font-semibold text-border-strong">Estado
-              <select className={selectClass} onChange={event => selectState(event.target.value)} value={state}>
-                <option value="ALL">Todos los estados</option>
-                {states.map(value => <option key={value} value={value}>{value}</option>)}
-              </select>
-            </label>
-            <label className="grid gap-2 text-sm font-semibold text-border-strong">Ciudad
-              <select className={selectClass} onChange={event => setCity(event.target.value)} value={city}>
-                <option value="ALL">Todas las ciudades</option>
-                {cities.map(value => <option key={value} value={value}>{value}</option>)}
-              </select>
-            </label>
+          <div className="grid gap-4 sm:grid-cols-3">
+            <Select label="País" onChange={event => selectCountry(event.target.value)} value={country}>
+              <option value="ALL">Todos los países</option>
+              {countries.map(code => <option key={code} value={code}>{countryName(code)}</option>)}
+            </Select>
+            <Select label="Estado" onChange={event => selectState(event.target.value)} value={state}>
+              <option value="ALL">Todos los estados</option>
+              {states.map(value => <option key={value} value={value}>{value}</option>)}
+            </Select>
+            <Select label="Ciudad" onChange={event => setCity(event.target.value)} value={city}>
+              <option value="ALL">Todas las ciudades</option>
+              {cities.map(value => <option key={value} value={value}>{value}</option>)}
+            </Select>
           </div>
-        </section>
+        </Card>
 
-        <div className="mb-7 flex flex-wrap items-end justify-between gap-4">
-          <div><p className="mb-1 text-[11px] font-bold uppercase tracking-[0.16em] text-indigo-400">Inventario</p><h2 className="text-2xl font-bold text-white">{visible.length} propiedades</h2></div>
-          <div className="flex rounded-xl border border-slate-700/50 bg-overlay p-1 backdrop-blur-sm">
-            {([['ALL', 'Todas'], ['SALE', 'Venta'], ['RENT', 'Renta']] as const).map(([value, label]) => (
-              <button className={`rounded-lg px-4 py-2 text-sm font-semibold transition ${filter === value ? 'bg-primary text-white' : 'text-border-strong hover:bg-inverse-hover hover:text-white'}`} key={value} onClick={() => setFilter(value)} type="button">{label}</button>
-            ))}
+        <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
+          <div>
+            <p className="mb-1 text-xs font-semibold uppercase tracking-[0.16em] text-primary-fg">Inventario</p>
+            <h2 className="text-2xl font-bold tracking-tight text-fg">{visible.length} {visible.length === 1 ? 'propiedad' : 'propiedades'}</h2>
           </div>
+          <Tabs
+            activeTab={filter}
+            onChange={value => setFilter(value as 'ALL' | 'SALE' | 'RENT')}
+            tabs={[{ id: 'ALL', label: 'Todas' }, { id: 'SALE', label: 'Venta' }, { id: 'RENT', label: 'Renta' }]}
+            variant="pills"
+          />
         </div>
 
-        {loading && <p className="py-12 text-center text-sm text-fg-subtle">Cargando propiedades...</p>}
-        {error && <p className="rounded-xl bg-danger-soft p-4 text-sm font-medium text-danger-fg">{error}</p>}
-        {!loading && !error && visible.length === 0 && <p className="py-12 text-center text-sm text-fg-subtle">No hay propiedades publicadas con estos filtros.</p>}
+        {loading && <LoadingState message="Cargando propiedades..." />}
+        {error && <Alert variant="error">{error}</Alert>}
+        {!loading && !error && visible.length === 0 && (
+          <Card className="border-dashed">
+            <EmptyState
+              actions={hasFilters ? <Button onClick={clearFilters} variant="tertiary">Limpiar filtros</Button> : undefined}
+              description="Prueba con otra ubicación o tipo de operación."
+              icon={<Icon name="properties" />}
+              title="No hay propiedades publicadas con estos filtros"
+            />
+          </Card>
+        )}
 
         <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
           {visible.map(({ property, seller }) => (
-            <article className="group overflow-hidden rounded-3xl border border-border bg-surface shadow-sm transition hover:-translate-y-1 hover:shadow-xl" key={property.id}>
+            <article className="group flex flex-col overflow-hidden rounded-2xl border border-border bg-surface shadow-card transition hover:shadow-lg" key={property.id}>
               <PropertyGallery property={property} />
-              <div className="p-6">
+              <div className="flex flex-1 flex-col p-5">
                 <div className="flex items-center justify-between gap-3">
-                  <small className="font-semibold text-primary-fg">{property.city}, {property.stateCode}</small>
-                  <span className="rounded-full bg-surface-sunken px-2.5 py-1 text-xs font-bold uppercase tracking-wider text-fg-muted">{countryName(property.countryCode)}</span>
+                  <small className="truncate text-sm font-medium text-primary-fg">{property.city}, {property.stateCode}</small>
+                  <Badge>{countryName(property.countryCode)}</Badge>
                 </div>
-                <h3 className="mt-2 text-xl font-bold">{property.title}</h3>
-                <p className="mt-3 line-clamp-2 min-h-10 text-sm text-fg-subtle">{property.description || 'Propiedad disponible. Solicita más información.'}</p>
-                <div className="mt-4 flex flex-wrap gap-2 text-xs text-fg-muted">
-                  {property.bedrooms !== undefined && <span className="rounded-full bg-surface-sunken px-2.5 py-1">{property.bedrooms} recámaras</span>}
-                  {property.bathrooms !== undefined && <span className="rounded-full bg-surface-sunken px-2.5 py-1">{property.bathrooms} baños</span>}
-                  {property.constructionArea !== undefined && <span className="rounded-full bg-surface-sunken px-2.5 py-1">{property.constructionArea} m² construcción</span>}
+                <h3 className="mt-2 text-lg font-semibold text-fg">
+                  <Link className="hover:text-primary-fg" to={`/propiedades/${property.id}`}>{property.title}</Link>
+                </h3>
+                <p className="mt-2 line-clamp-2 text-sm text-fg-subtle">{property.description || 'Propiedad disponible. Solicita más información.'}</p>
+                <div className="mt-4 flex flex-wrap gap-1.5">
+                  {property.bedrooms !== undefined && <Badge>{property.bedrooms} recámaras</Badge>}
+                  {property.bathrooms !== undefined && <Badge>{property.bathrooms} baños</Badge>}
+                  {property.constructionArea !== undefined && <Badge>{property.constructionArea} m²</Badge>}
                 </div>
-                <div className="mt-5 border-t border-border pt-5">
-                  <strong className="block text-xl text-primary-fg">{formatApiPrice(property)}</strong>
-                  <small className="text-fg-subtle">{property.propertyType} · {property.code}</small>
-                  <Link className="mt-4 block rounded-xl bg-primary px-4 py-3 text-center text-sm font-bold text-white hover:bg-primary-hover" to={`/propiedades/${property.id}`}>Ver todos los detalles</Link>
-                </div>
-                <div className="mt-5 rounded-2xl bg-surface-muted p-4">
-                  <span className="text-xs font-bold uppercase tracking-[.14em] text-fg-subtle">Publicada por</span>
-                  <Link className="mt-1 block text-sm font-bold text-fg hover:text-primary-fg" to={`/empresas/${seller.companyId}`}>{seller.companyName}</Link>
-                  <ContactActions listing={{ property, seller }} />
+                <div className="mt-auto pt-5">
+                  <div className="flex items-end justify-between gap-3 border-t border-border pt-4">
+                    <div className="min-w-0">
+                      <strong className="block text-xl font-bold tracking-tight text-fg">{formatApiPrice(property)}</strong>
+                      <small className="text-xs text-fg-subtle">{property.propertyType} · {property.code}</small>
+                    </div>
+                    <Link className={buttonClasses({ size: 'sm' })} to={`/propiedades/${property.id}`}>Ver detalles</Link>
+                  </div>
+                  <div className="mt-4 rounded-xl bg-surface-muted p-3.5">
+                    <span className="text-xs text-fg-subtle">Publicada por</span>
+                    <Link className="block truncate text-sm font-semibold text-fg hover:text-primary-fg" to={`/empresas/${seller.companyId}`}>{seller.companyName}</Link>
+                    <ContactActions listing={{ property, seller }} />
+                  </div>
                 </div>
               </div>
             </article>
@@ -231,14 +189,14 @@ function ContactActions({ listing }: { listing: PublicPropertyListing }) {
   }
 
   return (
-    <div className="mt-3 flex flex-wrap gap-2">
+    <div className="relative z-10 mt-3 flex flex-wrap gap-2">
       {phone && (
-        <a className="rounded-lg bg-success px-3 py-2 text-xs font-bold text-white hover:bg-success-hover" href={`https://wa.me/${phone}?text=${whatsappMessage}`} rel="noreferrer" target="_blank">
+        <a className={buttonClasses({ variant: 'success', size: 'sm' })} href={`https://wa.me/${phone}?text=${whatsappMessage}`} rel="noreferrer" target="_blank">
           WhatsApp
         </a>
       )}
       {seller.email && (
-        <a className="rounded-lg border border-border bg-surface px-3 py-2 text-xs font-bold text-fg-muted hover:border-primary-line hover:text-primary-fg" href={`mailto:${seller.email}?subject=${subject}`}>
+        <a className={buttonClasses({ variant: 'tertiary', size: 'sm' })} href={`mailto:${seller.email}?subject=${subject}`}>
           Enviar correo
         </a>
       )}
@@ -262,17 +220,17 @@ function PropertyGallery({ property }: { property: ApiProperty }) {
   const current = images[active] || fallbackImage;
 
   return (
-    <div>
-      <div className="relative h-60 overflow-hidden">
-        <img alt={property.title} className="h-full w-full object-cover transition duration-500 group-hover:scale-105" src={current} />
-        <span className={`absolute left-4 top-4 rounded-full px-3 py-1 text-xs font-bold backdrop-blur ${property.listingType === 'RENT' ? 'bg-accent/90 text-white' : 'bg-info-line/90 text-fg'}`}>{listingLabel(property.listingType)}</span>
-        {property.status !== 'AVAILABLE' && <span className={`absolute bottom-4 left-4 rounded-full px-3 py-1 text-xs font-bold ${propertyStatusClass(property.status)}`}>{propertyStatusLabel(property.status)}</span>}
-        {images.length > 1 && <span className="absolute right-4 top-4 rounded-full bg-overlay px-2.5 py-1 text-xs font-semibold text-white">{active + 1}/{images.length}</span>}
+    <div className="relative">
+      <div className="relative aspect-[4/3] overflow-hidden bg-surface-sunken">
+        <img alt={property.title} className="size-full object-cover transition duration-500 group-hover:scale-[1.03]" loading="lazy" src={current} />
+        <span className={`absolute left-3 top-3 rounded-full px-2.5 py-1 text-xs font-semibold text-white shadow-sm ${property.listingType === 'RENT' ? 'bg-violet-600' : 'bg-indigo-600'}`}>{listingLabel(property.listingType)}</span>
+        {property.status !== 'AVAILABLE' && <span className={`absolute bottom-3 left-3 rounded-full px-2.5 py-1 text-xs font-semibold ${propertyStatusClass(property.status)}`}>{propertyStatusLabel(property.status)}</span>}
+        {images.length > 1 && <span className="absolute right-3 top-3 rounded-full bg-black/55 px-2 py-0.5 text-xs font-medium text-white">{active + 1}/{images.length}</span>}
       </div>
       {images.length > 1 && (
-        <div className="flex gap-2 overflow-x-auto border-b border-border bg-surface p-3">
+        <div className="relative z-10 flex gap-1.5 overflow-x-auto border-b border-border bg-surface p-2.5">
           {images.map((image, index) => (
-            <button className={`size-12 shrink-0 overflow-hidden rounded-lg border-2 ${active === index ? 'border-primary' : 'border-transparent opacity-70 hover:opacity-100'}`} key={image} onClick={() => setActive(index)} type="button">
+            <button aria-label={`Ver foto ${index + 1}`} className={`size-11 shrink-0 overflow-hidden rounded-lg ring-2 transition ${active === index ? 'ring-primary' : 'ring-transparent opacity-70 hover:opacity-100'}`} key={image} onClick={() => setActive(index)} type="button">
               <img alt="" className="size-full object-cover" src={image} />
             </button>
           ))}
