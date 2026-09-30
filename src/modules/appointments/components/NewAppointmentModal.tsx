@@ -2,7 +2,17 @@ import { useState, useEffect } from 'react';
 import toast from 'react-hot-toast';
 import { createAppointment, updateAppointment, Appointment, AppointmentType, LocationType, appointmentTypeLabels, locationTypeLabels } from '../api/appointmentsApi';
 import { getSession } from '../../auth';
-import { Modal } from '../../../shared/ui/Modal';
+import { Button, Input, Modal, Select, Textarea } from '../../../shared/ui';
+import { timeSlotOptions } from '../timeSlots';
+
+const FORM_ID = 'calendar-appointment-form';
+const reminderOptions = [
+  { value: '0', label: 'Sin recordatorio' },
+  { value: '15', label: '15 minutos antes' },
+  { value: '30', label: '30 minutos antes' },
+  { value: '60', label: '1 hora antes' },
+  { value: '1440', label: '1 día antes' }
+];
 
 interface NewAppointmentModalProps {
   defaultDate?: Date;
@@ -14,18 +24,7 @@ interface NewAppointmentModalProps {
 export default function NewAppointmentModal({ defaultDate, appointment, onClose, onSuccess }: NewAppointmentModalProps) {
   const session = getSession();
 
-  // Generate time slots in 30-minute intervals
-  const generateTimeSlots = () => {
-    const slots: string[] = [];
-    for (let hour = 0; hour < 24; hour++) {
-      slots.push(`${String(hour).padStart(2, '0')}:00`);
-      slots.push(`${String(hour).padStart(2, '0')}:30`);
-    }
-    return slots;
-  };
-
-  const timeSlots = generateTimeSlots();
-
+  const [saving, setSaving] = useState(false);
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -89,15 +88,15 @@ export default function NewAppointmentModal({ defaultDate, appointment, onClose,
       return;
     }
 
+    const startDateTime = new Date(`${formData.date}T${formData.startTime}`);
+    const endDateTime = new Date(`${formData.date}T${formData.endTime}`);
+    if (endDateTime <= startDateTime) {
+      toast.error('La hora de fin debe ser posterior a la hora de inicio.');
+      return;
+    }
+
+    setSaving(true);
     try {
-      const startDateTime = new Date(`${formData.date}T${formData.startTime}`);
-      const endDateTime = new Date(`${formData.date}T${formData.endTime}`);
-
-      if (endDateTime <= startDateTime) {
-        toast.error('La hora de fin debe ser posterior a la hora de inicio.');
-        return;
-      }
-
       const payload = {
         companyId: session.companyId,
         title: formData.title.trim(),
@@ -117,182 +116,99 @@ export default function NewAppointmentModal({ defaultDate, appointment, onClose,
       toast.success(appointment ? 'Cita actualizada correctamente.' : 'Cita creada correctamente.');
       onSuccess();
     } catch (error) {
-      console.error('Error creating appointment:', error);
       toast.error(error instanceof Error ? error.message : 'Error al crear la cita.');
+    } finally {
+      setSaving(false);
     }
   };
 
   return (
     <Modal
-      isOpen={true}
-      onClose={onClose}
-      title={appointment ? 'Editar cita' : 'Nueva cita'}
-      subtitle={appointment ? 'Actualiza los datos de la cita' : 'Agrega una cita a tu agenda'}
+      footer={
+        <>
+          <Button onClick={onClose} variant="tertiary">Cancelar</Button>
+          <Button form={FORM_ID} loading={saving} type="submit">{appointment ? 'Guardar cambios' : 'Crear cita'}</Button>
+        </>
+      }
+      isOpen
       maxWidth="2xl"
+      onClose={onClose}
+      subtitle={appointment ? 'Actualiza los datos de la cita' : 'Agrega una cita a tu agenda'}
+      title={appointment ? 'Editar cita' : 'Nueva cita'}
     >
-      <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-fg-muted mb-1">Título *</label>
-            <input
-              type="text"
-              required
-              value={formData.title}
-              onChange={e => setFormData({ ...formData, title: e.target.value })}
-              className="w-full px-3 py-2 border border-border-strong rounded-lg focus:ring-2 focus:ring-info"
-              placeholder="Ej: Visita a casa en Las Lomas"
-            />
-          </div>
+      <form className="grid gap-4" id={FORM_ID} onSubmit={handleSubmit}>
+        <Input
+          label="Título"
+          onChange={e => setFormData({ ...formData, title: e.target.value })}
+          placeholder="Ej: Visita a casa en Las Lomas"
+          required
+          value={formData.title}
+        />
+        <Textarea
+          label="Descripción"
+          onChange={e => setFormData({ ...formData, description: e.target.value })}
+          placeholder="Detalles adicionales de la cita..."
+          rows={3}
+          value={formData.description}
+        />
 
-          <div>
-            <label className="block text-sm font-medium text-fg-muted mb-1">Descripción</label>
-            <textarea
-              value={formData.description}
-              onChange={e => setFormData({ ...formData, description: e.target.value })}
-              className="w-full px-3 py-2 border border-border-strong rounded-lg focus:ring-2 focus:ring-info"
-              rows={3}
-              placeholder="Detalles adicionales de la cita..."
-            />
-          </div>
+        <div className="grid gap-4 sm:grid-cols-2">
+          <Select
+            label="Tipo de cita"
+            onChange={e => setFormData({ ...formData, appointmentType: e.target.value as AppointmentType })}
+            options={Object.entries(appointmentTypeLabels).map(([value, label]) => ({ value, label }))}
+            required
+            value={formData.appointmentType}
+          />
+          <Select
+            label="Tipo de ubicación"
+            onChange={e => setFormData({ ...formData, locationType: e.target.value as LocationType })}
+            options={Object.entries(locationTypeLabels).map(([value, label]) => ({ value, label }))}
+            required
+            value={formData.locationType}
+          />
+        </div>
 
-          <div className="grid gap-4 sm:grid-cols-2">
-            <div>
-              <label className="block text-sm font-medium text-fg-muted mb-1">Tipo de Cita *</label>
-              <select
-                required
-                value={formData.appointmentType}
-                onChange={e => setFormData({ ...formData, appointmentType: e.target.value as AppointmentType })}
-                className="w-full px-3 py-2 border border-border-strong rounded-lg focus:ring-2 focus:ring-info"
-              >
-                {Object.entries(appointmentTypeLabels).map(([key, label]) => (
-                  <option key={key} value={key}>{label}</option>
-                ))}
-              </select>
-            </div>
+        <div className="grid gap-4 sm:grid-cols-3">
+          <Input label="Fecha" onChange={e => setFormData({ ...formData, date: e.target.value })} required type="date" value={formData.date} />
+          <Select label="Inicio" onChange={e => setFormData({ ...formData, startTime: e.target.value })} options={timeSlotOptions} required value={formData.startTime} />
+          <Select label="Fin" onChange={e => setFormData({ ...formData, endTime: e.target.value })} options={timeSlotOptions} required value={formData.endTime} />
+        </div>
 
-            <div>
-              <label className="block text-sm font-medium text-fg-muted mb-1">Tipo de Ubicación *</label>
-              <select
-                required
-                value={formData.locationType}
-                onChange={e => setFormData({ ...formData, locationType: e.target.value as LocationType })}
-                className="w-full px-3 py-2 border border-border-strong rounded-lg focus:ring-2 focus:ring-info"
-              >
-                {Object.entries(locationTypeLabels).map(([key, label]) => (
-                  <option key={key} value={key}>{label}</option>
-                ))}
-              </select>
-            </div>
-          </div>
+        {formData.locationType === LocationType.IN_PERSON && (
+          <Input
+            label="Dirección"
+            onChange={e => setFormData({ ...formData, locationAddress: e.target.value })}
+            placeholder="Ej: Av. Principal 123, Col. Centro"
+            value={formData.locationAddress}
+          />
+        )}
 
-          <div>
-            <label className="block text-sm font-medium text-fg-muted mb-1">Fecha *</label>
-            <input
-              type="date"
-              required
-              value={formData.date}
-              onChange={e => setFormData({ ...formData, date: e.target.value })}
-              className="w-full px-3 py-2 border border-border-strong rounded-lg focus:ring-2 focus:ring-info"
-            />
-          </div>
+        {formData.locationType === LocationType.VIRTUAL && (
+          <Input
+            label="URL de reunión"
+            onChange={e => setFormData({ ...formData, virtualMeetingUrl: e.target.value })}
+            placeholder="https://meet.google.com/..."
+            type="url"
+            value={formData.virtualMeetingUrl}
+          />
+        )}
 
-          <div className="grid gap-4 sm:grid-cols-2">
-            <div>
-              <label className="block text-sm font-medium text-fg-muted mb-1">Hora de Inicio *</label>
-              <select
-                required
-                value={formData.startTime}
-                onChange={e => setFormData({ ...formData, startTime: e.target.value })}
-                className="w-full px-3 py-2 border border-border-strong rounded-lg focus:ring-2 focus:ring-info"
-              >
-                {timeSlots.map(slot => (
-                  <option key={slot} value={slot}>{slot}</option>
-                ))}
-              </select>
-            </div>
+        <Select
+          label="Recordatorio"
+          onChange={e => setFormData({ ...formData, reminderMinutes: Number(e.target.value) })}
+          options={reminderOptions}
+          value={String(formData.reminderMinutes)}
+        />
 
-            <div>
-              <label className="block text-sm font-medium text-fg-muted mb-1">Hora de Fin *</label>
-              <select
-                required
-                value={formData.endTime}
-                onChange={e => setFormData({ ...formData, endTime: e.target.value })}
-                className="w-full px-3 py-2 border border-border-strong rounded-lg focus:ring-2 focus:ring-info"
-              >
-                {timeSlots.map(slot => (
-                  <option key={slot} value={slot}>{slot}</option>
-                ))}
-              </select>
-            </div>
-          </div>
-
-          {formData.locationType === LocationType.IN_PERSON && (
-            <div>
-              <label className="block text-sm font-medium text-fg-muted mb-1">Dirección</label>
-              <input
-                type="text"
-                value={formData.locationAddress}
-                onChange={e => setFormData({ ...formData, locationAddress: e.target.value })}
-                className="w-full px-3 py-2 border border-border-strong rounded-lg focus:ring-2 focus:ring-info"
-                placeholder="Ej: Av. Principal 123, Col. Centro"
-              />
-            </div>
-          )}
-
-          {formData.locationType === LocationType.VIRTUAL && (
-            <div>
-              <label className="block text-sm font-medium text-fg-muted mb-1">URL de Reunión</label>
-              <input
-                type="url"
-                value={formData.virtualMeetingUrl}
-                onChange={e => setFormData({ ...formData, virtualMeetingUrl: e.target.value })}
-                className="w-full px-3 py-2 border border-border-strong rounded-lg focus:ring-2 focus:ring-info"
-                placeholder="https://meet.google.com/..."
-              />
-            </div>
-          )}
-
-          <div>
-            <label className="block text-sm font-medium text-fg-muted mb-1">Recordatorio</label>
-            <select
-              value={formData.reminderMinutes}
-              onChange={e => setFormData({ ...formData, reminderMinutes: Number(e.target.value) })}
-              className="w-full px-3 py-2 border border-border-strong rounded-lg focus:ring-2 focus:ring-info"
-            >
-              <option value={0}>Sin recordatorio</option>
-              <option value={15}>15 minutos antes</option>
-              <option value={30}>30 minutos antes</option>
-              <option value={60}>1 hora antes</option>
-              <option value={1440}>1 día antes</option>
-            </select>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-fg-muted mb-1">Notas</label>
-            <textarea
-              value={formData.notes}
-              onChange={e => setFormData({ ...formData, notes: e.target.value })}
-              className="w-full px-3 py-2 border border-border-strong rounded-lg focus:ring-2 focus:ring-info"
-              rows={3}
-              placeholder="Notas internas..."
-            />
-          </div>
-
-          <div className="flex justify-end gap-3 pt-6 border-t border-border">
-            <button
-              type="button"
-              onClick={onClose}
-              className="px-6 py-2.5 border border-border rounded-xl text-sm font-semibold text-fg-muted hover:bg-surface-muted transition"
-            >
-              Cancelar
-            </button>
-            <button
-              type="submit"
-              className="px-6 py-2.5 bg-primary text-white rounded-xl text-sm font-semibold shadow-lg hover:shadow-xl transition"
-            >
-              {appointment ? 'Guardar cambios' : 'Crear cita'}
-            </button>
-          </div>
-        </form>
+        <Textarea
+          label="Notas"
+          onChange={e => setFormData({ ...formData, notes: e.target.value })}
+          placeholder="Notas internas..."
+          rows={3}
+          value={formData.notes}
+        />
+      </form>
     </Modal>
   );
 }

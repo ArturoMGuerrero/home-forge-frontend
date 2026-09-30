@@ -5,7 +5,7 @@ import { ApiProperty } from '../../properties';
 import { uploadStoredDocument as uploadDocument, StoredDocument } from '../api/storedDocumentsApi';
 import { SubscriptionRestrictions } from '../../../shared/subscriptionRestrictions';
 import { UpgradeModal } from '../../../shared/UpgradeModal';
-import { Modal } from '../../../shared/ui/Modal';
+import { Button, cn, Input, Modal, Select } from '../../../shared/ui';
 
 interface Props {
   isOpen: boolean;
@@ -16,6 +16,33 @@ interface Props {
   restrictions: SubscriptionRestrictions;
 }
 
+const FORM_ID = 'upload-document-form';
+const emptyForm = { leadId: '', propertyId: '', documentType: 'IDENTIFICATION', status: 'PENDING', notes: '' };
+const documentTypeOptions = [
+  { value: 'IDENTIFICATION', label: 'Identificación' },
+  { value: 'PROOF_OF_ADDRESS', label: 'Comprobante de domicilio' },
+  { value: 'PROOF_OF_INCOME', label: 'Comprobante de ingresos' },
+  { value: 'CONTRACT', label: 'Contrato' },
+  { value: 'PROPERTY_DEED', label: 'Escritura' },
+  { value: 'OTHER', label: 'Otro' }
+];
+const statusOptions = [
+  { value: 'PENDING', label: 'Pendiente' },
+  { value: 'RECEIVED', label: 'Recibido' },
+  { value: 'VALIDATED', label: 'Validado' },
+  { value: 'REJECTED', label: 'Rechazado' }
+];
+const validExtensions = ['.pdf', '.doc', '.docx', '.jpg', '.jpeg', '.png'];
+const validMimeTypes = [
+  'application/pdf',
+  'application/msword',
+  'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+  'image/jpeg',
+  'image/jpg',
+  'image/png'
+];
+const MAX_SIZE = 8 * 1024 * 1024;
+
 function sizeLabel(size?: number) {
   if (!size) return '-';
   return size > 1024 * 1024 ? `${(size / 1024 / 1024).toFixed(1)} MB` : `${Math.ceil(size / 1024)} KB`;
@@ -23,7 +50,7 @@ function sizeLabel(size?: number) {
 
 export function UploadDocumentModal({ isOpen, onClose, onDocumentUploaded, leads, properties, restrictions }: Props) {
   const [file, setFile] = useState<File>();
-  const [form, setForm] = useState({ leadId: '', propertyId: '', documentType: 'IDENTIFICATION', status: 'PENDING', notes: '' });
+  const [form, setForm] = useState(emptyForm);
   const [saving, setSaving] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
   const [upgradeModalOpen, setUpgradeModalOpen] = useState(false);
@@ -40,17 +67,6 @@ export function UploadDocumentModal({ isOpen, onClose, onDocumentUploaded, leads
       return;
     }
 
-    console.log('Iniciando subida de documento:', {
-      fileName: file.name,
-      fileSize: file.size,
-      fileType: file.type,
-      documentType: form.documentType,
-      status: form.status,
-      leadId: form.leadId || undefined,
-      propertyId: form.propertyId || undefined,
-      notes: form.notes
-    });
-
     setSaving(true);
     try {
       const created = await uploadDocument({
@@ -59,19 +75,12 @@ export function UploadDocumentModal({ isOpen, onClose, onDocumentUploaded, leads
         propertyId: form.propertyId || undefined,
         file
       });
-
-      console.log('Documento subido exitosamente:', created);
-
       onDocumentUploaded(created);
-      setFile(undefined);
-      setForm({ leadId: '', propertyId: '', documentType: 'IDENTIFICATION', status: 'PENDING', notes: '' });
-      formRef.current?.reset();
+      reset();
       toast.success('Documento guardado correctamente');
       onClose();
     } catch (e) {
-      console.error('Error al subir documento:', e);
-      const errorMessage = e instanceof Error ? e.message : 'No fue posible subir el documento.';
-      toast.error(errorMessage);
+      toast.error(e instanceof Error ? e.message : 'No fue posible subir el documento.');
     } finally {
       setSaving(false);
     }
@@ -91,194 +100,112 @@ export function UploadDocumentModal({ isOpen, onClose, onDocumentUploaded, leads
     event.preventDefault();
     setIsDragging(false);
     const droppedFile = event.dataTransfer.files[0];
-    if (droppedFile) {
-      validateAndSetFile(droppedFile);
-    }
+    if (droppedFile) validateAndSetFile(droppedFile);
   }
 
-  function validateAndSetFile(file: File) {
-    const validTypes = ['.pdf', '.doc', '.docx', '.jpg', '.jpeg', '.png'];
-    const validMimeTypes = [
-      'application/pdf',
-      'application/msword',
-      'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-      'image/jpeg',
-      'image/jpg',
-      'image/png'
-    ];
-    const extension = '.' + file.name.split('.').pop()?.toLowerCase();
-    const maxSize = 8 * 1024 * 1024; // 8 MB
-
-    if (!validTypes.includes(extension) && !validMimeTypes.includes(file.type)) {
+  function validateAndSetFile(candidate: File) {
+    const extension = '.' + candidate.name.split('.').pop()?.toLowerCase();
+    if (!validExtensions.includes(extension) && !validMimeTypes.includes(candidate.type)) {
       toast.error('Tipo de archivo no válido. Solo PDF, DOC, DOCX, JPG, JPEG, PNG.');
       return;
     }
-
-    if (file.size > maxSize) {
+    if (candidate.size > MAX_SIZE) {
       toast.error('El archivo es demasiado grande. Máximo 8 MB.');
       return;
     }
+    setFile(candidate);
+  }
 
-    console.log('Archivo válido:', {
-      name: file.name,
-      type: file.type,
-      size: file.size,
-      extension
-    });
-
-    setFile(file);
+  function reset() {
+    setFile(undefined);
+    setForm(emptyForm);
+    formRef.current?.reset();
   }
 
   function handleClose() {
-    setFile(undefined);
-    setForm({ leadId: '', propertyId: '', documentType: 'IDENTIFICATION', status: 'PENDING', notes: '' });
-    formRef.current?.reset();
+    reset();
     onClose();
   }
+
+  const dropTone = isDragging ? 'primary' : file ? 'success' : 'idle';
 
   return (
     <>
       <Modal
+        footer={
+          <>
+            <Button onClick={handleClose} variant="tertiary">Cancelar</Button>
+            <Button form={FORM_ID} loading={saving} type="submit">{saving ? 'Subiendo...' : 'Guardar documento'}</Button>
+          </>
+        }
         isOpen={isOpen}
-        onClose={handleClose}
-        title="Subir documento"
-        subtitle="Máximo 8 MB por archivo"
         maxWidth="3xl"
+        onClose={handleClose}
+        subtitle="Máximo 8 MB por archivo"
+        title="Subir documento"
       >
-        <form ref={formRef} onSubmit={submit}>
-            {/* Área de carga */}
-            <div className="mb-5">
-              <label
-                className={`group relative flex cursor-pointer flex-col items-center justify-center gap-3 rounded-2xl border-2 border-dashed px-6 py-10 text-center transition-all ${
-                  isDragging
-                    ? 'border-primary bg-primary-muted scale-[1.02]'
-                    : file
-                    ? 'border-success bg-success-soft'
-                    : 'border-border-strong bg-surface-muted hover:border-primary hover:bg-primary-soft'
-                }`}
-                onDragOver={handleDragOver}
-                onDragLeave={handleDragLeave}
-                onDrop={handleDrop}
-              >
-                <div className={`rounded-full p-4 transition-all ${isDragging ? 'bg-primary-muted' : file ? 'bg-success-muted' : 'bg-surface-strong group-hover:bg-primary-muted'}`}>
-                  <svg className={`size-8 transition-colors ${isDragging ? 'text-primary-fg' : file ? 'text-success-fg' : 'text-fg-subtle group-hover:text-primary-fg'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                  </svg>
-                </div>
-                <div>
-                  <p className={`text-sm font-semibold transition-colors ${isDragging ? 'text-primary-fg' : file ? 'text-success-fg' : 'text-fg-muted'}`}>
-                    {isDragging ? 'Suelta el archivo aquí' : file ? file.name : 'Arrastra un archivo o haz clic para seleccionar'}
-                  </p>
-                  <p className={`mt-1 text-xs transition-colors ${isDragging ? 'text-primary-fg' : file ? 'text-success-fg' : 'text-fg-subtle'}`}>
-                    {file ? `${sizeLabel(file.size)} • Listo para subir` : 'PDF, DOC, DOCX, JPG, JPEG, PNG • Máximo 8MB'}
-                  </p>
-                </div>
-                <input
-                  accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,image/jpeg,image/png"
-                  className="sr-only"
-                  onChange={e => {
-                    const selectedFile = e.target.files?.[0];
-                    if (selectedFile) {
-                      validateAndSetFile(selectedFile);
-                    }
-                  }}
-                  type="file"
-                />
-              </label>
-            </div>
+        <form id={FORM_ID} onSubmit={submit} ref={formRef}>
+          <label
+            className={cn(
+              'group mb-5 flex cursor-pointer flex-col items-center justify-center gap-3 rounded-xl border-2 border-dashed px-6 py-9 text-center transition',
+              'has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-primary',
+              dropTone === 'primary' && 'border-primary bg-primary-soft',
+              dropTone === 'success' && 'border-success-line bg-success-soft',
+              dropTone === 'idle' && 'border-border-strong bg-surface-muted hover:border-primary hover:bg-primary-soft',
+            )}
+            onDragLeave={handleDragLeave}
+            onDragOver={handleDragOver}
+            onDrop={handleDrop}
+          >
+            <span className={cn(
+              'grid size-12 place-items-center rounded-xl transition',
+              dropTone === 'primary' && 'bg-primary-muted text-primary-fg',
+              dropTone === 'success' && 'bg-success-muted text-success-fg',
+              dropTone === 'idle' && 'bg-surface-sunken text-fg-subtle group-hover:bg-primary-muted group-hover:text-primary-fg',
+            )}>
+              <svg aria-hidden="true" className="size-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              </svg>
+            </span>
+            <span>
+              <span className={cn('block text-sm font-semibold', file ? 'text-success-fg' : 'text-fg')}>
+                {isDragging ? 'Suelta el archivo aquí' : file ? file.name : 'Arrastra un archivo o haz clic para seleccionar'}
+              </span>
+              <span className="mt-1 block text-xs text-fg-subtle">
+                {file ? `${sizeLabel(file.size)} · Listo para subir` : 'PDF, DOC, DOCX, JPG, JPEG, PNG · Máximo 8 MB'}
+              </span>
+            </span>
+            <input
+              accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,image/jpeg,image/png"
+              className="sr-only"
+              onChange={e => {
+                const selectedFile = e.target.files?.[0];
+                if (selectedFile) validateAndSetFile(selectedFile);
+              }}
+              type="file"
+            />
+          </label>
 
-            {/* Formulario */}
-            <div className="grid gap-4 md:grid-cols-2">
-              <label className="grid gap-2 text-sm font-semibold text-fg-muted">
-                Tipo
-                <select
-                  className="w-full rounded-xl border border-border bg-surface px-3.5 py-3 text-sm font-normal outline-none transition focus:border-primary focus:ring-2 focus:ring-primary-line"
-                  onChange={e => setForm({ ...form, documentType: e.target.value })}
-                  value={form.documentType}
-                >
-                  <option value="IDENTIFICATION">Identificación</option>
-                  <option value="PROOF_OF_ADDRESS">Comprobante de domicilio</option>
-                  <option value="PROOF_OF_INCOME">Comprobante de ingresos</option>
-                  <option value="CONTRACT">Contrato</option>
-                  <option value="PROPERTY_DEED">Escritura</option>
-                  <option value="OTHER">Otro</option>
-                </select>
-              </label>
-
-              <label className="grid gap-2 text-sm font-semibold text-fg-muted">
-                Estado
-                <select
-                  className="w-full rounded-xl border border-border bg-surface px-3.5 py-3 text-sm font-normal outline-none transition focus:border-primary focus:ring-2 focus:ring-primary-line"
-                  onChange={e => setForm({ ...form, status: e.target.value })}
-                  value={form.status}
-                >
-                  <option value="PENDING">Pendiente</option>
-                  <option value="RECEIVED">Recibido</option>
-                  <option value="VALIDATED">Validado</option>
-                  <option value="REJECTED">Rechazado</option>
-                </select>
-              </label>
-
-              <label className="grid gap-2 text-sm font-semibold text-fg-muted">
-                Prospecto
-                <select
-                  className="w-full rounded-xl border border-border bg-surface px-3.5 py-3 text-sm font-normal outline-none transition focus:border-primary focus:ring-2 focus:ring-primary-line"
-                  onChange={e => setForm({ ...form, leadId: e.target.value })}
-                  value={form.leadId}
-                >
-                  <option value="">Sin prospecto</option>
-                  {leads.map(lead => (
-                    <option key={lead.id} value={lead.id}>
-                      {lead.firstName} {lead.lastName}
-                    </option>
-                  ))}
-                </select>
-              </label>
-
-              <label className="grid gap-2 text-sm font-semibold text-fg-muted">
-                Propiedad
-                <select
-                  className="w-full rounded-xl border border-border bg-surface px-3.5 py-3 text-sm font-normal outline-none transition focus:border-primary focus:ring-2 focus:ring-primary-line"
-                  onChange={e => setForm({ ...form, propertyId: e.target.value })}
-                  value={form.propertyId}
-                >
-                  <option value="">Sin propiedad</option>
-                  {properties.map(property => (
-                    <option key={property.id} value={property.id}>
-                      {property.code} · {property.title}
-                    </option>
-                  ))}
-                </select>
-              </label>
-
-              <label className="grid gap-2 text-sm font-semibold text-fg-muted md:col-span-2">
-                Notas
-                <input
-                  className="w-full rounded-xl border border-border bg-surface px-3.5 py-3 text-sm font-normal outline-none transition placeholder:text-fg-subtle focus:border-primary focus:ring-2 focus:ring-primary-line"
-                  onChange={e => setForm({ ...form, notes: e.target.value })}
-                  placeholder="Observaciones adicionales..."
-                  value={form.notes}
-                />
-              </label>
-            </div>
-
-            {/* Footer con botones */}
-            <div className="mt-6 flex justify-end gap-3">
-              <button
-                className="rounded-xl border border-border bg-surface px-6 py-3 text-sm font-semibold text-fg-muted transition hover:bg-surface-muted"
-                onClick={handleClose}
-                type="button"
-              >
-                Cancelar
-              </button>
-              <button
-                className="rounded-xl bg-primary px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-indigo-900/20 transition hover:shadow-xl hover:shadow-indigo-900/30 disabled:cursor-not-allowed disabled:opacity-60"
-                disabled={saving}
-              >
-                {saving ? 'Subiendo...' : 'Guardar documento'}
-              </button>
-            </div>
-          </form>
+          <div className="grid gap-4 md:grid-cols-2">
+            <Select label="Tipo" onChange={e => setForm({ ...form, documentType: e.target.value })} options={documentTypeOptions} value={form.documentType} />
+            <Select label="Estado" onChange={e => setForm({ ...form, status: e.target.value })} options={statusOptions} value={form.status} />
+            <Select
+              label="Prospecto"
+              onChange={e => setForm({ ...form, leadId: e.target.value })}
+              options={leads.map(lead => ({ value: lead.id, label: `${lead.firstName} ${lead.lastName}` }))}
+              placeholder="Sin prospecto"
+              value={form.leadId}
+            />
+            <Select
+              label="Propiedad"
+              onChange={e => setForm({ ...form, propertyId: e.target.value })}
+              options={properties.map(property => ({ value: property.id, label: `${property.code} · ${property.title}` }))}
+              placeholder="Sin propiedad"
+              value={form.propertyId}
+            />
+            <Input containerClassName="md:col-span-2" label="Notas" onChange={e => setForm({ ...form, notes: e.target.value })} placeholder="Observaciones adicionales..." value={form.notes} />
+          </div>
+        </form>
       </Modal>
 
       <UpgradeModal

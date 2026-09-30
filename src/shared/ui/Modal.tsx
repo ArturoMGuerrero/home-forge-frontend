@@ -9,7 +9,7 @@ interface ModalProps {
   children: ReactNode;
   /** Botones de acción fijos al pie del modal. */
   footer?: ReactNode;
-  maxWidth?: 'sm' | 'md' | 'lg' | 'xl' | '2xl' | '3xl' | '4xl' | '5xl';
+  maxWidth?: 'sm' | 'md' | 'lg' | 'xl' | '2xl' | '3xl' | '4xl' | '5xl' | '7xl';
   showCloseButton?: boolean;
   noPadding?: boolean;
 }
@@ -23,6 +23,7 @@ const maxWidthClasses = {
   '3xl': 'sm:max-w-3xl',
   '4xl': 'sm:max-w-4xl',
   '5xl': 'sm:max-w-5xl',
+  '7xl': 'sm:max-w-7xl',
 };
 
 const focusableSelector = 'button:not(:disabled), [href], input:not(:disabled), select:not(:disabled), textarea:not(:disabled), [tabindex]:not([tabindex="-1"])';
