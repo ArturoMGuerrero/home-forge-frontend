@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import { getSession, logout, updateSessionSubscription } from '../modules/auth';
 import { Icon, IconName } from '../shared/Icon';
-import { ACCOUNT_PREFERENCES_EVENT, COMPANY_BRANDING_EVENT, getCompanyLogo, getSubscription, getUserAvatar, Subscription } from '../modules/settings';
+import { ACCOUNT_PREFERENCES_EVENT, COMPANY_BRANDING_EVENT, getCompanyLogo, getSubscription, getUserAvatar, Subscription, SUBSCRIPTION_CHANGED_EVENT } from '../modules/settings';
 import { SubscriptionBanner } from '../shared/SubscriptionBanner';
 import { useSubscriptionRestrictions } from '../shared/useSubscriptionRestrictions';
 import { Avatar, cn } from '../shared/ui';
@@ -43,6 +43,10 @@ export function PrivateLayout() {
         updateSessionSubscription(response.planCode, response.userLimit, response.status, response.trialEndsAt);
       })
       .catch(() => undefined);
+
+    const onChanged = (event: Event) => setSubscription((event as CustomEvent<Subscription>).detail);
+    window.addEventListener(SUBSCRIPTION_CHANGED_EVENT, onChanged);
+    return () => window.removeEventListener(SUBSCRIPTION_CHANGED_EVENT, onChanged);
   }, []);
 
   useEffect(() => {
