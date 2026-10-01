@@ -1,15 +1,18 @@
 import { InputHTMLAttributes } from 'react';
+import { cn } from './cn';
+import { fieldClass } from './fieldStyles';
 
 interface SearchInputProps extends InputHTMLAttributes<HTMLInputElement> {
   onClear?: () => void;
+  containerClassName?: string;
 }
 
-export function SearchInput({ onClear, value, className = '', ...props }: SearchInputProps) {
+export function SearchInput({ onClear, value, className, containerClassName, ...props }: SearchInputProps) {
   return (
-    <div className="relative">
+    <div className={cn('relative w-full', containerClassName)}>
       <svg
         aria-hidden="true"
-        className="pointer-events-none absolute left-3.5 top-1/2 size-5 -translate-y-1/2 text-slate-400"
+        className="pointer-events-none absolute left-3.5 top-1/2 size-4.5 -translate-y-1/2 text-fg-subtle"
         fill="none"
         stroke="currentColor"
         viewBox="0 0 24 24"
@@ -20,12 +23,7 @@ export function SearchInput({ onClear, value, className = '', ...props }: Search
       <input
         type="search"
         value={value}
-        className={`
-          w-full pl-11 pr-10 py-2.5 border border-[rgb(var(--border-color))] bg-[rgb(var(--input-bg))] rounded-xl text-sm
-          text-[rgb(var(--text-primary))] transition focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20
-          placeholder:text-[rgb(var(--text-tertiary))]
-          ${className}
-        `}
+        className={fieldClass(false, cn('pl-10 pr-10 [&::-webkit-search-cancel-button]:hidden', className))}
         {...props}
       />
 
@@ -34,9 +32,9 @@ export function SearchInput({ onClear, value, className = '', ...props }: Search
           aria-label="Limpiar búsqueda"
           type="button"
           onClick={onClear}
-          className="absolute right-2 top-1/2 grid size-8 -translate-y-1/2 place-items-center rounded-lg text-slate-400 transition hover:bg-slate-100 hover:text-slate-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
+          className="absolute right-1.5 top-1/2 grid size-8 -translate-y-1/2 place-items-center rounded-lg text-fg-subtle transition hover:bg-surface-sunken hover:text-fg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
         >
-          <svg className="size-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg aria-hidden="true" className="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
           </svg>
         </button>

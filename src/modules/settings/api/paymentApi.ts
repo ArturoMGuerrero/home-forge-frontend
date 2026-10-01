@@ -76,15 +76,3 @@ export function formatSubscriptionStatus(status: SubscriptionStatus): string {
   };
   return labels[status];
 }
-
-export function getSubscriptionStatusColor(status: SubscriptionStatus): string {
-  const colors: Record<SubscriptionStatus, string> = {
-    TRIAL: 'bg-blue-100 text-blue-800',
-    ACTIVE: 'bg-emerald-100 text-emerald-800',
-    PENDING: 'bg-amber-100 text-amber-800',
-    SUSPENDED: 'bg-rose-100 text-rose-800',
-    CANCELLED: 'bg-slate-100 text-slate-600',
-    EXPIRED: 'bg-rose-100 text-rose-800'
-  };
-  return colors[status];
-}

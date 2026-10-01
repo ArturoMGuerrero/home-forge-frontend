@@ -1,4 +1,5 @@
 import { ReactNode } from 'react';
+import { cn } from './cn';
 
 export interface Tab {
   id: string;
@@ -14,82 +15,74 @@ interface TabsProps {
   onChange: (tabId: string) => void;
   variant?: 'default' | 'pills' | 'underline' | 'cards';
   size?: 'sm' | 'md' | 'lg';
+  className?: string;
 }
 
-export function Tabs({ tabs, activeTab, onChange, variant = 'default', size = 'md' }: TabsProps) {
-  const sizeClasses = {
-    sm: 'text-xs px-3 py-1.5',
-    md: 'text-sm px-4 py-2.5',
-    lg: 'text-base px-5 py-3'
-  };
+const sizeClasses = {
+  sm: 'text-xs px-3 py-1.5',
+  md: 'text-sm px-3.5 py-2',
+  lg: 'text-base px-5 py-2.5',
+};
 
-  const variantClasses = {
-    default: {
-      container: 'border-b border-slate-200 overflow-x-auto overscroll-x-contain [scrollbar-width:thin]',
-      wrapper: 'flex gap-1',
-      tab: 'border-b-2 border-transparent hover:border-slate-300',
-      active: 'border-indigo-600 text-indigo-600 font-semibold',
-      inactive: 'text-slate-600 hover:text-slate-900'
-    },
-    pills: {
-      container: 'bg-slate-100 rounded-xl p-1 overflow-x-auto overscroll-x-contain [scrollbar-width:thin]',
-      wrapper: 'flex gap-1',
-      tab: 'rounded-lg transition-all',
-      active: 'bg-white shadow-sm text-slate-900 font-semibold',
-      inactive: 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
-    },
-    underline: {
-      container: 'border-b border-slate-200 overflow-x-auto overscroll-x-contain [scrollbar-width:thin]',
-      wrapper: 'flex gap-6',
-      tab: 'border-b-2 border-transparent pb-3 transition-colors',
-      active: 'border-indigo-600 text-indigo-600 font-semibold',
-      inactive: 'text-slate-500 hover:text-slate-700 hover:border-slate-300'
-    },
-    cards: {
-      container: 'overflow-x-auto overscroll-x-contain pb-1 [scrollbar-width:thin]',
-      wrapper: 'flex gap-2',
-      tab: 'rounded-xl border-2 transition-all shadow-sm',
-      active: 'border-indigo-500 bg-indigo-50 text-indigo-700 font-semibold shadow-md',
-      inactive: 'border-slate-200 bg-white text-slate-700 hover:border-slate-300 hover:bg-slate-50'
-    }
-  };
+// 'default' y 'underline' comparten estilo; 'cards' se conserva por compatibilidad como pills.
+const variantClasses = {
+  underline: {
+    container: 'border-b border-border',
+    wrapper: 'flex gap-1',
+    tab: 'rounded-none border-b-2 px-1 mx-2 first:ml-0',
+    active: 'border-primary text-primary-fg',
+    inactive: 'border-transparent text-fg-subtle hover:border-border-strong hover:text-fg',
+  },
+  pills: {
+    container: 'inline-flex max-w-full rounded-xl bg-surface-sunken p-1',
+    wrapper: 'flex gap-1',
+    tab: 'rounded-lg',
+    active: 'bg-surface text-fg shadow-sm',
+    inactive: 'text-fg-subtle hover:text-fg',
+  },
+};
 
-  const classes = variantClasses[variant];
+export function Tabs({ tabs, activeTab, onChange, variant = 'default', size = 'md', className }: TabsProps) {
+  const styles = variant === 'pills' || variant === 'cards' ? variantClasses.pills : variantClasses.underline;
 
   return (
-    <div className={classes.container}>
-      <div className={classes.wrapper}>
-        {tabs.map(tab => (
-          <button
-            key={tab.id}
-            onClick={() => onChange(tab.id)}
-            className={`${sizeClasses[size]} ${classes.tab} ${
-              activeTab === tab.id ? classes.active : classes.inactive
-            } flex items-center gap-2 transition-all whitespace-nowrap shrink-0`}
-            type="button"
-          >
-            {tab.icon}
-            <span>{tab.label}</span>
-            {tab.count !== undefined && (
-              <span
-                className={`${
-                  activeTab === tab.id
-                    ? variant === 'cards'
-                      ? 'bg-indigo-600 text-white'
-                      : 'bg-indigo-100 text-indigo-700'
-                    : 'bg-slate-200 text-slate-600'
-                } rounded-full px-2 py-0.5 text-xs font-semibold min-w-[1.5rem] text-center`}
-              >
-                {tab.count}
-              </span>
-            )}
-            {tab.badge && (
-              <span className="rounded-full bg-red-500 px-1.5 py-0.5 text-xs font-bold text-white">
-                {tab.badge}
-              </span>
-            )}
-          </button>
-        ))}
+    <div className={cn('overflow-x-auto overflow-y-hidden overscroll-x-contain', styles.container, className)}>
+      <div className={styles.wrapper} role="tablist">
+        {tabs.map(tab => {
+          const isActive = activeTab === tab.id;
+          return (
+            <button
+              aria-selected={isActive}
+              className={cn(
+                'flex shrink-0 items-center gap-2 whitespace-nowrap font-medium transition-colors',
+                'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary',
+                sizeClasses[size],
+                styles.tab,
+                isActive ? styles.active : styles.inactive,
+              )}
+              key={tab.id}
+              onClick={() => onChange(tab.id)}
+              role="tab"
+              type="button"
+            >
+              {tab.icon}
+              <span>{tab.label}</span>
+              {tab.count !== undefined && (
+                <span
+                  className={cn(
+                    'min-w-[1.5rem] rounded-full px-1.5 py-0.5 text-center text-xs font-semibold',
+                    isActive ? 'bg-primary-soft text-primary-fg' : 'bg-surface-sunken text-fg-subtle',
+                  )}
+                >
+                  {tab.count}
+                </span>
+              )}
+              {tab.badge && (
+                <span className="rounded-full bg-danger px-1.5 py-0.5 text-xs font-bold text-white">{tab.badge}</span>
+              )}
+            </button>
+          );
+        })}
       </div>
     </div>
   );

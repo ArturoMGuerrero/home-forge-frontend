@@ -1,223 +1,172 @@
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
+import toast from 'react-hot-toast';
 import {
   FollowUpTask,
   listFollowUpTasks,
   updateFollowUpTask,
   deleteFollowUpTask,
   taskTypeLabels,
-  taskStatusLabels,
   taskPriorityLabels,
   FollowUpTaskStatus
 } from '../api/followUpTasksApi';
-import { Button, Select, Spinner, Badge } from '../../../shared/ui';
+import { LeadsNav } from '../components/LeadsNav';
+import { ConfirmModal } from '../../../shared/ConfirmModal';
+import { Icon } from '../../../shared/Icon';
+import { Badge, BadgeVariant, Button, Card, cn, EmptyState, LoadingState, PageHeader, Select, Tabs } from '../../../shared/ui';
+
+type TaskFilter = 'ALL' | 'PENDING' | 'OVERDUE' | 'COMPLETED';
+
+const statusOptions = [
+  { value: 'PENDING', label: 'Pendiente' },
+  { value: 'IN_PROGRESS', label: 'En progreso' },
+  { value: 'COMPLETED', label: 'Completada' },
+  { value: 'CANCELLED', label: 'Cancelada' }
+];
+
+const priorityVariants: Record<string, BadgeVariant> = {
+  URGENT: 'error',
+  HIGH: 'warning',
+  MEDIUM: 'warning',
+  LOW: 'neutral'
+};
+
+function isOverdue(task: FollowUpTask) {
+  return (task.status === 'PENDING' || task.status === 'OVERDUE') && new Date(task.scheduledFor) < new Date();
+}
 
 export default function FollowUpTasksPage() {
   const [tasks, setTasks] = useState<FollowUpTask[]>([]);
   const [loading, setLoading] = useState(true);
-  const [filter, setFilter] = useState<'ALL' | 'PENDING' | 'OVERDUE' | 'COMPLETED'>('ALL');
+  const [filter, setFilter] = useState<TaskFilter>('ALL');
+  const [taskToDelete, setTaskToDelete] = useState<FollowUpTask | null>(null);
+  const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
-    loadTasks();
+    listFollowUpTasks()
+      .then(setTasks)
+      .catch(error => toast.error(error instanceof Error ? error.message : 'No fue posible cargar las tareas.'))
+      .finally(() => setLoading(false));
   }, []);
-
-  async function loadTasks() {
-    try {
-      const data = await listFollowUpTasks();
-      setTasks(data);
-    } catch (error) {
-      console.error('Error loading tasks:', error);
-    } finally {
-      setLoading(false);
-    }
-  }
 
   async function handleStatusChange(taskId: string, status: FollowUpTaskStatus) {
     try {
       await updateFollowUpTask(taskId, { status });
-      setTasks(prev =>
-        prev.map(t => (t.id === taskId ? { ...t, status } : t))
-      );
+      setTasks(prev => prev.map(t => (t.id === taskId ? { ...t, status } : t)));
     } catch (error) {
-      console.error('Error updating task:', error);
-      alert('Error al actualizar la tarea');
+      toast.error(error instanceof Error ? error.message : 'Error al actualizar la tarea');
     }
   }
 
-  async function handleDelete(taskId: string) {
-    if (!confirm('¿Eliminar esta tarea?')) return;
-
+  async function confirmDelete() {
+    if (!taskToDelete) return;
+    setDeleting(true);
     try {
-      await deleteFollowUpTask(taskId);
-      setTasks(prev => prev.filter(t => t.id !== taskId));
+      await deleteFollowUpTask(taskToDelete.id);
+      setTasks(prev => prev.filter(t => t.id !== taskToDelete.id));
+      toast.success('Tarea eliminada.');
+      setTaskToDelete(null);
     } catch (error) {
-      console.error('Error deleting task:', error);
-      alert('Error al eliminar la tarea');
+      toast.error(error instanceof Error ? error.message : 'Error al eliminar la tarea');
+    } finally {
+      setDeleting(false);
     }
   }
 
-  function getFilteredTasks() {
-    const now = new Date();
-    switch (filter) {
-      case 'PENDING':
-        return tasks.filter(t => t.status === 'PENDING');
-      case 'OVERDUE':
-        return tasks.filter(
-          t =>
-            (t.status === 'PENDING' || t.status === 'OVERDUE') &&
-            new Date(t.scheduledFor) < now
-        );
-      case 'COMPLETED':
-        return tasks.filter(t => t.status === 'COMPLETED');
-      default:
-        return tasks;
-    }
-  }
+  const counts = {
+    ALL: tasks.length,
+    PENDING: tasks.filter(t => t.status === 'PENDING').length,
+    OVERDUE: tasks.filter(isOverdue).length,
+    COMPLETED: tasks.filter(t => t.status === 'COMPLETED').length
+  };
 
-  const filteredTasks = getFilteredTasks();
-
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <Spinner size="lg" />
-      </div>
-    );
-  }
+  const filteredTasks = tasks.filter(task => {
+    if (filter === 'PENDING') return task.status === 'PENDING';
+    if (filter === 'OVERDUE') return isOverdue(task);
+    if (filter === 'COMPLETED') return task.status === 'COMPLETED';
+    return true;
+  });
 
   return (
-    <div className="p-6">
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">Tareas de Seguimiento</h1>
-        <p className="text-sm text-gray-500 mt-1">
-          Tareas automáticas creadas al cambiar el estado de los leads
-        </p>
-      </div>
+    <>
+      <PageHeader
+        subtitle="Tareas automáticas creadas al cambiar la etapa de los prospectos."
+        title="Tareas de seguimiento"
+      >
+        <LeadsNav />
+      </PageHeader>
 
-      <div className="flex gap-2 mb-6">
-        <Button
-          onClick={() => setFilter('ALL')}
-          variant={filter === 'ALL' ? 'primary' : 'secondary'}
-          size="sm"
-        >
-          Todas ({tasks.length})
-        </Button>
-        <Button
-          onClick={() => setFilter('PENDING')}
-          variant={filter === 'PENDING' ? 'primary' : 'secondary'}
-          size="sm"
-        >
-          Pendientes ({tasks.filter(t => t.status === 'PENDING').length})
-        </Button>
-        <Button
-          onClick={() => setFilter('OVERDUE')}
-          variant={filter === 'OVERDUE' ? 'primary' : 'secondary'}
-          size="sm"
-        >
-          Vencidas (
-          {
-            tasks.filter(
-              t =>
-                (t.status === 'PENDING' || t.status === 'OVERDUE') &&
-                new Date(t.scheduledFor) < new Date()
-            ).length
-          }
-          )
-        </Button>
-        <Button
-          onClick={() => setFilter('COMPLETED')}
-          variant={filter === 'COMPLETED' ? 'primary' : 'secondary'}
-          size="sm"
-        >
-          Completadas ({tasks.filter(t => t.status === 'COMPLETED').length})
-        </Button>
-      </div>
-
-      {filteredTasks.length === 0 ? (
-        <div className="text-center py-12 text-gray-500">
-          No hay tareas {filter !== 'ALL' ? taskStatusLabels[filter] : ''}.
-        </div>
+      {loading ? (
+        <Card><LoadingState message="Cargando tareas..." /></Card>
       ) : (
-        <div className="space-y-3">
-          {filteredTasks.map(task => {
-            const isOverdue =
-              (task.status === 'PENDING' || task.status === 'OVERDUE') &&
-              new Date(task.scheduledFor) < new Date();
+        <>
+          <Tabs
+            activeTab={filter}
+            className="mb-5"
+            onChange={id => setFilter(id as TaskFilter)}
+            tabs={[
+              { id: 'ALL', label: 'Todas', count: counts.ALL },
+              { id: 'PENDING', label: 'Pendientes', count: counts.PENDING },
+              { id: 'OVERDUE', label: 'Vencidas', count: counts.OVERDUE },
+              { id: 'COMPLETED', label: 'Completadas', count: counts.COMPLETED }
+            ]}
+            variant="pills"
+          />
 
-            return (
-              <div
-                key={task.id}
-                className={`bg-white rounded-lg border-2 p-4 ${
-                  isOverdue
-                    ? 'border-red-300 bg-red-50'
-                    : task.status === 'COMPLETED'
-                    ? 'border-green-200 bg-green-50'
-                    : 'border-gray-200'
-                }`}
-              >
-                <div className="flex items-start justify-between">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2">
-                      <h3 className="font-semibold text-gray-900">{task.title}</h3>
-                      <span
-                        className={`inline-block px-2 py-0.5 rounded text-xs font-medium ${
-                          task.priority === 'URGENT'
-                            ? 'bg-red-100 text-red-800'
-                            : task.priority === 'HIGH'
-                            ? 'bg-orange-100 text-orange-800'
-                            : task.priority === 'MEDIUM'
-                            ? 'bg-yellow-100 text-yellow-800'
-                            : 'bg-gray-100 text-gray-600'
-                        }`}
-                      >
-                        {taskPriorityLabels[task.priority]}
-                      </span>
-                      <span className="inline-block px-2 py-0.5 rounded text-xs bg-blue-100 text-blue-800">
-                        {taskTypeLabels[task.taskType]}
-                      </span>
-                    </div>
-                    {task.description && (
-                      <p className="text-sm text-gray-600 mt-1">{task.description}</p>
-                    )}
-                    <div className="text-xs text-gray-500 mt-2">
-                      Programada:{' '}
-                      {new Date(task.scheduledFor).toLocaleString('es-MX', {
-                        dateStyle: 'short',
-                        timeStyle: 'short'
-                      })}
-                      {isOverdue && (
-                        <span className="ml-2 text-red-600 font-medium">
-                          ¡Vencida!
-                        </span>
-                      )}
-                    </div>
-                  </div>
+          {filteredTasks.length === 0 ? (
+            <Card className="border-dashed">
+              <EmptyState icon={<Icon name="check" />} title={filter === 'ALL' ? 'No hay tareas de seguimiento' : 'No hay tareas en este filtro'} />
+            </Card>
+          ) : (
+            <div className="space-y-3">
+              {filteredTasks.map(task => {
+                const overdue = isOverdue(task);
+                return (
+                  <Card className={cn('p-4', overdue && 'border-danger-line', task.status === 'COMPLETED' && 'opacity-75')} key={task.id}>
+                    <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                      <div className="min-w-0 flex-1">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <h3 className={cn('font-semibold text-fg', task.status === 'COMPLETED' && 'line-through decoration-fg-subtle')}>{task.title}</h3>
+                          <Badge variant={priorityVariants[task.priority] ?? 'neutral'}>{taskPriorityLabels[task.priority]}</Badge>
+                          <Badge variant="info">{taskTypeLabels[task.taskType]}</Badge>
+                        </div>
+                        {task.description && <p className="mt-1 text-sm text-fg-muted">{task.description}</p>}
+                        <p className={cn('mt-2 text-xs', overdue ? 'font-medium text-danger-fg' : 'text-fg-subtle')}>
+                          {overdue ? 'Vencida · ' : 'Programada · '}
+                          {new Date(task.scheduledFor).toLocaleString('es-MX', { dateStyle: 'medium', timeStyle: 'short' })}
+                        </p>
+                      </div>
 
-                  <div className="flex items-center gap-2 ml-4">
-                    <Select
-                      value={task.status}
-                      onChange={e =>
-                        handleStatusChange(task.id, e.target.value as FollowUpTaskStatus)
-                      }
-                      className="py-1.5"
-                    >
-                      <option value="PENDING">Pendiente</option>
-                      <option value="IN_PROGRESS">En progreso</option>
-                      <option value="COMPLETED">Completada</option>
-                      <option value="CANCELLED">Cancelada</option>
-                    </Select>
-                    <Button
-                      onClick={() => handleDelete(task.id)}
-                      variant="danger-ghost"
-                      size="sm"
-                    >
-                      Eliminar
-                    </Button>
-                  </div>
-                </div>
-              </div>
-            );
-          })}
-        </div>
+                      <div className="flex items-center gap-2">
+                        <Select
+                          aria-label={`Estado de ${task.title}`}
+                          containerClassName="w-40"
+                          onChange={e => handleStatusChange(task.id, e.target.value as FollowUpTaskStatus)}
+                          options={statusOptions}
+                          value={task.status}
+                        />
+                        <Button aria-label={`Eliminar ${task.title}`} onClick={() => setTaskToDelete(task)} size="icon" variant="danger-ghost">
+                          <svg aria-hidden="true" className="size-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                          </svg>
+                        </Button>
+                      </div>
+                    </div>
+                  </Card>
+                );
+              })}
+            </div>
+          )}
+        </>
       )}
-    </div>
+
+      <ConfirmModal
+        isOpen={taskToDelete !== null}
+        loading={deleting}
+        message={<>Se eliminará la tarea <strong className="text-fg">{taskToDelete?.title}</strong>.</>}
+        onCancel={() => setTaskToDelete(null)}
+        onConfirm={confirmDelete}
+        title="¿Eliminar tarea?"
+      />
+    </>
   );
 }

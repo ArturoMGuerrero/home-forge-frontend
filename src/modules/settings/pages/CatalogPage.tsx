@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react';
-import { Link, Navigate, useParams } from 'react-router-dom';
+import { Navigate, useParams } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { CatalogItem, catalogLabels } from '../api/catalogs';
 import { getJson } from '../../../shared/services/api';
 import { getSubscription, Subscription } from '../api/subscriptionApi';
+import { Card, EmptyState, LoadingState, PageHeader, Table, TBody, TD, TH, THead, TR } from '../../../shared/ui';
 
 export function CatalogPage() {
   const { catalogName } = useParams();
@@ -32,32 +33,40 @@ export function CatalogPage() {
 
   return (
     <>
-      <header className="mb-8">
-        <Link className="text-sm font-semibold text-indigo-600" to="/app/configuracion">&lt;- Volver a configuración</Link>
-        <p className="mb-1 mt-5 text-[11px] font-bold uppercase tracking-[0.16em] text-indigo-600">Catálogo</p>
-        <h1 className="text-3xl font-bold">{definition?.es ?? catalogName}</h1>
-        <p className="mt-2 text-sm text-slate-500">{definition?.description}</p>
-      </header>
+      <PageHeader
+        backLink={{ to: '/app/configuracion', label: 'Configuración' }}
+        badge={loading ? undefined : { value: items.length, label: 'elementos' }}
+        eyebrow="Catálogo"
+        subtitle={definition?.description}
+        title={definition?.es ?? catalogName}
+      />
 
-      {loading && <p className="rounded-2xl border border-slate-200 bg-white p-8 text-center text-sm text-slate-500">Consultando catálogo...</p>}
-
-      {!loading && (
-        <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-          <div className="grid grid-cols-[.7fr_1fr_1fr] gap-4 border-b border-slate-200 bg-slate-50 px-5 py-3 text-xs font-bold uppercase tracking-wide text-slate-500">
-            <span>Código</span>
-            <span>Español</span>
-            <span>Inglés</span>
-          </div>
-          {items.map(item => (
-            <article className="grid grid-cols-[.7fr_1fr_1fr] gap-4 border-b border-slate-100 px-5 py-4 text-sm last:border-0" key={item.code}>
-              <code className="font-semibold text-indigo-700">{item.code}</code>
-              <span>{item.labelEs}</span>
-              <span className="text-slate-500">{item.labelEn}</span>
-            </article>
-          ))}
-          {items.length === 0 && <p className="p-8 text-center text-sm text-slate-500">Este catálogo no contiene elementos.</p>}
-        </div>
-      )}
+      <Card noPadding truncate>
+        {loading ? (
+          <LoadingState message="Consultando catálogo..." />
+        ) : items.length === 0 ? (
+          <EmptyState title="Este catálogo no contiene elementos" />
+        ) : (
+          <Table>
+            <THead>
+              <tr>
+                <TH>Código</TH>
+                <TH>Español</TH>
+                <TH>Inglés</TH>
+              </tr>
+            </THead>
+            <TBody>
+              {items.map(item => (
+                <TR key={item.code}>
+                  <TD><code className="rounded bg-surface-sunken px-1.5 py-0.5 text-xs font-semibold text-fg">{item.code}</code></TD>
+                  <TD className="text-fg">{item.labelEs}</TD>
+                  <TD className="text-fg-subtle">{item.labelEn}</TD>
+                </TR>
+              ))}
+            </TBody>
+          </Table>
+        )}
+      </Card>
     </>
   );
 }

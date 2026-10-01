@@ -1,3 +1,5 @@
+import { cn } from './cn';
+
 type SpinnerSize = 'xs' | 'sm' | 'md' | 'lg' | 'xl';
 
 interface SpinnerProps {
@@ -13,13 +15,9 @@ const sizeClasses: Record<SpinnerSize, string> = {
   xl: 'size-12',
 };
 
-export function Spinner({ size = 'md', className = '' }: SpinnerProps) {
+export function Spinner({ size = 'md', className }: SpinnerProps) {
   return (
-    <svg
-      className={`animate-spin ${sizeClasses[size]} ${className}`}
-      fill="none"
-      viewBox="0 0 24 24"
-    >
+    <svg aria-hidden="true" className={cn('animate-spin', sizeClasses[size], className)} fill="none" viewBox="0 0 24 24">
       <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
       <path
         className="opacity-75"
@@ -30,33 +28,39 @@ export function Spinner({ size = 'md', className = '' }: SpinnerProps) {
   );
 }
 
-// Loading overlay para páginas completas
 interface LoadingOverlayProps {
   message?: string;
 }
 
+/** Bloquea la pantalla completa mientras se procesa algo. */
 export function LoadingOverlay({ message = 'Cargando...' }: LoadingOverlayProps) {
   return (
-    <div className="app-modal-backdrop fixed inset-0 z-50 flex items-center justify-center p-4">
-      <div className="app-modal flex flex-col items-center gap-4 rounded-2xl border px-8 py-7">
-        <Spinner size="xl" className="text-indigo-600" />
-        <p className="text-sm font-medium text-slate-600">{message}</p>
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-overlay p-4 backdrop-blur-[2px]" role="status">
+      <div className="flex flex-col items-center gap-4 rounded-2xl border border-border bg-surface px-8 py-7 shadow-pop">
+        <Spinner size="xl" className="text-primary" />
+        <p className="text-sm font-medium text-fg-muted">{message}</p>
       </div>
     </div>
   );
 }
 
-// Loading para secciones
 interface LoadingStateProps {
   message?: string;
   size?: SpinnerSize;
+  className?: string;
 }
 
-export function LoadingState({ message = 'Cargando...', size = 'lg' }: LoadingStateProps) {
+/** Estado de carga para una sección o página. */
+export function LoadingState({ message = 'Cargando...', size = 'lg', className }: LoadingStateProps) {
   return (
-    <div className="flex flex-col items-center justify-center py-16 gap-4">
-      <Spinner size={size} className="text-indigo-600" />
-      <p className="text-sm text-slate-500">{message}</p>
+    <div className={cn('flex flex-col items-center justify-center gap-3 py-16', className)} role="status">
+      <Spinner size={size} className="text-primary" />
+      <p className="text-sm text-fg-subtle">{message}</p>
     </div>
   );
+}
+
+/** Bloque gris animado para esqueletos de carga. */
+export function Skeleton({ className }: { className?: string }) {
+  return <div aria-hidden="true" className={cn('animate-pulse rounded-lg bg-surface-sunken', className)} />;
 }

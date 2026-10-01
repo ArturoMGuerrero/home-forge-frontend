@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import {
@@ -11,7 +11,7 @@ import {
   templateCategoryLabels,
   MessageTemplate
 } from '../api/notificationsApi';
-import { PageHeader } from '../../../shared/ui/PageHeader';
+import { Alert, Button, Card, Checkbox, Input, LoadingState, PageHeader, Select, Textarea } from '../../../shared/ui';
 
 export default function TemplateEditorPage() {
   const navigate = useNavigate();
@@ -20,7 +20,8 @@ export default function TemplateEditorPage() {
 
   const [loading, setLoading] = useState(isEditing);
   const [saving, setSaving] = useState(false);
-  const [template, setTemplate] = useState<MessageTemplate | null>(null);
+  const [, setTemplate] = useState<MessageTemplate | null>(null);
+  const contentRef = useRef<HTMLTextAreaElement>(null);
 
   const [formData, setFormData] = useState({
     name: '',
@@ -54,8 +55,7 @@ export default function TemplateEditorPage() {
         isDefault: data.isDefault
       });
     } catch (error) {
-      console.error('Error loading template:', error);
-      toast.error('Error al cargar la plantilla');
+      toast.error(error instanceof Error ? error.message : 'Error al cargar la plantilla');
     } finally {
       setLoading(false);
     }
@@ -75,34 +75,30 @@ export default function TemplateEditorPage() {
       }
       navigate('/app/notificaciones/plantillas');
     } catch (error) {
-      console.error('Error saving template:', error);
-      toast.error('Error al guardar la plantilla');
+      toast.error(error instanceof Error ? error.message : 'Error al guardar la plantilla');
     } finally {
       setSaving(false);
     }
   }
 
-  function handleChange(field: string, value: any) {
+  function handleChange<K extends keyof typeof formData>(field: K, value: (typeof formData)[K]) {
     setFormData(prev => ({ ...prev, [field]: value }));
   }
 
   function insertVariable(variable: string) {
-    const textarea = document.querySelector('textarea[name="content"]') as HTMLTextAreaElement;
-    if (textarea) {
-      const start = textarea.selectionStart;
-      const end = textarea.selectionEnd;
-      const text = formData.content;
-      const before = text.substring(0, start);
-      const after = text.substring(end);
-      const newContent = before + `{{${variable}}}` + after;
-      handleChange('content', newContent);
+    const textarea = contentRef.current;
+    if (!textarea) return;
+    const start = textarea.selectionStart;
+    const end = textarea.selectionEnd;
+    const token = `{{${variable}}}`;
+    const text = formData.content;
+    handleChange('content', text.substring(0, start) + token + text.substring(end));
 
-      // Restore cursor position
-      setTimeout(() => {
-        textarea.focus();
-        textarea.setSelectionRange(start + variable.length + 4, start + variable.length + 4);
-      }, 0);
-    }
+    // Restaurar la posición del cursor después del token insertado
+    setTimeout(() => {
+      textarea.focus();
+      textarea.setSelectionRange(start + token.length, start + token.length);
+    }, 0);
   }
 
   const commonVariables = [
@@ -119,196 +115,127 @@ export default function TemplateEditorPage() {
   ];
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <div className="animate-pulse text-slate-500">Cargando plantilla...</div>
-      </div>
-    );
+    return <Card><LoadingState message="Cargando plantilla..." /></Card>;
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
+    <div className="mx-auto max-w-4xl">
       <PageHeader
-        title={isEditing ? 'Editar Plantilla' : 'Nueva Plantilla'}
+        backLink={{ to: '/app/notificaciones/plantillas', label: 'Plantillas' }}
         subtitle="Crea plantillas reutilizables con variables dinámicas"
-        backLink={{ to: '/app/notificaciones/plantillas', label: 'Volver a Plantillas' }}
+        title={isEditing ? 'Editar plantilla' : 'Nueva plantilla'}
       />
 
-      <div className="p-4 lg:p-6">
-        <form onSubmit={handleSubmit} className="max-w-4xl mx-auto">
-          <div className="bg-white rounded-xl border border-slate-200 p-6 space-y-6">
-            {/* Información básica */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">
-                  Nombre de la plantilla *
-                </label>
-                <input
-                  type="text"
-                  required
-                  disabled={isEditing}
-                  value={formData.name}
-                  onChange={e => handleChange('name', e.target.value)}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent disabled:bg-slate-100 disabled:cursor-not-allowed"
-                  placeholder="Ej: Bienvenida a nuevo prospecto"
-                />
-              </div>
+      <form onSubmit={handleSubmit}>
+        <Card className="space-y-6">
+          {isEditing && (
+            <Alert variant="info">Al editar una plantilla existente solo se puede modificar el contenido del mensaje.</Alert>
+          )}
 
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Categoría</label>
-                <select
-                  disabled={isEditing}
-                  value={formData.category}
-                  onChange={e => handleChange('category', e.target.value as MessageTemplateCategory)}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent disabled:bg-slate-100 disabled:cursor-not-allowed"
-                >
-                  {Object.entries(templateCategoryLabels).map(([key, label]) => (
-                    <option key={key} value={key}>
-                      {label}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            </div>
+          <div className="grid gap-4 md:grid-cols-2">
+            <Input
+              disabled={isEditing}
+              label="Nombre de la plantilla"
+              onChange={e => handleChange('name', e.target.value)}
+              placeholder="Ej: Bienvenida a nuevo prospecto"
+              required
+              value={formData.name}
+            />
+            <Select
+              disabled={isEditing}
+              label="Categoría"
+              onChange={e => handleChange('category', e.target.value as MessageTemplateCategory)}
+              options={Object.entries(templateCategoryLabels).map(([value, label]) => ({ value, label }))}
+              value={formData.category}
+            />
+          </div>
 
-            <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">Descripción</label>
-              <input
-                type="text"
+          <Input
+            disabled={isEditing}
+            label="Descripción"
+            onChange={e => handleChange('description', e.target.value)}
+            placeholder="Describe el propósito de esta plantilla"
+            value={formData.description}
+          />
+
+          <div className="grid gap-4 md:grid-cols-2 md:items-end">
+            <Select
+              disabled={isEditing}
+              label="Tipo de notificación"
+              onChange={e => {
+                const type = e.target.value as NotificationType;
+                handleChange('templateType', type);
+                handleChange('channel', type);
+              }}
+              options={Object.entries(notificationTypeLabels).map(([value, label]) => ({ value, label }))}
+              required
+              value={formData.templateType}
+            />
+            <div className="pb-1">
+              <Checkbox
+                checked={formData.isDefault}
+                description="Se usará automáticamente para este tipo de notificación"
                 disabled={isEditing}
-                value={formData.description}
-                onChange={e => handleChange('description', e.target.value)}
-                className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent disabled:bg-slate-100 disabled:cursor-not-allowed"
-                placeholder="Describe el propósito de esta plantilla"
+                label="Plantilla por defecto"
+                onChange={e => handleChange('isDefault', e.target.checked)}
               />
-            </div>
-
-            {/* Tipo y canal */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">
-                  Tipo de notificación *
-                </label>
-                <select
-                  required
-                  disabled={isEditing}
-                  value={formData.templateType}
-                  onChange={e => {
-                    const type = e.target.value as NotificationType;
-                    handleChange('templateType', type);
-                    handleChange('channel', type);
-                  }}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent disabled:bg-slate-100 disabled:cursor-not-allowed"
-                >
-                  {Object.entries(notificationTypeLabels).map(([key, label]) => (
-                    <option key={key} value={key}>
-                      {label}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div>
-                <label className="flex items-center gap-2 text-sm font-medium text-slate-700 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    disabled={isEditing}
-                    checked={formData.isDefault}
-                    onChange={e => handleChange('isDefault', e.target.checked)}
-                    className="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 disabled:cursor-not-allowed"
-                  />
-                  Plantilla por defecto
-                </label>
-                <p className="text-xs text-slate-500 mt-1">
-                  Se usará automáticamente para este tipo de notificación
-                </p>
-              </div>
-            </div>
-
-            {/* Asunto (solo para emails) */}
-            {formData.templateType === 'EMAIL' && (
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">
-                  Asunto del email *
-                </label>
-                <input
-                  type="text"
-                  required={formData.templateType === 'EMAIL'}
-                  value={formData.subject}
-                  onChange={e => handleChange('subject', e.target.value)}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-                  placeholder="Ej: ¡Bienvenido {{leadName}}!"
-                />
-              </div>
-            )}
-
-            {/* Variables disponibles */}
-            <div className="border-t border-slate-200 pt-4">
-              <label className="block text-sm font-medium text-slate-700 mb-2">
-                Variables disponibles
-              </label>
-              <div className="flex flex-wrap gap-2">
-                {commonVariables.map(variable => (
-                  <button
-                    key={variable}
-                    type="button"
-                    onClick={() => insertVariable(variable)}
-                    className="px-3 py-1.5 bg-indigo-50 text-indigo-700 rounded-lg hover:bg-indigo-100 transition-colors text-sm font-mono"
-                  >
-                    {`{{${variable}}}`}
-                  </button>
-                ))}
-              </div>
-              <p className="text-xs text-slate-500 mt-2">
-                Haz clic en una variable para insertarla en el contenido
-              </p>
-            </div>
-
-            {/* Contenido */}
-            <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">
-                Contenido del mensaje *
-              </label>
-              <textarea
-                name="content"
-                required
-                value={formData.content}
-                onChange={e => handleChange('content', e.target.value)}
-                rows={12}
-                className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent font-mono text-sm"
-                placeholder={
-                  formData.templateType === 'EMAIL'
-                    ? 'Hola {{leadName}},\n\nGracias por tu interés en {{propertyAddress}}...'
-                    : formData.templateType === 'WHATSAPP'
-                    ? 'Hola {{leadFirstName}} 👋\n\nTe escribo de {{companyName}}...'
-                    : 'Escribe el contenido de tu mensaje aquí...'
-                }
-              />
-              <p className="text-xs text-slate-500 mt-1">
-                Usa variables como {'{{leadName}}'} para personalizar el mensaje
-              </p>
-            </div>
-
-            {/* Botones */}
-            <div className="flex gap-3 pt-4 border-t border-slate-200">
-              <button
-                type="button"
-                onClick={() => navigate('/app/notificaciones/plantillas')}
-                className="px-4 py-2 border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50 transition-colors font-medium"
-              >
-                Cancelar
-              </button>
-              <button
-                type="submit"
-                disabled={saving}
-                className="px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {saving ? 'Guardando...' : isEditing ? 'Actualizar plantilla' : 'Crear plantilla'}
-              </button>
             </div>
           </div>
-        </form>
-      </div>
+
+          {formData.templateType === 'EMAIL' && (
+            <Input
+              label="Asunto del email"
+              onChange={e => handleChange('subject', e.target.value)}
+              placeholder="Ej: ¡Bienvenido {{leadName}}!"
+              required
+              value={formData.subject}
+            />
+          )}
+
+          <div className="border-t border-border pt-5">
+            <p className="mb-2 text-sm font-semibold text-fg-muted">Variables disponibles</p>
+            <div className="flex flex-wrap gap-2">
+              {commonVariables.map(variable => (
+                <button
+                  className="rounded-lg bg-primary-soft px-2.5 py-1 font-mono text-xs text-primary-fg ring-1 ring-inset ring-primary-line transition hover:bg-primary-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                  key={variable}
+                  onClick={() => insertVariable(variable)}
+                  type="button"
+                >
+                  {`{{${variable}}}`}
+                </button>
+              ))}
+            </div>
+            <p className="mt-2 text-xs text-fg-subtle">Haz clic en una variable para insertarla donde está el cursor.</p>
+          </div>
+
+          <Textarea
+            className="font-mono"
+            helperText="Usa variables como {{leadName}} para personalizar el mensaje."
+            label="Contenido del mensaje"
+            name="content"
+            onChange={e => handleChange('content', e.target.value)}
+            placeholder={
+              formData.templateType === 'EMAIL'
+                ? 'Hola {{leadName}},\n\nGracias por tu interés en {{propertyAddress}}...'
+                : formData.templateType === 'WHATSAPP'
+                ? 'Hola {{leadFirstName}} 👋\n\nTe escribo de {{companyName}}...'
+                : 'Escribe el contenido de tu mensaje aquí...'
+            }
+            ref={contentRef}
+            required
+            rows={12}
+            value={formData.content}
+          />
+
+          <div className="flex flex-col-reverse gap-2 border-t border-border pt-5 sm:flex-row sm:justify-end">
+            <Button onClick={() => navigate('/app/notificaciones/plantillas')} variant="tertiary">Cancelar</Button>
+            <Button loading={saving} type="submit">
+              {saving ? 'Guardando...' : isEditing ? 'Actualizar plantilla' : 'Crear plantilla'}
+            </Button>
+          </div>
+        </Card>
+      </form>
     </div>
   );
 }

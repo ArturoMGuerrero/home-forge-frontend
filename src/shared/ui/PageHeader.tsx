@@ -2,8 +2,10 @@ import { ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 
 interface PageHeaderProps {
-  title: string;
-  subtitle?: string;
+  title: ReactNode;
+  subtitle?: ReactNode;
+  /** Texto corto sobre el título, p. ej. el nombre del módulo. */
+  eyebrow?: string;
   backLink?: {
     to: string;
     label?: string;
@@ -16,47 +18,40 @@ interface PageHeaderProps {
   children?: ReactNode;
 }
 
-export function PageHeader({ title, subtitle, backLink, badge, actions, children }: PageHeaderProps) {
+export function PageHeader({ title, subtitle, eyebrow, backLink, badge, actions, children }: PageHeaderProps) {
   return (
-    <div className="sticky top-0 z-10 border-b border-[rgb(var(--border-color))] bg-[rgb(var(--card-bg))]/95 shadow-sm backdrop-blur">
-      <div className="px-4 py-4 lg:px-6">
-        {/* Top bar */}
-        <div className="mb-4 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <div className="flex items-center gap-3 min-w-0 flex-1">
-            {backLink && (
-              <>
-                <Link
-                  to={backLink.to}
-                  className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100 hover:text-slate-900 transition shrink-0"
-                >
-                  <svg className="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                  </svg>
-                  <span className="hidden sm:inline">{backLink.label || 'Volver'}</span>
-                </Link>
-                <div className="h-6 w-px bg-slate-200 shrink-0" />
-              </>
-            )}
-            <div className="min-w-0">
-              <h1 className="text-xl lg:text-2xl font-bold text-slate-900 truncate">{title}</h1>
-              {subtitle && <p className="text-xs text-slate-500 mt-0.5 truncate">{subtitle}</p>}
-            </div>
-          </div>
+    <header className="mb-6 sm:mb-8">
+      {backLink && (
+        <Link
+          className="mb-3 inline-flex items-center gap-1.5 rounded-lg text-sm font-medium text-fg-subtle transition hover:text-fg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+          to={backLink.to}
+        >
+          <svg aria-hidden="true" className="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+          </svg>
+          {backLink.label || 'Volver'}
+        </Link>
+      )}
 
-          <div className="flex min-w-0 flex-wrap items-center gap-2 sm:shrink-0 sm:justify-end sm:gap-3">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+        <div className="min-w-0">
+          {eyebrow && <p className="mb-1 text-xs font-semibold uppercase tracking-[0.14em] text-primary-fg">{eyebrow}</p>}
+          <div className="flex flex-wrap items-center gap-3">
+            <h1 className="text-2xl font-bold tracking-tight text-fg sm:text-3xl">{title}</h1>
             {badge && (
-              <div className="rounded-xl border border-[rgb(var(--border-color))] bg-[rgb(var(--input-bg))] px-3 py-2 sm:px-4">
-                <span className="text-lg font-bold text-slate-900">{badge.value}</span>
-                <span className="text-xs text-slate-500 ml-1.5">{badge.label}</span>
-              </div>
+              <span className="inline-flex items-baseline gap-1 rounded-full bg-surface-sunken px-2.5 py-0.5 text-sm">
+                <span className="font-semibold text-fg">{badge.value}</span>
+                <span className="text-fg-subtle">{badge.label}</span>
+              </span>
             )}
-            {actions}
           </div>
+          {subtitle && <p className="mt-1.5 max-w-2xl text-sm text-fg-subtle">{subtitle}</p>}
         </div>
 
-        {/* Custom content (like tabs) */}
-        {children}
+        {actions && <div className="flex min-w-0 flex-wrap items-center gap-2 sm:shrink-0 sm:justify-end">{actions}</div>}
       </div>
-    </div>
+
+      {children && <div className="mt-5">{children}</div>}
+    </header>
   );
 }

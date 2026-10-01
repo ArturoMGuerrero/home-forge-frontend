@@ -3,8 +3,7 @@ import type { ChangeEvent } from 'react';
 import * as XLSX from 'xlsx';
 import toast from 'react-hot-toast';
 import { createLead, CreateLeadPayload, LeadItem } from '../api/leadsApi';
-import { Modal } from '../../../shared/ui/Modal';
-import { Button } from '../../../shared/ui/Button';
+import { Badge, Button, Modal, StatCard, TBody, TD, TH, TR } from '../../../shared/ui';
 import { Icon } from '../../../shared/Icon';
 
 type Props = {
@@ -142,43 +141,58 @@ export function ImportLeadsModal({ existingLeads, onClose, onImported, open }: P
   }
 
   return (
-    <Modal isOpen={open} maxWidth="5xl" noPadding onClose={handleClose} subtitle="CSV, XLS o XLSX · los duplicados no se importarán" title="Importar prospectos">
-      <div className="space-y-5 p-4 sm:p-6">
+    <Modal
+      footer={
+        <>
+          <Button disabled={importing} onClick={handleClose} variant="tertiary">Cancelar</Button>
+          <Button disabled={!readyRows.length} loading={importing} onClick={importRows}>{importing ? `Importando ${progress} de ${readyRows.length}` : `Importar ${readyRows.length} prospectos`}</Button>
+        </>
+      }
+      isOpen={open}
+      maxWidth="5xl"
+      onClose={handleClose}
+      subtitle="CSV, XLS o XLSX · los duplicados no se importarán"
+      title="Importar prospectos"
+    >
+      <div className="space-y-5">
         <input accept=".csv,.xls,.xlsx" className="hidden" onChange={selectFile} ref={inputRef} type="file" />
-        <button className="flex w-full flex-col items-center justify-center rounded-2xl border-2 border-dashed border-slate-300 bg-slate-50 px-5 py-8 text-center transition hover:border-indigo-400 hover:bg-indigo-50" onClick={() => inputRef.current?.click()} type="button">
-          <span className="grid size-12 place-items-center rounded-2xl bg-indigo-100 text-indigo-700"><Icon className="size-6" name="upload" /></span>
-          <strong className="mt-3 text-slate-900">{fileName || 'Seleccionar archivo'}</strong>
-          <span className="mt-1 text-sm text-slate-500">Columnas: Nombre, Apellidos, Correo, Teléfono, Operación, Presupuesto, Moneda y Ciudad.</span>
+        <button className="flex w-full flex-col items-center justify-center rounded-xl border-2 border-dashed border-border-strong bg-surface-muted px-5 py-8 text-center transition hover:border-primary hover:bg-primary-soft focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary" onClick={() => inputRef.current?.click()} type="button">
+          <span className="grid size-12 place-items-center rounded-xl bg-primary-soft text-primary-fg"><Icon className="size-6" name="upload" /></span>
+          <strong className="mt-3 font-semibold text-fg">{fileName || 'Seleccionar archivo'}</strong>
+          <span className="mt-1 text-sm text-fg-subtle">Columnas: Nombre, Apellidos, Correo, Teléfono, Operación, Presupuesto, Moneda y Ciudad.</span>
         </button>
 
         {rows.length > 0 && (
           <>
             <div className="grid gap-3 sm:grid-cols-3">
-              <Summary label="Listos" tone="emerald" value={readyRows.length} />
-              <Summary label="Duplicados" tone="amber" value={rows.filter(row => row.duplicate).length} />
-              <Summary label="Con errores" tone="rose" value={rows.filter(row => row.issue).length} />
+              <StatCard label="Listos" tone="success" value={readyRows.length} />
+              <StatCard label="Duplicados" tone="warning" value={rows.filter(row => row.duplicate).length} />
+              <StatCard label="Con errores" tone="danger" value={rows.filter(row => row.issue).length} />
             </div>
-            <div className="max-h-80 overflow-auto rounded-2xl border border-slate-200">
+            <div className="max-h-80 overflow-auto rounded-xl border border-border">
               <table className="w-full min-w-[760px] text-left text-sm">
-                <thead className="sticky top-0 bg-slate-100 text-xs uppercase tracking-wide text-slate-600"><tr><th className="p-3">Fila</th><th className="p-3">Prospecto</th><th className="p-3">Contacto</th><th className="p-3">Operación</th><th className="p-3">Ciudad</th><th className="p-3">Estado</th></tr></thead>
-                <tbody className="divide-y divide-slate-100">
-                  {rows.slice(0, 100).map(row => <tr key={row.rowNumber} className="bg-white"><td className="p-3 text-slate-500">{row.rowNumber}</td><td className="p-3 font-semibold">{row.firstName} {row.lastName}</td><td className="p-3 text-slate-600"><span className="block">{row.email || '—'}</span><span>{row.phoneE164 || '—'}</span></td><td className="p-3">{row.listingType === 'RENT' ? 'Renta' : 'Venta'}</td><td className="p-3">{row.city || '—'}</td><td className="p-3">{row.issue ? <span className="text-rose-600">{row.issue}</span> : row.duplicate ? <span className="text-amber-600">Duplicado</span> : <span className="text-emerald-600">Listo</span>}</td></tr>)}
-                </tbody>
+                <thead className="sticky top-0 z-10 border-b border-border bg-surface-muted">
+                  <tr>{['Fila', 'Prospecto', 'Contacto', 'Operación', 'Ciudad', 'Estado'].map(label => <TH key={label}>{label}</TH>)}</tr>
+                </thead>
+                <TBody>
+                  {rows.slice(0, 100).map(row => (
+                    <TR key={row.rowNumber}>
+                      <TD className="text-fg-subtle">{row.rowNumber}</TD>
+                      <TD className="font-medium text-fg">{row.firstName} {row.lastName}</TD>
+                      <TD><span className="block">{row.email || '—'}</span><span>{row.phoneE164 || '—'}</span></TD>
+                      <TD>{row.listingType === 'RENT' ? 'Renta' : 'Venta'}</TD>
+                      <TD>{row.city || '—'}</TD>
+                      <TD>{row.issue ? <Badge variant="error">{row.issue}</Badge> : row.duplicate ? <Badge variant="warning">Duplicado</Badge> : <Badge variant="success">Listo</Badge>}</TD>
+                    </TR>
+                  ))}
+                </TBody>
               </table>
             </div>
           </>
         )}
 
-        <div className="flex flex-col-reverse gap-3 border-t border-slate-200 pt-5 sm:flex-row sm:justify-end">
-          <Button disabled={importing} onClick={handleClose} variant="ghost">Cancelar</Button>
-          <Button disabled={!readyRows.length} loading={importing} onClick={importRows}>{importing ? `Importando ${progress} de ${readyRows.length}` : `Importar ${readyRows.length} prospectos`}</Button>
-        </div>
       </div>
     </Modal>
   );
 }
 
-function Summary({ label, tone, value }: { label: string; tone: 'emerald' | 'amber' | 'rose'; value: number }) {
-  const colors = { emerald: 'border-emerald-200 bg-emerald-50 text-emerald-800', amber: 'border-amber-200 bg-amber-50 text-amber-800', rose: 'border-rose-200 bg-rose-50 text-rose-800' };
-  return <div className={`rounded-xl border p-3 ${colors[tone]}`}><strong className="text-xl">{value}</strong><span className="ml-2 text-sm font-semibold">{label}</span></div>;
-}

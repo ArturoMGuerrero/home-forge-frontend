@@ -1,10 +1,11 @@
-import { useEffect, useState } from 'react';
+import { ReactNode, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { CatalogIndex, catalogLabels, primaryCatalogs, workflowCatalogs } from '../api/catalogs';
 import { Icon, IconName } from '../../../shared/Icon';
 import { getJson } from '../../../shared/services/api';
 import { getSubscription, Subscription } from '../api/subscriptionApi';
+import { Badge, buttonClasses, Card, cardClass, cn, LoadingState, PageHeader } from '../../../shared/ui';
 
 const catalogIcons: Record<string, IconName> = {
   'lead-sources': 'leads',
@@ -27,7 +28,7 @@ export function SettingsPage() {
         setCatalogs(response.catalogs);
         setSubscription(subscriptionResponse);
       })
-      .catch(() => toast.error('No fue posible consultar la configuración del backend.'))
+      .catch(() => toast.error('No fue posible consultar la configuración.'))
       .finally(() => setLoading(false));
   }, []);
 
@@ -37,54 +38,66 @@ export function SettingsPage() {
 
   return (
     <>
-      <header className="mb-8">
-        <p className="mb-1 text-[11px] font-bold uppercase tracking-[0.16em] text-indigo-600">Administración</p>
-        <h1 className="text-3xl font-bold">Configuración</h1>
-        <p className="mt-2 text-sm text-slate-500">Administra la empresa, el equipo, tu cuenta, el plan y los catálogos desde un solo lugar.</p>
-      </header>
+      <PageHeader
+        eyebrow="Administración"
+        subtitle="Administra la empresa, el equipo, tu cuenta, el plan y los catálogos desde un solo lugar."
+        title="Configuración"
+      />
 
       <section className="mb-10">
-        <div className="mb-5"><h2 className="text-xl font-bold">Centro de configuración</h2><p className="mt-1 text-sm text-slate-500">Elige qué área deseas administrar.</p></div>
         <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
           <SettingsLink description="Logo, datos comerciales y perfil público." icon="properties" label="Empresa" to="/app/configuracion/empresa" />
           <SettingsLink description="Usuarios, equipos, roles y actividad." icon="users" label="Equipo y usuarios" to="/app/usuarios" />
           <SettingsLink description="Avatar, seguridad y apariencia personal." icon="user" label="Mi cuenta" to="/app/cuenta" />
           <SettingsLink description="Suscripción, límites y estado de pago." icon="plans" label="Plan y facturación" to="/app/planes" />
         </div>
-        <Link className="mt-4 flex items-center justify-between rounded-2xl border border-indigo-200 bg-indigo-50 p-5 text-indigo-950 transition hover:border-indigo-400 hover:shadow-sm" to="/app/configuracion/asignacion"><div><h3 className="font-bold">Asignación automática</h3><p className="mt-1 text-sm text-indigo-700">Distribuye prospectos por turnos, carga, ciudad, operación y presupuesto.</p></div><Icon className="size-5 shrink-0" name="arrow" /></Link>
-        <Link className="mt-3 flex items-center justify-between rounded-2xl border border-emerald-200 bg-emerald-50 p-5 text-emerald-950 transition hover:border-emerald-400 hover:shadow-sm" to="/app/prospectos/tareas"><div><div className="flex flex-wrap items-center gap-2"><h3 className="font-bold">Seguimientos automáticos</h3><span className="rounded-full bg-emerald-200 px-2 py-0.5 text-[10px] font-bold text-emerald-800">ACTIVOS</span></div><p className="mt-1 text-sm text-emerald-700">Primer contacto, alerta a las 24 horas y seguimiento posterior a visitas.</p></div><Icon className="size-5 shrink-0" name="arrow" /></Link>
+        <div className="mt-4 grid gap-4 lg:grid-cols-2">
+          <AutomationLink description="Distribuye prospectos por turnos, carga, ciudad, operación y presupuesto." title="Asignación automática" to="/app/configuracion/asignacion" />
+          <AutomationLink
+            badge={<Badge dot variant="success">Activos</Badge>}
+            description="Primer contacto, alerta a las 24 horas y seguimiento posterior a visitas."
+            title="Seguimientos automáticos"
+            to="/app/prospectos/tareas"
+          />
+        </div>
       </section>
 
-      {loading && <p className="rounded-2xl border border-slate-200 bg-white p-8 text-center text-sm text-slate-500">Cargando configuración...</p>}
+      {loading && <Card><LoadingState message="Cargando configuración..." /></Card>}
 
       {!loading && (
         <>
           <section>
-            <div className="mb-5 flex flex-wrap items-end justify-between gap-3">
+            <div className="mb-4 flex flex-wrap items-end justify-between gap-3">
               <div>
-                <h2 className="text-xl font-bold">Catálogos principales</h2>
-                <p className="mt-1 text-sm text-slate-500">Opciones que se usan al registrar prospectos, propiedades y expedientes.</p>
+                <h2 className="text-lg font-semibold text-fg">Catálogos principales</h2>
+                <p className="mt-0.5 text-sm text-fg-subtle">Opciones que se usan al registrar prospectos, propiedades y expedientes.</p>
               </div>
-              {starter && <Link className="rounded-xl bg-amber-100 px-3 py-2 text-xs font-bold text-amber-800" to="/app/planes">Disponible desde Pro</Link>}
+              {starter && <Link className={buttonClasses({ variant: 'secondary', size: 'sm' })} to="/app/planes">Disponible desde Pro</Link>}
             </div>
             <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
               {primary.map(name => <CatalogCard key={name} locked={starter} name={name} />)}
             </div>
           </section>
 
-          <details className={`mt-10 rounded-2xl border bg-white shadow-sm ${starter ? 'border-amber-200 opacity-75' : 'border-slate-200'}`}>
-            <summary className="flex cursor-pointer list-none items-center justify-between gap-4 p-5">
+          <details className={cn(cardClass, 'group mt-8', starter && 'opacity-75')}>
+            <summary className="flex cursor-pointer list-none items-center justify-between gap-4 p-5 [&::-webkit-details-marker]:hidden">
               <div className="flex items-center gap-3">
-                <span className="grid size-11 place-items-center rounded-xl bg-slate-100 text-slate-600"><Icon className="size-5" name="workflow" /></span>
-                <div><h2 className="font-bold">Flujos del sistema</h2><p className="mt-1 text-sm text-slate-500">Estados internos usados por los procesos de HomeForge.</p></div>
+                <span className="grid size-10 place-items-center rounded-xl bg-surface-sunken text-fg-muted"><Icon className="size-5" name="workflow" /></span>
+                <div>
+                  <h2 className="font-semibold text-fg">Flujos del sistema</h2>
+                  <p className="mt-0.5 text-sm text-fg-subtle">Estados internos usados por los procesos de HomeForge.</p>
+                </div>
               </div>
-              <span className="text-xs font-semibold text-slate-400">{starter ? 'Plan Pro' : `${workflows.length} catálogos`}</span>
+              <span className="flex items-center gap-2 text-xs font-medium text-fg-subtle">
+                {starter ? 'Plan Pro' : `${workflows.length} catálogos`}
+                <svg aria-hidden="true" className="size-4 transition group-open:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
+              </span>
             </summary>
-            <div className="grid gap-3 border-t border-slate-100 p-5 sm:grid-cols-2 xl:grid-cols-3">
+            <div className="grid gap-2 border-t border-border p-5 sm:grid-cols-2 xl:grid-cols-3">
               {workflows.map(name => (
-                <Link className="flex items-center justify-between rounded-xl border border-slate-200 px-4 py-3 text-sm font-semibold text-slate-700 hover:border-indigo-300 hover:bg-indigo-50" key={name} to={starter ? '/app/planes' : `/app/configuracion/catalogos/${name}`}>
+                <Link className="flex items-center justify-between rounded-xl border border-border px-4 py-3 text-sm font-medium text-fg-muted transition hover:border-primary-line hover:bg-primary-soft hover:text-primary-fg" key={name} to={starter ? '/app/planes' : `/app/configuracion/catalogos/${name}`}>
                   {catalogLabels[name]?.es ?? name}
-                  <Icon className="size-4 text-slate-400" name="arrow" />
+                  <Icon className="size-4 text-fg-subtle" name="arrow" />
                 </Link>
               ))}
             </div>
@@ -95,15 +108,32 @@ export function SettingsPage() {
   );
 }
 
+const linkCardClass = cn(cardClass, 'group block min-w-0 p-5 transition hover:border-primary-line hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary');
+
 function SettingsLink({ description, icon, label, to }: { description: string; icon: IconName; label: string; to: string }) {
   return (
-    <Link className="group min-w-0 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:border-indigo-300 hover:shadow-md" to={to}>
+    <Link className={linkCardClass} to={to}>
       <div className="flex items-start justify-between gap-4">
-        <span className="grid size-11 shrink-0 place-items-center rounded-xl bg-indigo-100 text-indigo-700"><Icon className="size-5" name={icon} /></span>
-        <Icon className="size-5 text-slate-300 transition group-hover:translate-x-1 group-hover:text-indigo-600" name="arrow" />
+        <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-primary-soft text-primary-fg"><Icon className="size-5" name={icon} /></span>
+        <Icon className="size-4 text-fg-subtle transition group-hover:translate-x-0.5 group-hover:text-primary-fg" name="arrow" />
       </div>
-      <h3 className="mt-4 font-bold text-slate-900">{label}</h3>
-      <p className="mt-1 text-sm leading-5 text-slate-500">{description}</p>
+      <h3 className="mt-4 font-semibold text-fg">{label}</h3>
+      <p className="mt-1 text-sm text-fg-subtle">{description}</p>
+    </Link>
+  );
+}
+
+function AutomationLink({ title, description, to, badge }: { title: string; description: string; to: string; badge?: ReactNode }) {
+  return (
+    <Link className={cn(linkCardClass, 'flex items-center justify-between gap-4')} to={to}>
+      <div className="min-w-0">
+        <div className="flex flex-wrap items-center gap-2">
+          <h3 className="font-semibold text-fg">{title}</h3>
+          {badge}
+        </div>
+        <p className="mt-1 text-sm text-fg-subtle">{description}</p>
+      </div>
+      <Icon className="size-4 shrink-0 text-fg-subtle transition group-hover:translate-x-0.5 group-hover:text-primary-fg" name="arrow" />
     </Link>
   );
 }
@@ -111,13 +141,13 @@ function SettingsLink({ description, icon, label, to }: { description: string; i
 function CatalogCard({ name, locked }: { name: string; locked: boolean }) {
   const definition = catalogLabels[name];
   return (
-    <Link className={`group rounded-2xl border bg-white p-5 shadow-sm transition ${locked ? 'border-amber-200 opacity-75' : 'border-slate-200 hover:-translate-y-0.5 hover:border-indigo-300 hover:shadow-md'}`} to={locked ? '/app/planes' : `/app/configuracion/catalogos/${name}`}>
+    <Link className={cn(linkCardClass, locked && 'opacity-75')} to={locked ? '/app/planes' : `/app/configuracion/catalogos/${name}`}>
       <div className="flex items-start justify-between gap-4">
-        <span className="grid size-11 place-items-center rounded-xl bg-indigo-100 text-indigo-700"><Icon className="size-5" name={catalogIcons[name] ?? 'settings'} /></span>
-        <span className={`text-xs font-bold ${locked ? 'text-amber-600' : 'text-slate-300'}`}>{locked ? 'PRO' : <Icon className="size-5 transition group-hover:translate-x-1 group-hover:text-indigo-600" name="arrow" />}</span>
+        <span className="grid size-10 place-items-center rounded-xl bg-surface-sunken text-fg-muted"><Icon className="size-5" name={catalogIcons[name] ?? 'settings'} /></span>
+        {locked ? <Badge variant="warning">Pro</Badge> : <Icon className="size-4 text-fg-subtle transition group-hover:translate-x-0.5 group-hover:text-primary-fg" name="arrow" />}
       </div>
-      <h2 className="mt-5 text-lg font-bold">{definition?.es ?? name}</h2>
-      <p className="mt-2 text-sm leading-6 text-slate-500">{definition?.description}</p>
+      <h2 className="mt-4 font-semibold text-fg">{definition?.es ?? name}</h2>
+      <p className="mt-1 text-sm text-fg-subtle">{definition?.description}</p>
     </Link>
   );
 }

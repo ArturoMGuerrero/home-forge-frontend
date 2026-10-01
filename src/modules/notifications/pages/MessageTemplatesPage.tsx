@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import toast from 'react-hot-toast';
 import {
   MessageTemplate,
   listMessageTemplates,
@@ -7,8 +8,8 @@ import {
   notificationTypeLabels,
   templateCategoryLabels
 } from '../api/notificationsApi';
-import { PageHeader } from '../../../shared/ui/PageHeader';
-import { Button, Spinner, Checkbox, Badge } from '../../../shared/ui';
+import { Icon } from '../../../shared/Icon';
+import { Badge, Button, buttonClasses, Card, cn, EmptyState, LoadingState, PageHeader, Switch } from '../../../shared/ui';
 
 export default function MessageTemplatesPage() {
   const [templates, setTemplates] = useState<MessageTemplate[]>([]);
@@ -16,161 +17,83 @@ export default function MessageTemplatesPage() {
   const [showInactive, setShowInactive] = useState(false);
 
   useEffect(() => {
-    loadTemplates();
+    listMessageTemplates()
+      .then(setTemplates)
+      .catch(error => toast.error(error instanceof Error ? error.message : 'No fue posible cargar las plantillas.'))
+      .finally(() => setLoading(false));
   }, []);
-
-  async function loadTemplates() {
-    try {
-      const data = await listMessageTemplates();
-      setTemplates(data);
-    } catch (error) {
-      console.error('Error loading templates:', error);
-    } finally {
-      setLoading(false);
-    }
-  }
 
   async function handleToggleActive(templateId: string) {
     try {
       const updated = await toggleTemplateActive(templateId);
       setTemplates(prev => prev.map(t => (t.id === templateId ? updated : t)));
     } catch (error) {
-      console.error('Error toggling template:', error);
-      alert('Error al cambiar estado de la plantilla');
+      toast.error(error instanceof Error ? error.message : 'Error al cambiar estado de la plantilla');
     }
   }
 
   const filteredTemplates = showInactive ? templates : templates.filter(t => t.active);
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <Spinner size="lg" />
-      </div>
-    );
-  }
-
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
+    <>
       <PageHeader
-        title="Plantillas de Mensajes"
-        subtitle="Crea plantillas reutilizables para emails, WhatsApp, push y SMS"
-        backLink={{ to: '/app/notificaciones', label: 'Volver a Notificaciones' }}
-        badge={{ value: templates.filter(t => t.active).length, label: 'activas' }}
         actions={
-          <Button
-            as={Link}
-            to="/app/notificaciones/plantillas/nueva"
-            variant="primary"
-            icon={
-              <svg className="size-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-              </svg>
-            }
-          >
-            Nueva Plantilla
-          </Button>
+          <Link className={buttonClasses()} to="/app/notificaciones/plantillas/nueva">
+            <Icon className="size-4" name="plus" />
+            Nueva plantilla
+          </Link>
         }
+        backLink={{ to: '/app/notificaciones', label: 'Notificaciones' }}
+        badge={{ value: templates.filter(t => t.active).length, label: 'activas' }}
+        subtitle="Crea plantillas reutilizables para emails, WhatsApp, push y SMS."
+        title="Plantillas de mensajes"
       />
 
-      <div className="p-4 lg:p-6">
-        <div className="mb-4 flex items-center gap-2">
-          <Checkbox
-            checked={showInactive}
-            onChange={(e) => setShowInactive(e.target.checked)}
-            label="Mostrar inactivas"
-          />
-        </div>
+      {loading ? (
+        <Card><LoadingState message="Cargando plantillas..." /></Card>
+      ) : (
+        <>
+          <Switch checked={showInactive} className="mb-5 justify-start" label="Mostrar inactivas" onChange={setShowInactive} />
 
-        {filteredTemplates.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-20 text-center">
-            <div className="rounded-full bg-slate-100 p-6 mb-4">
-              <svg className="size-12 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                />
-              </svg>
-            </div>
-            <p className="text-slate-600 font-medium">No hay plantillas {!showInactive && 'activas'}</p>
-            <p className="text-sm text-slate-500 mt-1">Crea tu primera plantilla con variables dinámicas</p>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            {filteredTemplates.map(template => (
-              <div
-                key={template.id}
-                className={`bg-white rounded-xl border border-slate-200 p-5 hover:shadow-lg transition-all ${
-                  !template.active ? 'opacity-60' : ''
-                }`}
-              >
-                <div className="flex items-start justify-between mb-3">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-1">
-                      <h3 className="font-semibold text-slate-900">{template.name}</h3>
-                      {template.isDefault && (
-                        <span className="inline-block px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                          Por defecto
-                        </span>
-                      )}
-                      {!template.active && (
-                        <span className="inline-block px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-600">
-                          Inactiva
-                        </span>
-                      )}
-                    </div>
-
-                    <div className="flex items-center gap-2 text-xs text-slate-500 mb-2">
-                      <span className="px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-700">
-                        {notificationTypeLabels[template.templateType]}
-                      </span>
-                      {template.category && (
-                        <span className="px-2 py-0.5 rounded-full bg-slate-50 text-slate-700">
-                          {templateCategoryLabels[template.category]}
-                        </span>
-                      )}
-                    </div>
-
-                    {template.description && (
-                      <p className="text-sm text-slate-600 mb-2">{template.description}</p>
-                    )}
-
-                    {template.subject && (
-                      <div className="text-sm text-slate-600 mb-2">
-                        <span className="font-medium">Asunto:</span> {template.subject}
-                      </div>
-                    )}
-
-                    <div className="text-sm text-slate-600 line-clamp-2 bg-slate-50 p-2 rounded border border-slate-200">
-                      {template.content}
-                    </div>
+          {filteredTemplates.length === 0 ? (
+            <Card className="border-dashed">
+              <EmptyState
+                description="Crea tu primera plantilla con variables dinámicas."
+                icon={<Icon name="envelope" />}
+                title={showInactive ? 'No hay plantillas' : 'No hay plantillas activas'}
+              />
+            </Card>
+          ) : (
+            <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+              {filteredTemplates.map(template => (
+                <Card className={cn('flex flex-col', !template.active && 'opacity-70')} key={template.id}>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <h3 className="font-semibold text-fg">{template.name}</h3>
+                    {template.isDefault && <Badge variant="info">Por defecto</Badge>}
+                    {!template.active && <Badge>Inactiva</Badge>}
                   </div>
-                </div>
+                  <div className="mt-2 flex flex-wrap gap-1.5">
+                    <Badge variant="primary">{notificationTypeLabels[template.templateType]}</Badge>
+                    {template.category && <Badge>{templateCategoryLabels[template.category]}</Badge>}
+                  </div>
+                  {template.description && <p className="mt-2 text-sm text-fg-muted">{template.description}</p>}
+                  {template.subject && (
+                    <p className="mt-2 text-sm text-fg-muted"><span className="font-medium text-fg">Asunto:</span> {template.subject}</p>
+                  )}
+                  <p className="mt-2 line-clamp-2 rounded-lg bg-surface-muted p-2.5 font-mono text-xs text-fg-muted">{template.content}</p>
 
-                <div className="flex items-center gap-2 mt-4">
-                  <Button
-                    as={Link}
-                    to={`/app/notificaciones/plantillas/${template.id}`}
-                    variant="primary"
-                    size="sm"
-                  >
-                    Ver/Editar
-                  </Button>
-                  <Button
-                    onClick={() => handleToggleActive(template.id)}
-                    variant="secondary"
-                    size="sm"
-                  >
-                    {template.active ? 'Desactivar' : 'Activar'}
-                  </Button>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-    </div>
+                  <div className="mt-auto flex items-center gap-2 pt-4">
+                    <Link className={buttonClasses({ variant: 'secondary', size: 'sm' })} to={`/app/notificaciones/plantillas/${template.id}`}>Ver / editar</Link>
+                    <Button onClick={() => handleToggleActive(template.id)} size="sm" variant="ghost">
+                      {template.active ? 'Desactivar' : 'Activar'}
+                    </Button>
+                  </div>
+                </Card>
+              ))}
+            </div>
+          )}
+        </>
+      )}
+    </>
   );
 }

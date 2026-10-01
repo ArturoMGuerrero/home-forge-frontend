@@ -6,7 +6,8 @@ import { ApiProperty } from '../../properties';
 import { AgendaAppointment as Appointment, createAgendaAppointment as createAppointment } from '../api/agendaApi';
 import { SubscriptionRestrictions } from '../../../shared/subscriptionRestrictions';
 import { UpgradeModal } from '../../../shared/UpgradeModal';
-import { Modal } from '../../../shared/ui/Modal';
+import { Button, Input, Modal, SearchInput, Select, Textarea } from '../../../shared/ui';
+import { timeSlotOptions } from '../timeSlots';
 
 interface Props {
   isOpen: boolean;
@@ -17,7 +18,20 @@ interface Props {
   restrictions: SubscriptionRestrictions;
 }
 
-const inputClass = 'w-full rounded-xl border border-slate-200 bg-white px-3.5 py-3 text-sm outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100';
+const FORM_ID = 'agenda-appointment-form';
+const appointmentTypeOptions = [
+  { value: 'PROPERTY_TOUR', label: 'Recorrido' },
+  { value: 'CALL', label: 'Llamada' },
+  { value: 'MEETING', label: 'Reunión' },
+  { value: 'VIDEO_CALL', label: 'Videollamada' },
+  { value: 'SIGNING', label: 'Firma de contrato' },
+  { value: 'OTHER', label: 'Otro' }
+];
+const statusOptions = [
+  { value: 'SCHEDULED', label: 'Programada' },
+  { value: 'COMPLETED', label: 'Realizada' },
+  { value: 'CANCELLED', label: 'Cancelada' }
+];
 const initialForm = {
   title: '',
   appointmentType: 'PROPERTY_TOUR' as Appointment['appointmentType'],
@@ -31,19 +45,8 @@ const initialForm = {
   notes: ''
 };
 
-// Generate time slots in 30-minute intervals
-const generateTimeSlots = () => {
-  const slots: string[] = [];
-  for (let hour = 0; hour < 24; hour++) {
-    slots.push(`${String(hour).padStart(2, '0')}:00`);
-    slots.push(`${String(hour).padStart(2, '0')}:30`);
-  }
-  return slots;
-};
-
 export function AppointmentModal({ isOpen, onClose, onAppointmentCreated, leads, properties, restrictions }: Props) {
   const { t } = useTranslation();
-  const timeSlots = generateTimeSlots();
   const [form, setForm] = useState(initialForm);
   const [saving, setSaving] = useState(false);
   const [upgradeModalOpen, setUpgradeModalOpen] = useState(false);
@@ -119,176 +122,58 @@ export function AppointmentModal({ isOpen, onClose, onAppointmentCreated, leads,
 
   return (
     <>
-      <Modal isOpen={isOpen} maxWidth="2xl" noPadding onClose={handleClose} subtitle="Agrega una cita a tu agenda" title="Nueva cita">
-          <form ref={formRef} className="p-6" onSubmit={submit}>
-            <div className="grid gap-4">
-              <label className="text-sm font-semibold">
-                Título
-                <input className={inputClass} maxLength={180} onChange={e => setForm({ ...form, title: e.target.value })} required value={form.title} />
-              </label>
+      <Modal
+        footer={
+          <>
+            <Button onClick={handleClose} variant="tertiary">Cancelar</Button>
+            <Button form={FORM_ID} loading={saving} type="submit">{saving ? 'Guardando...' : 'Agregar cita'}</Button>
+          </>
+        }
+        isOpen={isOpen}
+        maxWidth="2xl"
+        onClose={handleClose}
+        subtitle="Agrega una cita a tu agenda"
+        title="Nueva cita"
+      >
+        <form className="grid gap-4" id={FORM_ID} onSubmit={submit} ref={formRef}>
+          <Input label="Título" maxLength={180} onChange={e => setForm({ ...form, title: e.target.value })} required value={form.title} />
 
-              <div className="grid gap-3 sm:grid-cols-2">
-                <label className="text-sm font-semibold">
-                  Tipo
-                  <select className={inputClass} onChange={e => setForm({ ...form, appointmentType: e.target.value as Appointment['appointmentType'] })} value={form.appointmentType}>
-                    <option value="PROPERTY_TOUR">Recorrido</option>
-                    <option value="CALL">Llamada</option>
-                    <option value="MEETING">Reunión</option>
-                    <option value="VIDEO_CALL">Videollamada</option>
-                    <option value="SIGNING">Firma de contrato</option>
-                    <option value="OTHER">Otro</option>
-                  </select>
-                </label>
-                <label className="text-sm font-semibold">
-                  Estado
-                  <select className={inputClass} onChange={e => setForm({ ...form, status: e.target.value as Appointment['status'] })} value={form.status}>
-                    <option value="SCHEDULED">Programada</option>
-                    <option value="COMPLETED">Realizada</option>
-                    <option value="CANCELLED">Cancelada</option>
-                  </select>
-                </label>
-              </div>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <Select label="Tipo" onChange={e => setForm({ ...form, appointmentType: e.target.value as Appointment['appointmentType'] })} options={appointmentTypeOptions} value={form.appointmentType} />
+            <Select label="Estado" onChange={e => setForm({ ...form, status: e.target.value as Appointment['status'] })} options={statusOptions} value={form.status} />
+          </div>
 
-              <label className="text-sm font-semibold">
-                Fecha
-                <input
-                  className={inputClass}
-                  onChange={e => setForm({ ...form, date: e.target.value })}
-                  required
-                  type="date"
-                  value={form.date}
-                />
-              </label>
+          <div className="grid gap-4 sm:grid-cols-3">
+            <Input label="Fecha" onChange={e => setForm({ ...form, date: e.target.value })} required type="date" value={form.date} />
+            <Select label="Inicio" onChange={e => setForm({ ...form, startTime: e.target.value })} options={timeSlotOptions} required value={form.startTime} />
+            <Select label="Fin" onChange={e => setForm({ ...form, endTime: e.target.value })} options={timeSlotOptions} required value={form.endTime} />
+          </div>
 
-              <div className="grid gap-3 sm:grid-cols-2">
-                <label className="text-sm font-semibold">
-                  Hora de Inicio
-                  <select
-                    className={inputClass}
-                    onChange={e => setForm({ ...form, startTime: e.target.value })}
-                    required
-                    value={form.startTime}
-                  >
-                    {timeSlots.map(slot => (
-                      <option key={slot} value={slot}>{slot}</option>
-                    ))}
-                  </select>
-                </label>
-                <label className="text-sm font-semibold">
-                  Hora de Fin
-                  <select
-                    className={inputClass}
-                    onChange={e => setForm({ ...form, endTime: e.target.value })}
-                    required
-                    value={form.endTime}
-                  >
-                    {timeSlots.map(slot => (
-                      <option key={slot} value={slot}>{slot}</option>
-                    ))}
-                  </select>
-                </label>
-              </div>
+          <div className="grid gap-2">
+            <Select
+              label="Prospecto (opcional)"
+              onChange={e => { setForm({ ...form, leadId: e.target.value }); setSearchLead(''); }}
+              options={filteredLeads.map(lead => ({ value: lead.id, label: `${lead.firstName} ${lead.lastName}` }))}
+              placeholder={`Sin vincular (${filteredLeads.length})`}
+              value={form.leadId}
+            />
+            <SearchInput aria-label="Buscar prospecto" onChange={e => setSearchLead(e.target.value)} onClear={() => setSearchLead('')} placeholder="Filtrar prospectos..." value={searchLead} />
+          </div>
 
-              {/* Prospecto con búsqueda */}
-              <div>
-                <label className="text-sm font-semibold">Prospecto (opcional)</label>
-                <div className="relative mb-2 mt-2">
-                  <svg className="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                  </svg>
-                  <input
-                    className="w-full rounded-lg border border-slate-200 py-2 pl-11 pr-9 text-sm transition focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-100"
-                    onChange={e => setSearchLead(e.target.value)}
-                    placeholder="Buscar prospecto..."
-                    type="text"
-                    value={searchLead}
-                  />
-                  {searchLead && (
-                    <button
-                      className="absolute right-2.5 top-1/2 -translate-y-1/2 rounded p-1 text-slate-400 transition hover:bg-slate-100 hover:text-slate-600"
-                      onClick={() => setSearchLead('')}
-                      type="button"
-                    >
-                      <svg className="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                      </svg>
-                    </button>
-                  )}
-                </div>
-                <select className={inputClass} onChange={e => { setForm({ ...form, leadId: e.target.value }); setSearchLead(''); }} value={form.leadId}>
-                  <option value="">Sin vincular ({filteredLeads.length})</option>
-                  {filteredLeads.map(lead => (
-                    <option key={lead.id} value={lead.id}>
-                      {lead.firstName} {lead.lastName}
-                    </option>
-                  ))}
-                </select>
-              </div>
+          <div className="grid gap-2">
+            <Select
+              label="Propiedad (opcional)"
+              onChange={e => { setForm({ ...form, propertyId: e.target.value }); setSearchProperty(''); }}
+              options={filteredProperties.map(property => ({ value: property.id, label: `${property.code} · ${property.title}` }))}
+              placeholder={`Sin vincular (${filteredProperties.length})`}
+              value={form.propertyId}
+            />
+            <SearchInput aria-label="Buscar propiedad" onChange={e => setSearchProperty(e.target.value)} onClear={() => setSearchProperty('')} placeholder="Filtrar propiedades..." value={searchProperty} />
+          </div>
 
-              {/* Propiedad con búsqueda */}
-              <div>
-                <label className="text-sm font-semibold">Propiedad (opcional)</label>
-                <div className="relative mb-2 mt-2">
-                  <svg className="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                  </svg>
-                  <input
-                    className="w-full rounded-lg border border-slate-200 py-2 pl-11 pr-9 text-sm transition focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-100"
-                    onChange={e => setSearchProperty(e.target.value)}
-                    placeholder="Buscar propiedad..."
-                    type="text"
-                    value={searchProperty}
-                  />
-                  {searchProperty && (
-                    <button
-                      className="absolute right-2.5 top-1/2 -translate-y-1/2 rounded p-1 text-slate-400 transition hover:bg-slate-100 hover:text-slate-600"
-                      onClick={() => setSearchProperty('')}
-                      type="button"
-                    >
-                      <svg className="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                      </svg>
-                    </button>
-                  )}
-                </div>
-                <select className={inputClass} onChange={e => { setForm({ ...form, propertyId: e.target.value }); setSearchProperty(''); }} value={form.propertyId}>
-                  <option value="">Sin vincular ({filteredProperties.length})</option>
-                  {filteredProperties.map(property => (
-                    <option key={property.id} value={property.id}>
-                      {property.code} · {property.title}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <label className="text-sm font-semibold">
-                Lugar (opcional)
-                <input className={inputClass} maxLength={255} onChange={e => setForm({ ...form, location: e.target.value })} value={form.location} />
-              </label>
-
-              <label className="text-sm font-semibold">
-                Notas (opcional)
-                <textarea className={`${inputClass} min-h-24`} onChange={e => setForm({ ...form, notes: e.target.value })} value={form.notes} />
-              </label>
-            </div>
-
-            {/* Footer con botones */}
-            <div className="mt-6 flex justify-end gap-3">
-              <button
-                className="rounded-xl border border-slate-200 bg-white px-6 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
-                onClick={handleClose}
-                type="button"
-              >
-                Cancelar
-              </button>
-              <button
-                className="rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-indigo-900/20 transition hover:shadow-xl hover:shadow-indigo-900/30 disabled:cursor-not-allowed disabled:opacity-60"
-                disabled={saving}
-              >
-                {saving ? 'Guardando...' : 'Agregar cita'}
-              </button>
-            </div>
-          </form>
+          <Input label="Lugar (opcional)" maxLength={255} onChange={e => setForm({ ...form, location: e.target.value })} value={form.location} />
+          <Textarea className="min-h-24" label="Notas (opcional)" onChange={e => setForm({ ...form, notes: e.target.value })} value={form.notes} />
+        </form>
       </Modal>
 
       <UpgradeModal feature="crear nuevas citas" isOpen={upgradeModalOpen} level={restrictions.level === 'BLOCKED' ? 'BLOCKED' : 'LIMITED'} onClose={() => setUpgradeModalOpen(false)} />

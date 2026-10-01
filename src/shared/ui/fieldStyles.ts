@@ -1,12 +1,18 @@
-export const fieldLabelClass = 'block text-sm font-semibold text-slate-700 mb-2';
+import { cn } from './cn';
+
+export const fieldLabelClass = 'mb-1.5 block text-sm font-semibold text-fg-muted';
 
 export const fieldControlClass =
-  'w-full px-3.5 py-3 border rounded-xl text-sm bg-[rgb(var(--input-bg))] text-[rgb(var(--text-primary))] ' +
-  'placeholder:text-[rgb(var(--text-tertiary))] outline-none transition ' +
-  'disabled:bg-slate-50 disabled:text-slate-500';
+  'w-full min-h-11 rounded-xl border bg-surface px-3.5 py-2.5 text-sm text-fg shadow-sm outline-none transition ' +
+  'placeholder:text-fg-subtle disabled:cursor-not-allowed disabled:bg-surface-sunken disabled:text-fg-subtle';
 
 export function fieldStateClass(hasError: boolean) {
   return hasError
-    ? 'border-rose-300 focus:border-rose-400 focus:ring-2 focus:ring-rose-100'
-    : 'border-[rgb(var(--border-color))] focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100';
+    ? 'border-danger-line focus:border-danger focus:ring-3 focus:ring-danger/15'
+    : 'border-border hover:border-border-strong focus:border-primary focus:ring-3 focus:ring-primary/15';
+}
+
+/** Clases para un control de formulario nativo (input, select, textarea) fuera de los componentes. */
+export function fieldClass(hasError = false, className?: string) {
+  return cn(fieldControlClass, fieldStateClass(hasError), className);
 }

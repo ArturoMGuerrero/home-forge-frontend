@@ -1,10 +1,33 @@
 import { FormEvent, useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 import { getSession } from '../../auth';
+import { Alert, Button, Card, Checkbox, LoadingState, Select, Switch, Textarea } from '../../../shared/ui';
 import { UserSettings, getUserSettings, updateUserSettings } from '../api/usersApi';
 
-const inputClass = 'w-full rounded-xl border border-slate-200 bg-white px-3.5 py-3 text-sm font-normal text-slate-900 outline-none transition focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100';
-const labelClass = 'grid gap-2 text-sm font-semibold text-slate-700';
+const languageOptions = [{ value: 'es', label: 'Español' }, { value: 'en', label: 'English' }];
+const timezoneOptions = [
+  { value: 'America/Mexico_City', label: 'Ciudad de México (GMT-6)' },
+  { value: 'America/Monterrey', label: 'Monterrey (GMT-6)' },
+  { value: 'America/Cancun', label: 'Cancún (GMT-5)' },
+  { value: 'America/Tijuana', label: 'Tijuana (GMT-8)' },
+  { value: 'America/New_York', label: 'New York (GMT-5)' },
+  { value: 'America/Los_Angeles', label: 'Los Angeles (GMT-8)' }
+];
+const currencyOptions = [
+  { value: 'MXN', label: 'MXN - Peso mexicano' },
+  { value: 'USD', label: 'USD - Dólar estadounidense' },
+  { value: 'EUR', label: 'EUR - Euro' }
+];
+const themeOptions = [{ value: 'light', label: 'Claro' }, { value: 'dark', label: 'Oscuro' }, { value: 'auto', label: 'Automático' }];
+const layoutOptions = [{ value: 'default', label: 'Predeterminado' }, { value: 'compact', label: 'Compacto' }, { value: 'detailed', label: 'Detallado' }];
+
+type EventKey = 'notificationNewLead' | 'notificationLeadUpdate' | 'notificationAppointment' | 'notificationTeamActivity';
+const eventOptions: Array<{ key: EventKey; label: string }> = [
+  { key: 'notificationNewLead', label: 'Nuevo lead asignado' },
+  { key: 'notificationLeadUpdate', label: 'Actualización de lead' },
+  { key: 'notificationAppointment', label: 'Recordatorio de citas' },
+  { key: 'notificationTeamActivity', label: 'Actividad del equipo' }
+];
 
 export function UserSettingsTab() {
   const session = getSession();
@@ -46,180 +69,77 @@ export function UserSettingsTab() {
     }
   }
 
-  if (loading) return <p className="rounded-2xl border border-slate-200 bg-white p-8 text-center text-sm text-slate-500">Cargando configuración...</p>;
-  if (!settings) return <p className="rounded-2xl border border-rose-200 bg-rose-50 p-7 text-sm text-rose-800">No fue posible cargar la configuración.</p>;
+  if (loading) return <Card><LoadingState message="Cargando configuración..." /></Card>;
+  if (!settings) return <Alert variant="error">No fue posible cargar la configuración.</Alert>;
 
   return (
     <form onSubmit={submit} className="max-w-3xl space-y-6">
-      <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-        <h2 className="text-lg font-bold">Preferencias generales</h2>
+      <Card>
+        <h2 className="text-lg font-semibold text-fg">Preferencias generales</h2>
         <div className="mt-5 grid gap-4 sm:grid-cols-2">
-          <label className={labelClass}>
-            Idioma
-            <select
-              className={inputClass}
-              value={settings.language}
-              onChange={e => setSettings({ ...settings, language: e.target.value })}
-            >
-              <option value="es">Español</option>
-              <option value="en">English</option>
-            </select>
-          </label>
-          <label className={labelClass}>
-            Zona horaria
-            <select
-              className={inputClass}
-              value={settings.timezone}
-              onChange={e => setSettings({ ...settings, timezone: e.target.value })}
-            >
-              <option value="America/Mexico_City">Ciudad de México (GMT-6)</option>
-              <option value="America/Monterrey">Monterrey (GMT-6)</option>
-              <option value="America/Cancun">Cancún (GMT-5)</option>
-              <option value="America/Tijuana">Tijuana (GMT-8)</option>
-              <option value="America/New_York">New York (GMT-5)</option>
-              <option value="America/Los_Angeles">Los Angeles (GMT-8)</option>
-            </select>
-          </label>
-          <label className={labelClass}>
-            Moneda predeterminada
-            <select
-              className={inputClass}
-              value={settings.currency}
-              onChange={e => setSettings({ ...settings, currency: e.target.value })}
-            >
-              <option value="MXN">MXN - Peso mexicano</option>
-              <option value="USD">USD - Dólar estadounidense</option>
-              <option value="EUR">EUR - Euro</option>
-            </select>
-          </label>
-          <label className={labelClass}>
-            Tema de la interfaz
-            <select
-              className={inputClass}
-              value={settings.theme}
-              onChange={e => setSettings({ ...settings, theme: e.target.value })}
-            >
-              <option value="light">Claro</option>
-              <option value="dark">Oscuro</option>
-              <option value="auto">Automático</option>
-            </select>
-          </label>
+          <Select label="Idioma" onChange={e => setSettings({ ...settings, language: e.target.value })} options={languageOptions} value={settings.language} />
+          <Select label="Zona horaria" onChange={e => setSettings({ ...settings, timezone: e.target.value })} options={timezoneOptions} value={settings.timezone} />
+          <Select label="Moneda predeterminada" onChange={e => setSettings({ ...settings, currency: e.target.value })} options={currencyOptions} value={settings.currency} />
+          <Select label="Tema de la interfaz" onChange={e => setSettings({ ...settings, theme: e.target.value })} options={themeOptions} value={settings.theme} />
         </div>
-      </section>
+      </Card>
 
-      <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-        <h2 className="text-lg font-bold">Notificaciones</h2>
-        <p className="mt-1 text-sm text-slate-600">Configura cómo y cuándo quieres recibir notificaciones.</p>
-        <div className="mt-5 space-y-4">
-          <label className="flex items-center gap-3">
-            <input
-              type="checkbox"
-              checked={settings.emailNotifications}
-              onChange={e => setSettings({ ...settings, emailNotifications: e.target.checked })}
-              className="size-5 rounded border-slate-300 text-indigo-600 focus:ring-2 focus:ring-indigo-100"
-            />
-            <div>
-              <p className="text-sm font-semibold text-slate-900">Notificaciones por correo</p>
-              <p className="text-xs text-slate-500">Recibe resúmenes y alertas importantes por email</p>
-            </div>
-          </label>
-          <label className="flex items-center gap-3">
-            <input
-              type="checkbox"
-              checked={settings.pushNotifications}
-              onChange={e => setSettings({ ...settings, pushNotifications: e.target.checked })}
-              className="size-5 rounded border-slate-300 text-indigo-600 focus:ring-2 focus:ring-indigo-100"
-            />
-            <div>
-              <p className="text-sm font-semibold text-slate-900">Notificaciones push</p>
-              <p className="text-xs text-slate-500">Alertas en tiempo real en tu navegador</p>
-            </div>
-          </label>
+      <Card>
+        <h2 className="text-lg font-semibold text-fg">Notificaciones</h2>
+        <p className="mt-1 text-sm text-fg-subtle">Configura cómo y cuándo quieres recibir notificaciones.</p>
+        <div className="mt-5 space-y-5">
+          <Switch
+            checked={settings.emailNotifications}
+            description="Recibe resúmenes y alertas importantes por email"
+            label="Notificaciones por correo"
+            onChange={checked => setSettings({ ...settings, emailNotifications: checked })}
+          />
+          <Switch
+            checked={settings.pushNotifications}
+            description="Alertas en tiempo real en tu navegador"
+            label="Notificaciones push"
+            onChange={checked => setSettings({ ...settings, pushNotifications: checked })}
+          />
 
-          <div className="border-t border-slate-100 pt-4">
-            <p className="mb-3 text-xs font-bold uppercase tracking-wider text-slate-500">Eventos específicos</p>
-            <div className="space-y-3">
-              <label className="flex items-center gap-3">
-                <input
-                  type="checkbox"
-                  checked={settings.notificationNewLead}
-                  onChange={e => setSettings({ ...settings, notificationNewLead: e.target.checked })}
-                  className="size-4 rounded border-slate-300 text-indigo-600"
+          <div className="border-t border-border pt-5">
+            <p className="mb-3 text-xs font-semibold uppercase tracking-wider text-fg-subtle">Eventos específicos</p>
+            <div className="grid gap-3 sm:grid-cols-2">
+              {eventOptions.map(option => (
+                <Checkbox
+                  checked={settings[option.key]}
+                  key={option.key}
+                  label={option.label}
+                  onChange={e => setSettings({ ...settings, [option.key]: e.target.checked })}
                 />
-                <span className="text-sm text-slate-700">Nuevo lead asignado</span>
-              </label>
-              <label className="flex items-center gap-3">
-                <input
-                  type="checkbox"
-                  checked={settings.notificationLeadUpdate}
-                  onChange={e => setSettings({ ...settings, notificationLeadUpdate: e.target.checked })}
-                  className="size-4 rounded border-slate-300 text-indigo-600"
-                />
-                <span className="text-sm text-slate-700">Actualización de lead</span>
-              </label>
-              <label className="flex items-center gap-3">
-                <input
-                  type="checkbox"
-                  checked={settings.notificationAppointment}
-                  onChange={e => setSettings({ ...settings, notificationAppointment: e.target.checked })}
-                  className="size-4 rounded border-slate-300 text-indigo-600"
-                />
-                <span className="text-sm text-slate-700">Recordatorio de citas</span>
-              </label>
-              <label className="flex items-center gap-3">
-                <input
-                  type="checkbox"
-                  checked={settings.notificationTeamActivity}
-                  onChange={e => setSettings({ ...settings, notificationTeamActivity: e.target.checked })}
-                  className="size-4 rounded border-slate-300 text-indigo-600"
-                />
-                <span className="text-sm text-slate-700">Actividad del equipo</span>
-              </label>
+              ))}
             </div>
           </div>
         </div>
-      </section>
+      </Card>
 
-      <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-        <h2 className="text-lg font-bold">Firma de correo</h2>
-        <p className="mt-1 text-sm text-slate-600">Esta firma se agregará automáticamente a tus correos.</p>
-        <div className="mt-4">
-          <textarea
-            className={inputClass}
-            rows={4}
-            placeholder="Saludos,&#10;[Tu nombre]&#10;[Tu cargo]&#10;[Teléfono]"
-            value={settings.emailSignature || ''}
-            onChange={e => setSettings({ ...settings, emailSignature: e.target.value })}
-          />
-        </div>
-      </section>
+      <Card>
+        <Textarea
+          helperText="Esta firma se agregará automáticamente a tus correos."
+          label="Firma de correo"
+          onChange={e => setSettings({ ...settings, emailSignature: e.target.value })}
+          placeholder={'Saludos,\n[Tu nombre]\n[Tu cargo]\n[Teléfono]'}
+          rows={4}
+          value={settings.emailSignature || ''}
+        />
+      </Card>
 
-      <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-        <h2 className="text-lg font-bold">Dashboard</h2>
-        <div className="mt-4">
-          <label className={labelClass}>
-            Diseño del dashboard
-            <select
-              className={inputClass}
-              value={settings.dashboardLayout}
-              onChange={e => setSettings({ ...settings, dashboardLayout: e.target.value })}
-            >
-              <option value="default">Predeterminado</option>
-              <option value="compact">Compacto</option>
-              <option value="detailed">Detallado</option>
-            </select>
-          </label>
-        </div>
-      </section>
+      <Card>
+        <Select
+          containerClassName="sm:max-w-xs"
+          label="Diseño del dashboard"
+          onChange={e => setSettings({ ...settings, dashboardLayout: e.target.value })}
+          options={layoutOptions}
+          value={settings.dashboardLayout}
+        />
+      </Card>
 
       <div className="flex justify-end">
-        <button
-          type="submit"
-          disabled={saving}
-          className="rounded-xl bg-indigo-600 px-6 py-3 text-sm font-bold text-white hover:bg-indigo-700 disabled:opacity-60 disabled:cursor-not-allowed"
-        >
-          {saving ? 'Guardando...' : 'Guardar configuración'}
-        </button>
+        <Button loading={saving} type="submit">{saving ? 'Guardando...' : 'Guardar configuración'}</Button>
       </div>
     </form>
   );

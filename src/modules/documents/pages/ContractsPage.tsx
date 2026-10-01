@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import toast from 'react-hot-toast';
 import {
   Document,
   DocumentStatus,
@@ -7,11 +8,20 @@ import {
   documentTypeLabels,
   listDocuments
 } from '../api/documentsApi';
-import { PageHeader } from '../../../shared/ui/PageHeader';
-import { Tabs, Tab } from '../../../shared/ui/Tabs';
-import { Button, Spinner } from '../../../shared/ui';
+import { Icon } from '../../../shared/Icon';
+import { Badge, BadgeVariant, buttonClasses, Card, cardClass, cn, EmptyState, LoadingState, PageHeader, Tab, Tabs } from '../../../shared/ui';
 
 const STATUS_FILTERS: (DocumentStatus | 'ALL')[] = ['ALL', 'DRAFT', 'PENDING_SIGNATURE', 'SIGNED', 'COMPLETED'];
+
+const statusVariants: Partial<Record<DocumentStatus, BadgeVariant>> = {
+  DRAFT: 'neutral',
+  PENDING_SIGNATURE: 'warning',
+  PARTIALLY_SIGNED: 'info',
+  SIGNED: 'success',
+  COMPLETED: 'success',
+  CANCELLED: 'error',
+  EXPIRED: 'warning'
+};
 
 export default function ContractsPage() {
   const [documents, setDocuments] = useState<Document[]>([]);
@@ -19,26 +29,13 @@ export default function ContractsPage() {
   const [activeTab, setActiveTab] = useState<DocumentStatus | 'ALL'>('ALL');
 
   useEffect(() => {
-    loadDocuments();
+    listDocuments()
+      .then(setDocuments)
+      .catch(error => toast.error(error instanceof Error ? error.message : 'No fue posible cargar los contratos.'))
+      .finally(() => setLoading(false));
   }, []);
 
-  async function loadDocuments() {
-    try {
-      const data = await listDocuments();
-      setDocuments(data);
-    } catch (error) {
-      console.error('Error loading documents:', error);
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  function getFilteredDocuments() {
-    if (activeTab === 'ALL') return documents;
-    return documents.filter(d => d.status === activeTab);
-  }
-
-  const filteredDocuments = getFilteredDocuments();
+  const filteredDocuments = activeTab === 'ALL' ? documents : documents.filter(d => d.status === activeTab);
 
   const tabs: Tab[] = STATUS_FILTERS.map(status => ({
     id: status,
@@ -46,110 +43,66 @@ export default function ContractsPage() {
     count: status === 'ALL' ? documents.length : documents.filter(d => d.status === status).length
   }));
 
-  function getStatusColor(status: DocumentStatus): string {
-    switch (status) {
-      case 'DRAFT': return 'bg-gray-100 text-gray-800';
-      case 'PENDING_SIGNATURE': return 'bg-yellow-100 text-yellow-800';
-      case 'PARTIALLY_SIGNED': return 'bg-blue-100 text-blue-800';
-      case 'SIGNED': return 'bg-green-100 text-green-800';
-      case 'COMPLETED': return 'bg-emerald-100 text-emerald-800';
-      case 'CANCELLED': return 'bg-red-100 text-red-800';
-      case 'EXPIRED': return 'bg-orange-100 text-orange-800';
-      default: return 'bg-gray-100 text-gray-800';
-    }
-  }
-
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <Spinner size="lg" />
-      </div>
-    );
-  }
-
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
+    <>
       <PageHeader
-        title="Contratos y Documentos"
-        subtitle="Gestiona plantillas, genera contratos y administra firmas electrónicas"
-        badge={{ value: documents.length, label: 'documentos' }}
         actions={
-          <div className="flex gap-2">
-            <Button
-              as={Link}
-              to="/app/contratos/plantillas"
-              variant="secondary"
-            >
-              📝 Plantillas
-            </Button>
-            <Button
-              as={Link}
-              to="/app/contratos/nuevo"
-              variant="primary"
-              icon={
-                <svg className="size-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                </svg>
-              }
-            >
-              Nuevo Contrato
-            </Button>
-          </div>
+          <>
+            <Link className={buttonClasses({ variant: 'tertiary' })} to="/app/contratos/plantillas">
+              <Icon className="size-4" name="document" />
+              Plantillas
+            </Link>
+            <Link className={buttonClasses()} to="/app/contratos/nuevo">
+              <Icon className="size-4" name="plus" />
+              Nuevo contrato
+            </Link>
+          </>
         }
+        badge={{ value: documents.length, label: 'documentos' }}
+        subtitle="Gestiona plantillas, genera contratos y administra firmas electrónicas."
+        title="Contratos"
       >
-        <Tabs tabs={tabs} activeTab={activeTab} onChange={(id) => setActiveTab(id as DocumentStatus | 'ALL')} variant="pills" size="sm" />
+        <Tabs activeTab={activeTab} onChange={id => setActiveTab(id as DocumentStatus | 'ALL')} tabs={tabs} variant="pills" />
       </PageHeader>
 
-      <div className="p-4 lg:p-6">
-        {filteredDocuments.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-20 text-center">
-            <div className="rounded-full bg-slate-100 p-6 mb-4">
-              <svg className="size-12 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-              </svg>
-            </div>
-            <p className="text-slate-600 font-medium">No hay contratos {activeTab !== 'ALL' && documentStatusLabels[activeTab as DocumentStatus]}</p>
-            <p className="text-sm text-slate-500 mt-1">Crea tu primer contrato desde una plantilla</p>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {filteredDocuments.map(doc => (
-              <Link
-                key={doc.id}
-                to={`/app/contratos/${doc.id}`}
-                className="bg-white rounded-xl border border-slate-200 p-5 hover:shadow-lg hover:border-indigo-300 transition-all"
-              >
-                <div className="flex items-start justify-between mb-3">
-                  <div className="flex items-center gap-2">
-                    <div className="size-10 rounded-lg bg-indigo-100 flex items-center justify-center text-xl">
-                      📄
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <h3 className="font-semibold text-slate-900 truncate">{doc.name}</h3>
-                      <p className="text-xs text-slate-500">{documentTypeLabels[doc.documentType]}</p>
-                    </div>
-                  </div>
+      {loading ? (
+        <Card><LoadingState message="Cargando contratos..." /></Card>
+      ) : filteredDocuments.length === 0 ? (
+        <Card className="border-dashed">
+          <EmptyState
+            description="Crea tu primer contrato desde una plantilla."
+            icon={<Icon name="document" />}
+            title={activeTab === 'ALL' ? 'No hay contratos' : `No hay contratos en "${documentStatusLabels[activeTab]}"`}
+          />
+        </Card>
+      ) : (
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+          {filteredDocuments.map(doc => (
+            <Link
+              className={cn(cardClass, 'block p-5 transition hover:border-primary-line hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary')}
+              key={doc.id}
+              to={`/app/contratos/${doc.id}`}
+            >
+              <div className="flex items-start gap-3">
+                <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-primary-soft text-primary-fg">
+                  <Icon className="size-5" name="document" />
+                </span>
+                <div className="min-w-0 flex-1">
+                  <h3 className="truncate font-semibold text-fg">{doc.name}</h3>
+                  <p className="text-xs text-fg-subtle">{documentTypeLabels[doc.documentType]}</p>
                 </div>
-
-                <div className="flex items-center justify-between mt-4">
-                  <span className={`inline-block px-2.5 py-1 rounded-full text-xs font-medium ${getStatusColor(doc.status)}`}>
-                    {documentStatusLabels[doc.status]}
-                  </span>
-                  <span className="text-xs text-slate-500">
-                    {new Date(doc.createdAt).toLocaleDateString('es-MX')}
-                  </span>
-                </div>
-
-                {doc.version > 1 && (
-                  <div className="mt-2 text-xs text-slate-500">
-                    Versión {doc.version}
-                  </div>
-                )}
-              </Link>
-            ))}
-          </div>
-        )}
-      </div>
-    </div>
+              </div>
+              <div className="mt-4 flex items-center justify-between gap-3">
+                <Badge dot variant={statusVariants[doc.status] ?? 'neutral'}>{documentStatusLabels[doc.status]}</Badge>
+                <span className="text-xs text-fg-subtle">
+                  {new Date(doc.createdAt).toLocaleDateString('es-MX')}
+                  {doc.version > 1 && ` · v${doc.version}`}
+                </span>
+              </div>
+            </Link>
+          ))}
+        </div>
+      )}
+    </>
   );
 }

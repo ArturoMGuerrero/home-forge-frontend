@@ -2,7 +2,8 @@ import { FormEvent, useState } from 'react';
 import { Link } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { requestPasswordReset } from '../api/authApi';
-import { Button, Input } from '../../../shared/ui';
+import { Alert, Button, buttonClasses, Input } from '../../../shared/ui';
+import { AuthHeading, AuthLayout } from '../components/AuthLayout';
 
 export function ForgotPasswordPage() {
   const [email, setEmail] = useState('');
@@ -25,95 +26,53 @@ export function ForgotPasswordPage() {
   }
 
   return (
-    <div className="grid min-h-screen bg-slate-950 lg:grid-cols-[1.05fr_.95fr]">
-      <section className="relative hidden overflow-hidden p-12 text-white lg:flex lg:flex-col lg:justify-between">
-        <div className="absolute inset-0 bg-gradient-to-br from-indigo-600/80 via-slate-950 to-cyan-500/40" />
-        <div className="absolute -left-24 top-28 size-80 rounded-full border-[60px] border-white/5" />
-        <img alt="HomeForge" className="relative w-56 rounded-3xl object-contain shadow-2xl shadow-cyan-950/40" src="/homeforge-logo.png" />
-        <div className="relative max-w-xl">
-          <p className="mb-4 text-sm font-bold uppercase tracking-[.2em] text-cyan-300">Recuperación de acceso</p>
-          <h1 className="text-5xl font-bold leading-tight">Recupera el acceso a tu cuenta de forma segura.</h1>
-          <p className="mt-5 text-lg text-slate-300">Ingresa tu correo y tu nueva contraseña para restablecer el acceso.</p>
-        </div>
-      </section>
+    <AuthLayout
+      description="Te enviaremos un enlace seguro para que elijas una nueva contraseña."
+      eyebrow="Recuperación de acceso"
+      headline="Recupera el acceso a tu cuenta de forma segura."
+    >
+      <Link className="mb-6 inline-flex items-center gap-1.5 text-sm font-medium text-fg-subtle transition hover:text-fg" to="/login">
+        <svg aria-hidden="true" className="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+        </svg>
+        Volver al inicio de sesión
+      </Link>
 
-      <section className="flex items-center justify-center bg-slate-50 px-5 py-10">
-        <div className="w-full max-w-md">
-          <div className="mb-8 lg:hidden">
-            <div className="flex items-center gap-3">
-              <img alt="HomeForge" className="size-12 rounded-xl object-cover" src="/favicon.png" />
-              <strong className="text-xl font-bold text-slate-950">HomeForge</strong>
-            </div>
-          </div>
+      {!success ? (
+        <>
+          <AuthHeading description="Ingresa tu correo electrónico y te enviaremos un enlace seguro para continuar." eyebrow="Recuperar contraseña" title="¿Olvidaste tu contraseña?" />
 
-          <Link className="mb-6 inline-flex items-center gap-2 text-sm font-semibold text-slate-600 transition hover:text-indigo-600" to="/login">
-            <svg className="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-            </svg>
-            Volver al inicio de sesión
-          </Link>
+          <form className="mt-8 space-y-5" onSubmit={submit}>
+            <Input
+              autoComplete="email"
+              label="Correo electrónico"
+              onChange={event => setEmail(event.target.value)}
+              placeholder="tu@email.com"
+              required
+              type="email"
+              value={email}
+            />
+            <Button fullWidth loading={saving} size="lg" type="submit">
+              {saving ? 'Enviando...' : 'Enviar enlace seguro'}
+            </Button>
+          </form>
+        </>
+      ) : (
+        <Alert
+          actions={<Link className={buttonClasses({ fullWidth: true })} to="/login">Volver al inicio de sesión</Link>}
+          title="Revisa tu correo"
+          variant="success"
+        >
+          Si existe una cuenta asociada, recibirás un enlace que será válido durante 30 minutos.
+        </Alert>
+      )}
 
-          {!success ? (
-            <>
-              <p className="mb-1 text-xs font-bold uppercase tracking-[0.16em] text-indigo-600">Recuperar contraseña</p>
-              <h2 className="text-3xl font-bold">¿Olvidaste tu contraseña?</h2>
-              <p className="mt-2 text-sm text-slate-500">Ingresa tu correo electrónico y te enviaremos un enlace seguro para continuar.</p>
-
-              <form className="mt-8 space-y-5" onSubmit={submit}>
-                <Input
-                    autoComplete="email"
-                    label="Correo electrónico"
-                    onChange={event => setEmail(event.target.value)}
-                    placeholder="tu@email.com"
-                    required
-                    type="email"
-                    value={email}
-                />
-
-                <Button
-                  disabled={saving}
-                  fullWidth
-                  loading={saving}
-                  size="lg"
-                  type="submit"
-                >
-                  {saving ? 'Enviando...' : 'Enviar enlace seguro'}
-                </Button>
-              </form>
-            </>
-          ) : (
-            <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-6">
-              <div className="mb-4 flex items-center gap-3">
-                <div className="grid size-12 shrink-0 place-items-center rounded-full bg-emerald-100">
-                  <svg className="size-6 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                  </svg>
-                </div>
-                <div>
-                  <h3 className="font-bold text-emerald-900">Revisa tu correo</h3>
-                  <p className="text-sm text-emerald-700">La solicitud fue procesada</p>
-                </div>
-              </div>
-              <p className="text-sm text-emerald-800">
-                Si existe una cuenta asociada, recibirás un enlace que será válido durante 30 minutos.
-              </p>
-              <Link
-                className="mt-4 block w-full rounded-xl bg-indigo-600 px-4 py-3 text-center text-sm font-semibold text-white transition hover:bg-indigo-700"
-                to="/login"
-              >
-                Volver al inicio de sesión
-              </Link>
-            </div>
-          )}
-
-          <p className="mt-6 text-center text-sm text-slate-500">
-            ¿Recordaste tu contraseña?{' '}
-            <Link className="font-semibold text-indigo-600 hover:text-indigo-800" to="/login">
-              Iniciar sesión
-            </Link>
-          </p>
-        </div>
-      </section>
-    </div>
+      <p className="mt-6 text-center text-sm text-fg-subtle">
+        ¿Recordaste tu contraseña?{' '}
+        <Link className="font-semibold text-primary-fg hover:underline" to="/login">
+          Iniciar sesión
+        </Link>
+      </p>
+    </AuthLayout>
   );
 }

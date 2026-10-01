@@ -182,6 +182,23 @@ El idioma se puede cambiar desde la interfaz de usuario o configurando el locale
 
 El proyecto usa **Tailwind CSS 4** y tokens CSS semánticos para los temas light, dark y obsidian.
 
+### Reglas del sistema de diseño
+
+- **Colores solo por token**, nunca por paleta: `bg-app`, `bg-surface`, `bg-surface-muted`,
+  `text-fg`, `text-fg-muted`, `text-fg-subtle`, `border-border`, y los roles
+  `primary | accent | success | warning | danger | info` con sus variantes
+  (`bg-primary`, `bg-primary-soft`, `text-primary-fg`, `border-primary-line`...).
+  Los tokens se definen en `src/index.css`; cada tema solo cambia variables, así que no
+  hacen falta clases `dark:` ni overrides por tema.
+- **Componentes de `src/shared/ui`** para todo control estándar: `Button` (o `buttonClasses()`
+  para `<Link>`), `Input`, `Select`, `Textarea`, `SearchInput`, `Checkbox`, `Switch`,
+  `SegmentedControl`, `Modal` (con `footer`), `Card`/`CardWithHeader`, `PageHeader`, `Tabs`,
+  `Badge`, `Alert`, `StatCard`, `EmptyState`, `LoadingState`/`Skeleton`, `Table`, `Menu`, `Avatar`.
+- **Confirmaciones** con `ConfirmModal` y avisos con `toast`; no usar `alert()`/`confirm()`.
+- Cada página empieza con `PageHeader`; el layout privado ya aporta el fondo y el padding.
+- Excepción intencional: el sidebar y los paneles de marca (login, hero público) son siempre
+  oscuros y usan colores fijos de Tailwind.
+
 ## 🛠️ Comandos Útiles
 
 ```bash

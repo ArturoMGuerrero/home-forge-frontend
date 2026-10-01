@@ -2,12 +2,8 @@ import { useRef, useState } from 'react';
 import type { ChangeEvent } from 'react';
 import { Link } from 'react-router-dom';
 import toast from 'react-hot-toast';
-import { Tabs } from '../../../shared/ui/Tabs';
-import { Card } from '../../../shared/ui/Card';
-import { Input } from '../../../shared/ui/Input';
-import { Button } from '../../../shared/ui/Button';
+import { Alert, Avatar, Button, buttonClasses, Card, Input, PageHeader, Tabs } from '../../../shared/ui';
 import { Icon } from '../../../shared/Icon';
-import { Avatar } from '../../../shared/ui/Avatar';
 import { ThemeSelector } from '../components/ThemeSelector';
 import { getSession } from '../../auth';
 import { getUserAvatar, setUserAvatar } from '../api/accountPreferences';
@@ -22,22 +18,20 @@ export function AccountSettingsPage() {
 
   return (
     <div className="mx-auto max-w-5xl">
-      <header className="mb-7 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-        <div>
-          <p className="mb-1 text-[11px] font-bold uppercase tracking-[0.16em] text-indigo-600">Preferencias personales</p>
-          <h1 className="text-2xl font-bold text-slate-900 sm:text-3xl">Mi cuenta</h1>
-          <p className="mt-2 text-sm text-slate-500">Administra tu identidad personal, seguridad y apariencia de HomeForge.</p>
-        </div>
-        <Link className="inline-flex items-center gap-2 self-start rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 shadow-sm transition hover:border-indigo-300 hover:text-indigo-700 sm:self-auto" to="/app/configuracion/empresa">
-          <Icon className="size-4" name="properties" />Logo y perfil de empresa
-        </Link>
-      </header>
+      <PageHeader
+        actions={
+          <Link className={buttonClasses({ variant: 'tertiary' })} to="/app/configuracion/empresa">
+            <Icon className="size-4" name="properties" />Logo y perfil de empresa
+          </Link>
+        }
+        eyebrow="Preferencias personales"
+        subtitle="Administra tu identidad personal, seguridad y apariencia de HomeForge."
+        title="Mi cuenta"
+      />
 
-      <div className="rounded-2xl border border-blue-200 bg-blue-50 p-4 text-sm text-blue-900">
-        <strong>Cuenta personal:</strong> el avatar te identifica dentro del equipo. El logo, nombre comercial y datos públicos se administran en Configuración de empresa.
-      </div>
+      <Alert title="Cuenta personal">El avatar te identifica dentro del equipo. El logo, nombre comercial y datos públicos se administran en Configuración de empresa.</Alert>
 
-      <div className="mt-6"><Tabs tabs={tabs} activeTab={activeTab} onChange={setActiveTab} variant="underline" /></div>
+      <div className="mt-6"><Tabs tabs={tabs} activeTab={activeTab} onChange={setActiveTab} /></div>
       <div className="mt-6">
         {activeTab === 'profile' && <ProfileTab />}
         {activeTab === 'security' && <SecurityTab />}
@@ -72,18 +66,18 @@ function ProfileTab() {
   return (
     <Card>
       <div className="space-y-7">
-        <div><h2 className="text-lg font-bold text-slate-900">Perfil personal</h2><p className="mt-1 text-sm text-slate-500">Información utilizada para identificarte dentro del equipo.</p></div>
-        <div className="flex flex-col gap-4 rounded-2xl bg-slate-50 p-4 sm:flex-row sm:items-center">
-          <Avatar src={avatar || undefined} name={session?.name || 'Usuario'} size="2xl" className="shrink-0 ring-4 ring-white" />
+        <div><h2 className="text-lg font-semibold text-fg">Perfil personal</h2><p className="mt-1 text-sm text-fg-subtle">Información utilizada para identificarte dentro del equipo.</p></div>
+        <div className="flex flex-col gap-4 rounded-2xl bg-surface-muted p-4 sm:flex-row sm:items-center">
+          <Avatar src={avatar || undefined} name={session?.name || 'Usuario'} size="2xl" className="shrink-0 ring-4 ring-surface" />
           <div>
-            <h3 className="font-bold text-slate-900">Avatar personal</h3>
-            <p className="mt-1 text-sm text-slate-500">No es el logo de la empresa. Solo se muestra a los integrantes de tu organización.</p>
+            <h3 className="font-semibold text-fg">Avatar personal</h3>
+            <p className="mt-1 text-sm text-fg-subtle">No es el logo de la empresa. Solo se muestra a los integrantes de tu organización.</p>
             <input accept="image/png,image/jpeg,image/webp" className="hidden" onChange={selectAvatar} ref={fileRef} type="file" />
             <div className="mt-3 flex flex-wrap gap-2">
               <Button icon={<Icon className="size-4" name="upload" />} onClick={() => fileRef.current?.click()} size="sm">Cambiar avatar</Button>
               {avatar && <Button onClick={() => { setUserAvatar(session?.userId, ''); setAvatar(''); }} size="sm" variant="tertiary">Usar iniciales</Button>}
             </div>
-            <p className="mt-2 text-xs text-slate-500">JPG, PNG o WebP. Máximo 2 MB.</p>
+            <p className="mt-2 text-xs text-fg-subtle">JPG, PNG o WebP. Máximo 2 MB.</p>
           </div>
         </div>
 
@@ -93,9 +87,9 @@ function ProfileTab() {
           <div className="sm:col-span-2"><Input disabled helperText="El correo está asociado a tus credenciales de acceso." label="Correo electrónico" type="email" value={session?.email || ''} /></div>
         </div>
 
-        <div className="flex flex-col-reverse gap-3 border-t border-slate-200 pt-5 sm:flex-row sm:justify-end">
+        <div className="flex flex-col-reverse gap-3 border-t border-border pt-5 sm:flex-row sm:justify-end">
           <Button onClick={() => { setFirstName(session?.name?.split(' ')[0] || ''); setLastName(session?.name?.split(' ').slice(1).join(' ') || ''); }} variant="ghost">Cancelar cambios</Button>
-          <Button onClick={() => toast.success('Preferencias personales guardadas.')}><Icon className="size-4" name="save" />Guardar cambios</Button>
+          <Button icon={<Icon className="size-4" name="save" />} onClick={() => toast.success('Preferencias personales guardadas.')}>Guardar cambios</Button>
         </div>
       </div>
     </Card>
@@ -115,13 +109,13 @@ function SecurityTab() {
   return (
     <Card>
       <div className="space-y-6">
-        <div className="flex items-start gap-4"><span className="grid size-11 shrink-0 place-items-center rounded-xl bg-indigo-100"><Icon className="size-5 text-indigo-600" name="shield" /></span><div><h2 className="text-lg font-bold">Seguridad de acceso</h2><p className="mt-1 text-sm text-slate-500">Utiliza una contraseña única de al menos ocho caracteres.</p></div></div>
+        <div className="flex items-start gap-4"><span className="grid size-10 shrink-0 place-items-center rounded-xl bg-primary-soft"><Icon className="size-5 text-primary-fg" name="shield" /></span><div><h2 className="text-lg font-semibold text-fg">Seguridad de acceso</h2><p className="mt-1 text-sm text-fg-subtle">Utiliza una contraseña única de al menos ocho caracteres.</p></div></div>
         <div className="grid gap-5 sm:grid-cols-2">
           <div className="sm:col-span-2"><Input label="Contraseña actual" onChange={event => setCurrentPassword(event.target.value)} type="password" value={currentPassword} /></div>
           <Input label="Nueva contraseña" onChange={event => setNewPassword(event.target.value)} type="password" value={newPassword} />
           <Input label="Confirmar contraseña" onChange={event => setConfirmPassword(event.target.value)} type="password" value={confirmPassword} />
         </div>
-        <div className="flex justify-end border-t border-slate-200 pt-5"><Button onClick={changePassword}><Icon className="size-4" name="shield" />Actualizar contraseña</Button></div>
+        <div className="flex justify-end border-t border-border pt-5"><Button icon={<Icon className="size-4" name="shield" />} onClick={changePassword}>Actualizar contraseña</Button></div>
       </div>
     </Card>
   );

@@ -1,5 +1,6 @@
 import { StoredDocument, storedDocumentDownloadUrl as documentDownloadUrl, storedDocumentViewUrl as documentViewUrl } from '../api/storedDocumentsApi';
-import { Modal } from '../../../shared/ui/Modal';
+import { Icon } from '../../../shared/Icon';
+import { buttonClasses, EmptyState, Modal } from '../../../shared/ui';
 
 type Props = {
   document: StoredDocument;
@@ -36,13 +37,13 @@ export function DocumentPreviewModal({ document: doc, onClose }: Props) {
           {isPdf && (
             <iframe
               src={viewUrl}
-              className="w-full h-full min-h-[600px]"
+              className="h-[70dvh] w-full"
               title={doc.fileName}
             />
           )}
 
           {isImage && (
-            <div className="flex items-center justify-center p-6 bg-slate-50">
+            <div className="flex items-center justify-center p-6 bg-surface-muted">
               <img
                 src={viewUrl}
                 alt={doc.fileName}
@@ -51,52 +52,21 @@ export function DocumentPreviewModal({ document: doc, onClose }: Props) {
             </div>
           )}
 
-          {isWordDoc && (
-            <div className="flex flex-col items-center justify-center p-12 text-center">
-              <div className="rounded-full bg-indigo-100 p-6 mb-4">
-                <svg className="size-12 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                </svg>
-              </div>
-              <h3 className="text-lg font-semibold text-slate-900 mb-2">Vista previa no disponible</h3>
-              <p className="text-sm text-slate-600 mb-6 max-w-md">
-                Los documentos de Word no se pueden previsualizar en el navegador. Descarga el archivo para verlo.
-              </p>
-              <a
-                href={downloadUrl}
-                className="rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 px-6 py-3 text-sm font-semibold text-white shadow-lg hover:shadow-xl transition"
-              >
-                Descargar documento
-              </a>
-            </div>
-          )}
-
-          {!isPdf && !isImage && !isWordDoc && (
-            <div className="flex flex-col items-center justify-center p-12 text-center">
-              <div className="rounded-full bg-slate-100 p-6 mb-4">
-                <svg className="size-12 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
-                </svg>
-              </div>
-              <h3 className="text-lg font-semibold text-slate-900 mb-2">Vista previa no disponible</h3>
-              <p className="text-sm text-slate-600 mb-6">
-                Este tipo de archivo no se puede previsualizar en el navegador.
-              </p>
-              <a
-                href={downloadUrl}
-                className="rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 px-6 py-3 text-sm font-semibold text-white shadow-lg hover:shadow-xl transition"
-              >
-                Descargar archivo
-              </a>
-            </div>
+          {!isPdf && !isImage && (
+            <EmptyState
+              actions={<a className={buttonClasses()} href={downloadUrl}>{isWordDoc ? 'Descargar documento' : 'Descargar archivo'}</a>}
+              description={isWordDoc ? 'Los documentos de Word no se pueden previsualizar en el navegador. Descarga el archivo para verlo.' : 'Este tipo de archivo no se puede previsualizar en el navegador.'}
+              icon={<Icon name="document" />}
+              title="Vista previa no disponible"
+            />
           )}
         </div>
 
         {/* Footer with notes if any */}
         {doc.notes && (
-          <div className="border-t border-slate-200 px-6 py-4 bg-slate-50">
-            <p className="text-xs font-semibold text-slate-500 mb-1">Notas:</p>
-            <p className="text-sm text-slate-700">{doc.notes}</p>
+          <div className="border-t border-border bg-surface-muted px-6 py-4">
+            <p className="mb-1 text-xs font-semibold text-fg-subtle">Notas</p>
+            <p className="text-sm text-fg-muted">{doc.notes}</p>
           </div>
         )}
       </div>

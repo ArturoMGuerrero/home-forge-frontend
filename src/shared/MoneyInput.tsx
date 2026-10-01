@@ -1,4 +1,5 @@
 import { InputHTMLAttributes, useEffect, useState } from 'react';
+import { cn } from './ui';
 
 type MoneyInputProps = Omit<InputHTMLAttributes<HTMLInputElement>, 'onChange' | 'type' | 'value'> & {
   currency?: string;
@@ -28,7 +29,7 @@ export function formatMoneyInput(value: string | number | undefined): string {
   return decimals === undefined ? grouped : `${grouped}.${decimals}`;
 }
 
-export function MoneyInput({ className = '', currency, onBlur, onChange, value, ...props }: MoneyInputProps) {
+export function MoneyInput({ className, currency, onBlur, onChange, value, ...props }: MoneyInputProps) {
   const [displayValue, setDisplayValue] = useState(() => formatMoneyInput(value));
 
   useEffect(() => setDisplayValue(formatMoneyInput(value)), [value]);
@@ -37,7 +38,7 @@ export function MoneyInput({ className = '', currency, onBlur, onChange, value, 
     <div className="relative">
       <input
         {...props}
-        className={`${className} pr-16`}
+        className={cn(className, currency && 'pr-16')}
         inputMode="decimal"
         onBlur={event => {
           setDisplayValue(formatMoneyInput(value));
@@ -52,7 +53,7 @@ export function MoneyInput({ className = '', currency, onBlur, onChange, value, 
         type="text"
         value={displayValue}
       />
-      {currency && <span className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-xs font-bold text-slate-500">{currency}</span>}
+      {currency && <span className="pointer-events-none absolute inset-y-0 right-3.5 flex items-center text-xs font-semibold text-fg-subtle">{currency}</span>}
     </div>
   );
 }

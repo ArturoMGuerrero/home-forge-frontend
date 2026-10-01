@@ -1,7 +1,8 @@
 import { getSession } from '../../auth';
 import { deleteJson, deleteVoid, getJson, patchJson, postJson, putJson } from '../../../shared/services/api';
 
-const STORAGE_KEY = 'casaflow_leads';
+const STORAGE_KEY = 'homeforge_leads';
+export const LEADS_CHANGED_EVENT = 'homeforge:leads';
 
 const DEMO_COMPANY_ID = '00000000-0000-0000-0000-000000000001';
 
@@ -180,6 +181,6 @@ export function getLocalLeads(): LeadItem[] {
 export function addLocalLead(lead: Omit<LeadItem, 'id' | 'status' | 'createdAt' | 'updatedAt'>): LeadItem {
   const item = { ...lead, id: crypto.randomUUID(), status: 'NEW' as LeadStatus, createdAt: new Date().toISOString() };
   localStorage.setItem(STORAGE_KEY, JSON.stringify([item, ...getLocalLeads()]));
-  window.dispatchEvent(new Event('casaflow:leads'));
+  window.dispatchEvent(new Event(LEADS_CHANGED_EVENT));
   return item;
 }

@@ -1,5 +1,29 @@
 import { useState } from 'react';
+import { Button, Card, Checkbox, cn, Input, SearchInput, Select } from '../../../shared/ui';
 import { ApiProperty } from '../api/propertyApi';
+
+const statusOptions = [
+  { value: 'ALL', label: 'Todos los estados' },
+  { value: 'AVAILABLE', label: 'Disponible' },
+  { value: 'RESERVED', label: 'Apartada' },
+  { value: 'SOLD', label: 'Vendida' },
+  { value: 'RENTED', label: 'Rentada' },
+  { value: 'UNAVAILABLE', label: 'No disponible' }
+];
+const listingOptions = [
+  { value: 'ALL', label: 'Venta y renta' },
+  { value: 'SALE', label: 'Venta' },
+  { value: 'RENT', label: 'Renta' }
+];
+const propertyTypeOptions = [
+  { value: 'ALL', label: 'Todos los tipos' },
+  { value: 'HOUSE', label: 'Casa' },
+  { value: 'APARTMENT', label: 'Departamento' },
+  { value: 'LAND', label: 'Terreno' },
+  { value: 'COMMERCIAL', label: 'Local comercial' },
+  { value: 'OFFICE', label: 'Oficina' },
+  { value: 'WAREHOUSE', label: 'Bodega' }
+];
 
 export type PropertyFilterOptions = {
   searchQuery: string;
@@ -61,235 +85,57 @@ export function PropertyFilters({ filters, onChange, resultCount, totalCount }: 
     filters.publishedOnly;
 
   return (
-    <div className="space-y-4 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-      {/* Búsqueda principal */}
-      <div className="relative">
-        <svg className="pointer-events-none absolute left-3.5 top-1/2 size-5 -translate-y-1/2 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-        </svg>
-        <input
-          className="w-full rounded-xl border border-slate-200 py-2.5 pl-11 pr-4 text-sm transition focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+    <Card className="space-y-4 p-4 sm:p-5">
+      <div className="grid gap-3">
+        <SearchInput
+          aria-label="Buscar propiedades"
+          
           onChange={e => updateFilter('searchQuery', e.target.value)}
+          onClear={() => updateFilter('searchQuery', '')}
           placeholder="Buscar por código, título o ciudad..."
-          type="text"
           value={filters.searchQuery}
         />
-        {filters.searchQuery && (
-          <button
-            className="absolute right-3 top-1/2 -translate-y-1/2 rounded-lg p-1 text-slate-400 transition hover:bg-slate-100 hover:text-slate-600"
-            onClick={() => updateFilter('searchQuery', '')}
-            type="button"
-          >
-            <svg className="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          </button>
-        )}
-      </div>
-
-      {/* Filtros básicos */}
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-        <div>
-          <label className="mb-1.5 block text-xs font-semibold text-slate-600">Estado</label>
-          <select
-            className="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm transition focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
-            onChange={e => updateFilter('statusFilter', e.target.value)}
-            value={filters.statusFilter}
-          >
-            <option value="ALL">Todos</option>
-            <option value="AVAILABLE">Disponible</option>
-            <option value="RESERVED">Apartada</option>
-            <option value="SOLD">Vendida</option>
-            <option value="RENTED">Rentada</option>
-            <option value="UNAVAILABLE">No disponible</option>
-          </select>
-        </div>
-
-        <div>
-          <label className="mb-1.5 block text-xs font-semibold text-slate-600">Operación</label>
-          <select
-            className="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm transition focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
-            onChange={e => updateFilter('listingTypeFilter', e.target.value)}
-            value={filters.listingTypeFilter}
-          >
-            <option value="ALL">Todas</option>
-            <option value="SALE">Venta</option>
-            <option value="RENT">Renta</option>
-          </select>
-        </div>
-
-        <div>
-          <label className="mb-1.5 block text-xs font-semibold text-slate-600">Tipo</label>
-          <select
-            className="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm transition focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
-            onChange={e => updateFilter('propertyTypeFilter', e.target.value)}
-            value={filters.propertyTypeFilter}
-          >
-            <option value="ALL">Todos</option>
-            <option value="HOUSE">Casa</option>
-            <option value="APARTMENT">Departamento</option>
-            <option value="LAND">Terreno</option>
-            <option value="COMMERCIAL">Local comercial</option>
-            <option value="OFFICE">Oficina</option>
-            <option value="WAREHOUSE">Bodega</option>
-          </select>
-        </div>
-
-        <div className="flex items-end">
-          <button
-            className="w-full rounded-xl border-2 border-indigo-200 bg-indigo-50 px-3 py-2 text-sm font-semibold text-indigo-700 transition hover:bg-indigo-100"
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-[1fr_1fr_1fr_auto]">
+          <Select aria-label="Estado" onChange={e => updateFilter('statusFilter', e.target.value)} options={statusOptions} value={filters.statusFilter} />
+          <Select aria-label="Operación" onChange={e => updateFilter('listingTypeFilter', e.target.value)} options={listingOptions} value={filters.listingTypeFilter} />
+          <Select aria-label="Tipo de inmueble" onChange={e => updateFilter('propertyTypeFilter', e.target.value)} options={propertyTypeOptions} value={filters.propertyTypeFilter} />
+          <Button
+            aria-expanded={showAdvanced}
+            className="min-h-11"
+            iconRight={<svg aria-hidden="true" className={cn('size-4 transition', showAdvanced && 'rotate-180')} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>}
             onClick={() => setShowAdvanced(!showAdvanced)}
-            type="button"
+            variant={showAdvanced ? 'secondary' : 'tertiary'}
           >
-            {showAdvanced ? '⬆ Menos filtros' : '⬇ Más filtros'}
-          </button>
+            Más filtros
+          </Button>
         </div>
       </div>
 
-      {/* Filtros avanzados */}
       {showAdvanced && (
-        <div className="space-y-4 rounded-xl border border-indigo-100 bg-indigo-50/50 p-4">
-          <p className="text-xs font-bold uppercase tracking-wider text-indigo-700">Filtros avanzados</p>
-
-          {/* Rango de precio */}
-          <div className="grid gap-3 sm:grid-cols-2">
-            <div>
-              <label className="mb-1.5 block text-xs font-semibold text-slate-600">Precio mínimo (MXN)</label>
-              <input
-                className="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm transition focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
-                min="0"
-                placeholder="$ 0"
-                type="number"
-                value={filters.minPrice}
-                onChange={e => updateFilter('minPrice', e.target.value)}
-              />
-            </div>
-            <div>
-              <label className="mb-1.5 block text-xs font-semibold text-slate-600">Precio máximo (MXN)</label>
-              <input
-                className="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm transition focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
-                min="0"
-                placeholder="$ 10,000,000"
-                type="number"
-                value={filters.maxPrice}
-                onChange={e => updateFilter('maxPrice', e.target.value)}
-              />
-            </div>
+        <div className="grid gap-4 rounded-xl border border-border bg-surface-muted p-4 sm:grid-cols-2 lg:grid-cols-4">
+          <Input label="Precio mínimo (MXN)" min="0" onChange={e => updateFilter('minPrice', e.target.value)} placeholder="$ 0" type="number" value={filters.minPrice} />
+          <Input label="Precio máximo (MXN)" min="0" onChange={e => updateFilter('maxPrice', e.target.value)} placeholder="$ 10,000,000" type="number" value={filters.maxPrice} />
+          <Input label="Superficie mínima (m²)" min="0" onChange={e => updateFilter('minArea', e.target.value)} placeholder="0" type="number" value={filters.minArea} />
+          <Input label="Superficie máxima (m²)" min="0" onChange={e => updateFilter('maxArea', e.target.value)} placeholder="1000" type="number" value={filters.maxArea} />
+          <Input label="Recámaras mínimas" max="20" min="0" onChange={e => updateFilter('minBedrooms', e.target.value)} placeholder="0" type="number" value={filters.minBedrooms} />
+          <Input label="Recámaras máximas" max="20" min="0" onChange={e => updateFilter('maxBedrooms', e.target.value)} placeholder="10" type="number" value={filters.maxBedrooms} />
+          <Input label="Baños mínimos" max="20" min="0" onChange={e => updateFilter('minBathrooms', e.target.value)} placeholder="0" step="0.5" type="number" value={filters.minBathrooms} />
+          <Input label="Baños máximos" max="20" min="0" onChange={e => updateFilter('maxBathrooms', e.target.value)} placeholder="10" step="0.5" type="number" value={filters.maxBathrooms} />
+          <div className="sm:col-span-2 lg:col-span-4">
+            <Checkbox checked={filters.publishedOnly} label="Solo mostrar propiedades publicadas" onChange={e => updateFilter('publishedOnly', e.target.checked)} />
           </div>
-
-          {/* Rango de recámaras */}
-          <div className="grid gap-3 sm:grid-cols-2">
-            <div>
-              <label className="mb-1.5 block text-xs font-semibold text-slate-600">Recámaras mínimas</label>
-              <input
-                className="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm transition focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
-                min="0"
-                max="20"
-                placeholder="0"
-                type="number"
-                value={filters.minBedrooms}
-                onChange={e => updateFilter('minBedrooms', e.target.value)}
-              />
-            </div>
-            <div>
-              <label className="mb-1.5 block text-xs font-semibold text-slate-600">Recámaras máximas</label>
-              <input
-                className="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm transition focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
-                min="0"
-                max="20"
-                placeholder="10"
-                type="number"
-                value={filters.maxBedrooms}
-                onChange={e => updateFilter('maxBedrooms', e.target.value)}
-              />
-            </div>
-          </div>
-
-          {/* Rango de baños */}
-          <div className="grid gap-3 sm:grid-cols-2">
-            <div>
-              <label className="mb-1.5 block text-xs font-semibold text-slate-600">Baños mínimos</label>
-              <input
-                className="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm transition focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
-                min="0"
-                max="20"
-                step="0.5"
-                placeholder="0"
-                type="number"
-                value={filters.minBathrooms}
-                onChange={e => updateFilter('minBathrooms', e.target.value)}
-              />
-            </div>
-            <div>
-              <label className="mb-1.5 block text-xs font-semibold text-slate-600">Baños máximos</label>
-              <input
-                className="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm transition focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
-                min="0"
-                max="20"
-                step="0.5"
-                placeholder="10"
-                type="number"
-                value={filters.maxBathrooms}
-                onChange={e => updateFilter('maxBathrooms', e.target.value)}
-              />
-            </div>
-          </div>
-
-          {/* Rango de superficie */}
-          <div className="grid gap-3 sm:grid-cols-2">
-            <div>
-              <label className="mb-1.5 block text-xs font-semibold text-slate-600">Superficie mínima (m²)</label>
-              <input
-                className="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm transition focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
-                min="0"
-                placeholder="0"
-                type="number"
-                value={filters.minArea}
-                onChange={e => updateFilter('minArea', e.target.value)}
-              />
-            </div>
-            <div>
-              <label className="mb-1.5 block text-xs font-semibold text-slate-600">Superficie máxima (m²)</label>
-              <input
-                className="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm transition focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
-                min="0"
-                placeholder="1000"
-                type="number"
-                value={filters.maxArea}
-                onChange={e => updateFilter('maxArea', e.target.value)}
-              />
-            </div>
-          </div>
-
-          {/* Solo publicadas */}
-          <label className="flex items-center gap-2 text-sm text-slate-700">
-            <input
-              checked={filters.publishedOnly}
-              className="size-4 rounded border-slate-300 text-indigo-600 focus:ring-2 focus:ring-indigo-500/20"
-              type="checkbox"
-              onChange={e => updateFilter('publishedOnly', e.target.checked)}
-            />
-            <span className="font-medium">Solo mostrar propiedades publicadas</span>
-          </label>
         </div>
       )}
 
-      {/* Contador de resultados */}
       {hasActiveFilters && (
-        <div className="flex items-center justify-between rounded-lg bg-indigo-50 px-4 py-2.5 text-xs">
-          <span className="font-medium text-indigo-900">
-            {resultCount} de {totalCount} {resultCount === 1 ? 'propiedad encontrada' : 'propiedades encontradas'}
+        <div className="flex items-center justify-between gap-3 border-t border-border pt-3 text-sm">
+          <span className="text-fg-subtle">
+            <strong className="font-semibold text-fg">{resultCount}</strong> de {totalCount} {resultCount === 1 ? 'propiedad encontrada' : 'propiedades encontradas'}
           </span>
-          <button
-            className="font-semibold text-indigo-600 transition hover:text-indigo-700"
-            onClick={clearFilters}
-            type="button"
-          >
-            Limpiar filtros
-          </button>
+          <Button onClick={clearFilters} size="sm" variant="ghost">Limpiar filtros</Button>
         </div>
       )}
-    </div>
+    </Card>
   );
 }
 

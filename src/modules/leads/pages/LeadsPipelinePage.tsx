@@ -1,13 +1,22 @@
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { DndContext, DragEndEvent, DragOverlay, DragStartEvent, closestCenter, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
-import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
-import { useSortable } from '@dnd-kit/sortable';
-import { CSS } from '@dnd-kit/utilities';
+import toast from 'react-hot-toast';
+import {
+  DndContext,
+  DragEndEvent,
+  DragOverlay,
+  DragStartEvent,
+  KeyboardSensor,
+  PointerSensor,
+  useDraggable,
+  useDroppable,
+  useSensor,
+  useSensors
+} from '@dnd-kit/core';
 import { changeLeadStatus, LeadItem, LeadStatus, leadStatusLabels, listLeads } from '../api/leadsApi';
-import { Tabs, Tab } from '../../../shared/ui/Tabs';
-import { PageHeader } from '../../../shared/ui/PageHeader';
-import { InfoBanner } from '../../../shared/ui/InfoBanner';
+import { leadStatusVariants } from '../components/LeadList';
+import { LeadsNav } from '../components/LeadsNav';
+import { Avatar, Badge, Card, cn, LoadingState, PageHeader } from '../../../shared/ui';
 
 const PIPELINE_COLUMNS: LeadStatus[] = [
   'NEW',
@@ -20,217 +29,155 @@ const PIPELINE_COLUMNS: LeadStatus[] = [
   'CLOSED'
 ];
 
-interface LeadCardProps {
-  lead: LeadItem;
-  isDragging?: boolean;
+const priorityLabels: Record<LeadItem['priority'], string> = { HIGH: 'Alta', MEDIUM: 'Media', LOW: 'Baja' };
+
+function LeadCardContent({ lead }: { lead: LeadItem }) {
+  const name = `${lead.firstName} ${lead.lastName}`;
+  return (
+    <>
+      <div className="flex items-start gap-2.5">
+        <Avatar name={name} size="sm" />
+        <div className="min-w-0 flex-1">
+          <p className="truncate text-sm font-semibold text-fg">{name}</p>
+          {(lead.email || lead.city) && <p className="truncate text-xs text-fg-subtle">{lead.city || lead.email}</p>}
+        </div>
+      </div>
+      <div className="mt-3 flex flex-wrap items-center gap-1.5">
+        {lead.budgetMax && <span className="text-xs font-semibold tabular-nums text-fg">${lead.budgetMax.toLocaleString()}</span>}
+        {lead.priority === 'HIGH' && <Badge dot variant="error">{priorityLabels.HIGH}</Badge>}
+        {lead.score !== undefined && lead.score > 0 && (
+          <Badge variant={lead.score >= 70 ? 'success' : lead.score >= 40 ? 'warning' : 'neutral'}>{lead.score} pts</Badge>
+        )}
+      </div>
+    </>
+  );
 }
 
-function LeadCard({ lead, isDragging }: LeadCardProps) {
-  const {
-    attributes,
-    listeners,
-    setNodeRef,
-    transform,
-    transition
-  } = useSortable({ id: lead.id });
-
-  const style = {
-    transform: CSS.Transform.toString(transform),
-    transition,
-    opacity: isDragging ? 0.5 : 1
-  };
+function DraggableLeadCard({ lead }: { lead: LeadItem }) {
+  const { attributes, listeners, setNodeRef, isDragging } = useDraggable({ id: lead.id });
 
   return (
     <Link
-      to={`/app/prospectos/${lead.id}`}
       ref={setNodeRef}
-      style={style}
+      to={`/app/prospectos/${lead.id}`}
       {...attributes}
       {...listeners}
-      className="flex items-center gap-4 bg-white p-4 rounded-xl shadow-sm border border-slate-200 hover:shadow-md hover:border-indigo-300 transition-all cursor-grab active:cursor-grabbing"
+      className={cn(
+        'block cursor-grab touch-none rounded-xl border border-border bg-surface p-3 shadow-card transition-[border-color,box-shadow,opacity]',
+        'hover:border-primary-line hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary active:cursor-grabbing',
+        isDragging && 'opacity-40'
+      )}
     >
-      {/* Avatar/Initials */}
-      <div className="size-12 shrink-0 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-bold">
-        {lead.firstName[0]}{lead.lastName[0]}
-      </div>
-
-      {/* Info */}
-      <div className="flex-1 min-w-0">
-        <div className="flex items-center gap-2 mb-1">
-          <h3 className="font-semibold text-slate-900 truncate">
-            {lead.firstName} {lead.lastName}
-          </h3>
-          {lead.score !== undefined && lead.score > 0 && (
-            <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${
-              lead.score >= 70 ? 'bg-green-100 text-green-700' :
-              lead.score >= 40 ? 'bg-yellow-100 text-yellow-700' :
-              'bg-slate-100 text-slate-600'
-            }`}>
-              {lead.score} pts
-            </span>
-          )}
-        </div>
-        <div className="flex flex-wrap items-center gap-2 text-xs text-slate-600">
-          {lead.email && <span className="truncate">{lead.email}</span>}
-          {lead.phoneE164 && <span>{lead.phoneE164}</span>}
-          {lead.city && <span>• {lead.city}</span>}
-        </div>
-      </div>
-
-      {/* Budget & Priority */}
-      <div className="text-right shrink-0">
-        {lead.budgetMax && (
-          <div className="text-sm font-bold text-slate-900 mb-1">
-            ${lead.budgetMax.toLocaleString()}
-          </div>
-        )}
-        {lead.priority && (
-          <span className={`inline-block px-2 py-0.5 rounded-full text-xs font-medium ${
-            lead.priority === 'HIGH' ? 'bg-red-100 text-red-700' :
-            lead.priority === 'MEDIUM' ? 'bg-yellow-100 text-yellow-700' :
-            'bg-slate-100 text-slate-600'
-          }`}>
-            {lead.priority === 'HIGH' ? 'Alta' : lead.priority === 'MEDIUM' ? 'Media' : 'Baja'}
-          </span>
-        )}
-      </div>
+      <LeadCardContent lead={lead} />
     </Link>
+  );
+}
+
+function PipelineColumn({ status, leads }: { status: LeadStatus; leads: LeadItem[] }) {
+  const { setNodeRef, isOver } = useDroppable({ id: status });
+  const total = leads.reduce((sum, lead) => sum + (lead.budgetMax ?? 0), 0);
+
+  return (
+    <section
+      aria-label={leadStatusLabels[status]}
+      className={cn(
+        'flex w-72 shrink-0 flex-col rounded-2xl border bg-surface-muted transition-colors',
+        isOver ? 'border-primary bg-primary-soft' : 'border-border'
+      )}
+      ref={setNodeRef}
+    >
+      <header className="flex items-center justify-between gap-2 px-3.5 pb-2 pt-3">
+        <div className="flex min-w-0 items-center gap-2">
+          <Badge dot variant={leadStatusVariants[status]}>{leadStatusLabels[status]}</Badge>
+          <span className="text-xs font-semibold tabular-nums text-fg-subtle">{leads.length}</span>
+        </div>
+        {total > 0 && <span className="truncate text-xs tabular-nums text-fg-subtle">${total.toLocaleString()}</span>}
+      </header>
+      <div className="flex min-h-32 flex-1 flex-col gap-2 overflow-y-auto px-2 pb-2">
+        {leads.map(lead => <DraggableLeadCard key={lead.id} lead={lead} />)}
+        {leads.length === 0 && (
+          <p className="m-1 grid flex-1 place-items-center rounded-xl border border-dashed border-border-strong px-3 py-6 text-center text-xs text-fg-subtle">
+            Suelta aquí un prospecto
+          </p>
+        )}
+      </div>
+    </section>
   );
 }
 
 export default function LeadsPipelinePage() {
   const [leads, setLeads] = useState<LeadItem[]>([]);
-  const [activeTab, setActiveTab] = useState<LeadStatus>('NEW');
   const [activeId, setActiveId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
   const sensors = useSensors(
-    useSensor(PointerSensor, {
-      activationConstraint: {
-        distance: 8,
-      },
-    })
+    useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
+    useSensor(KeyboardSensor)
   );
 
   useEffect(() => {
-    loadLeads();
+    listLeads()
+      .then(setLeads)
+      .catch(error => toast.error(error instanceof Error ? error.message : 'No fue posible cargar el pipeline.'))
+      .finally(() => setLoading(false));
   }, []);
 
-  async function loadLeads() {
-    try {
-      const data = await listLeads();
-      setLeads(data);
-    } catch (error) {
-      console.error('Error loading leads:', error);
-    } finally {
-      setLoading(false);
-    }
-  }
-
   function handleDragStart(event: DragStartEvent) {
-    setActiveId(event.active.id as string);
+    setActiveId(String(event.active.id));
   }
 
   async function handleDragEnd(event: DragEndEvent) {
-    const { active } = event;
     setActiveId(null);
-
-    const leadId = active.id as string;
+    const leadId = String(event.active.id);
+    const target = event.over?.id as LeadStatus | undefined;
     const lead = leads.find(l => l.id === leadId);
+    if (!lead || !target || lead.status === target) return;
 
-    if (!lead || lead.status === activeTab) return;
-
+    const previousStatus = lead.status;
+    setLeads(prev => prev.map(l => (l.id === leadId ? { ...l, status: target } : l)));
     try {
-      await changeLeadStatus(leadId, activeTab);
-      setLeads(prev => prev.map(l =>
-        l.id === leadId ? { ...l, status: activeTab } : l
-      ));
+      await changeLeadStatus(leadId, target);
+      toast.success(`${lead.firstName} pasó a ${leadStatusLabels[target]}`);
     } catch (error) {
-      console.error('Error updating lead status:', error);
-      alert('Error al cambiar el estado del lead');
+      setLeads(prev => prev.map(l => (l.id === leadId ? { ...l, status: previousStatus } : l)));
+      toast.error(error instanceof Error ? error.message : 'Error al cambiar la etapa del prospecto');
     }
   }
 
-  function getLeadsByStatus(status: LeadStatus): LeadItem[] {
-    return leads.filter(l => l.status === status);
-  }
-
-  const tabs: Tab[] = PIPELINE_COLUMNS.map(status => ({
-    id: status,
-    label: leadStatusLabels[status],
-    count: getLeadsByStatus(status).length
-  }));
-
-  const currentLeads = getLeadsByStatus(activeTab);
   const activeLead = activeId ? leads.find(l => l.id === activeId) : null;
-
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <div className="animate-pulse text-slate-500">Cargando pipeline...</div>
-      </div>
-    );
-  }
+  const pipelineLeads = leads.filter(lead => PIPELINE_COLUMNS.includes(lead.status));
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
+    <>
       <PageHeader
-        title="Pipeline de Ventas"
-        subtitle="Gestiona el estado de tus prospectos"
-        backLink={{ to: '/app/prospectos', label: 'Volver' }}
-        badge={{ value: leads.length, label: 'leads' }}
+        badge={{ value: pipelineLeads.length, label: 'en el pipeline' }}
+        subtitle="Arrastra cada prospecto a la columna de su nueva etapa."
+        title="Pipeline de ventas"
       >
-        <Tabs tabs={tabs} activeTab={activeTab} onChange={(id) => setActiveTab(id as LeadStatus)} variant="cards" size="md" />
+        <LeadsNav />
       </PageHeader>
 
-      {/* Content */}
-      <div className="p-4 lg:p-6">
-        <DndContext
-          sensors={sensors}
-          collisionDetection={closestCenter}
-          onDragStart={handleDragStart}
-          onDragEnd={handleDragEnd}
-        >
-          <div className="mb-5">
-            <InfoBanner
-              title="Arrastra los leads para cambiar su estado"
-              description={`Los leads en esta pestaña se moverán a: ${leadStatusLabels[activeTab]}`}
-              variant="info"
-            />
-          </div>
-
-          <SortableContext
-            items={currentLeads.map(l => l.id)}
-            strategy={verticalListSortingStrategy}
-          >
-            <div className="space-y-3 max-w-6xl">
-              {currentLeads.map(lead => (
-                <LeadCard key={lead.id} lead={lead} />
+      {loading ? (
+        <Card><LoadingState message="Cargando pipeline..." /></Card>
+      ) : (
+        <DndContext onDragCancel={() => setActiveId(null)} onDragEnd={handleDragEnd} onDragStart={handleDragStart} sensors={sensors}>
+          <div className="-mx-4 overflow-x-auto px-4 pb-4 sm:-mx-6 sm:px-6 lg:-mx-10 lg:px-10">
+            <div className="flex h-[calc(100dvh-16rem)] min-h-[28rem] gap-3">
+              {PIPELINE_COLUMNS.map(status => (
+                <PipelineColumn key={status} leads={leads.filter(lead => lead.status === status)} status={status} />
               ))}
             </div>
-          </SortableContext>
-
-          {currentLeads.length === 0 && (
-            <div className="flex flex-col items-center justify-center py-20 text-center">
-              <div className="rounded-full bg-slate-100 p-6 mb-4">
-                <svg className="size-12 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
-                </svg>
-              </div>
-              <h3 className="text-lg font-semibold text-slate-700 mb-1">No hay leads en {leadStatusLabels[activeTab]}</h3>
-              <p className="text-sm text-slate-500">Arrastra leads desde otras etapas o crea uno nuevo</p>
-            </div>
-          )}
+          </div>
 
           <DragOverlay>
             {activeLead ? (
-              <div className="rotate-2 max-w-2xl">
-                <LeadCard lead={activeLead} isDragging />
+              <div className="w-68 rotate-2 cursor-grabbing rounded-xl border border-primary bg-surface p-3 shadow-pop">
+                <LeadCardContent lead={activeLead} />
               </div>
             ) : null}
           </DragOverlay>
         </DndContext>
-      </div>
-    </div>
+      )}
+    </>
   );
 }

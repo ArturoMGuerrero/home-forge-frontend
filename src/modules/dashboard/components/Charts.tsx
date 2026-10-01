@@ -1,4 +1,5 @@
 import { LineChart, Line, BarChart, Bar, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
+import { useId } from 'react';
 import { useTheme } from '../../../shared/contexts/ThemeContext';
 
 type ChartData = {
@@ -24,15 +25,16 @@ type AreaChartProps = {
   height?: number;
 };
 
+// Recharts recibe colores como atributos SVG (no admiten var()), por eso se replican los tokens de index.css.
 function useChartPalette() {
   const { theme } = useTheme();
   if (theme === 'light') {
     return { grid: '#e2e8f0', tick: '#64748b', axis: '#cbd5e1', tooltip: '#ffffff', tooltipText: '#0f172a', tooltipBorder: '#e2e8f0' };
   }
   if (theme === 'dark') {
-    return { grid: '#334155', tick: '#cbd5e1', axis: '#475569', tooltip: '#1e293b', tooltipText: '#f8fafc', tooltipBorder: '#475569' };
+    return { grid: '#243049', tick: '#94a3b8', axis: '#364560', tooltip: '#131c2e', tooltipText: '#f1f5f9', tooltipBorder: '#364560' };
   }
-  return { grid: '#2a2a34', tick: '#d4d4e1', axis: '#3f3f4d', tooltip: '#1b1c26', tooltipText: '#f5f5fa', tooltipBorder: '#353544' };
+  return { grid: '#232329', tick: '#a1a1aa', axis: '#383842', tooltip: '#121216', tooltipText: '#f4f4f5', tooltipBorder: '#383842' };
 }
 
 export function TrendLineChart({ data, lines, height = 300 }: LineChartProps) {
@@ -124,12 +126,15 @@ export function TrendBarChart({ data, bars, height = 300 }: BarChartProps) {
 
 export function TrendAreaChart({ data, areas, height = 300 }: AreaChartProps) {
   const palette = useChartPalette();
+  // El id del degradado no puede tener espacios: url(#...) inválido deja el área rellena de negro.
+  const gradientPrefix = useId().replace(/[^a-zA-Z0-9_-]/g, '');
+  const gradientId = (key: string) => `${gradientPrefix}-${key.replace(/[^a-zA-Z0-9_-]/g, '-')}`;
   return (
     <ResponsiveContainer width="100%" height={height}>
       <AreaChart data={data} margin={{ top: 5, right: 20, left: 0, bottom: 5 }}>
         <defs>
           {areas.map(area => (
-            <linearGradient key={`gradient-${area.key}`} id={`color-${area.key}`} x1="0" y1="0" x2="0" y2="1">
+            <linearGradient key={`gradient-${area.key}`} id={gradientId(area.key)} x1="0" y1="0" x2="0" y2="1">
               <stop offset="5%" stopColor={area.color} stopOpacity={0.3} />
               <stop offset="95%" stopColor={area.color} stopOpacity={0} />
             </linearGradient>
@@ -166,7 +171,7 @@ export function TrendAreaChart({ data, areas, height = 300 }: AreaChartProps) {
             name={area.name}
             stroke={area.color}
             strokeWidth={2}
-            fill={`url(#color-${area.key})`}
+            fill={`url(#${gradientId(area.key)})`}
           />
         ))}
       </AreaChart>

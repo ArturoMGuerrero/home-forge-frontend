@@ -1,66 +1,48 @@
-import { InputHTMLAttributes, forwardRef, useId } from 'react';
+import { InputHTMLAttributes, ReactNode, forwardRef, useId } from 'react';
+import { cn } from './cn';
+import { FieldMessage, RequiredMark } from './FieldMessage';
 
 interface CheckboxProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 'type'> {
-  label?: string;
+  label?: ReactNode;
   description?: string;
   error?: string;
 }
 
+export const choiceControlClass =
+  'mt-0.5 size-4.5 shrink-0 cursor-pointer rounded border-border-strong transition ' +
+  'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface ' +
+  'disabled:cursor-not-allowed disabled:opacity-50';
+
 export const Checkbox = forwardRef<HTMLInputElement, CheckboxProps>(
-  ({ label, description, error, className = '', ...props }, ref) => {
+  ({ label, description, error, className, ...props }, ref) => {
     const generatedId = useId();
     const checkboxId = props.id ?? generatedId;
     const messageId = `${checkboxId}-message`;
 
     return (
       <div className="flex items-start gap-3">
-        <div className="flex items-center h-5">
-          <input
-            aria-describedby={description || error ? messageId : undefined}
-            aria-invalid={Boolean(error)}
-            id={checkboxId}
-            ref={ref}
-            type="checkbox"
-            className={`
-              size-5 rounded border-slate-300 text-indigo-600
-              focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2
-              transition cursor-pointer
-              disabled:opacity-50 disabled:cursor-not-allowed
-              ${error ? 'border-rose-300' : ''}
-              ${className}
-            `}
-            {...props}
-          />
-        </div>
+        <input
+          aria-describedby={description || error ? messageId : undefined}
+          aria-invalid={error ? true : undefined}
+          id={checkboxId}
+          ref={ref}
+          type="checkbox"
+          className={cn(choiceControlClass, className)}
+          {...props}
+        />
 
-        {(label || description) && (
-          <div className="flex-1">
+        {(label || description || error) && (
+          <div className={cn('min-w-0 flex-1', props.disabled && 'opacity-50')}>
             {label && (
-              <label
-                htmlFor={checkboxId}
-                className={`
-                  block text-sm font-semibold cursor-pointer
-                  ${error ? 'text-rose-600' : 'text-slate-700'}
-                  ${props.disabled ? 'opacity-50' : ''}
-                `}
-              >
+              <label className="block cursor-pointer text-sm font-medium text-fg" htmlFor={checkboxId}>
                 {label}
-                {props.required && <span className="text-rose-500 ml-1">*</span>}
+                {props.required && <RequiredMark />}
               </label>
             )}
-            {description && (
-              <p className={`mt-0.5 text-xs ${error ? 'text-rose-600' : 'text-slate-500'}`} id={!error ? messageId : undefined}>
-                {description}
-              </p>
+            {description && !error && (
+              <p className="mt-0.5 text-xs text-fg-subtle" id={messageId}>{description}</p>
             )}
-            {error && (
-              <p className="mt-1 text-xs text-rose-600 flex items-center gap-1" id={messageId} role="alert">
-                <svg className="size-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-                {error}
-              </p>
-            )}
+            {error && <FieldMessage error={error} id={messageId} />}
           </div>
         )}
       </div>
@@ -70,33 +52,29 @@ export const Checkbox = forwardRef<HTMLInputElement, CheckboxProps>(
 
 Checkbox.displayName = 'Checkbox';
 
-// Checkbox Group para múltiples checkboxes relacionados
-interface CheckboxGroupProps {
+interface ChoiceGroupProps {
   label?: string;
   error?: string;
-  children: React.ReactNode;
+  required?: boolean;
+  children: ReactNode;
   className?: string;
 }
 
-export function CheckboxGroup({ label, error, children, className = '' }: CheckboxGroupProps) {
+export function ChoiceGroup({ label, error, required, children, className }: ChoiceGroupProps) {
+  const id = useId();
   return (
-    <div className={className}>
+    <fieldset aria-describedby={error ? `${id}-message` : undefined} className={className}>
       {label && (
-        <label className="block text-sm font-semibold text-slate-700 mb-3">
+        <legend className="mb-3 text-sm font-semibold text-fg-muted">
           {label}
-        </label>
+          {required && <RequiredMark />}
+        </legend>
       )}
-      <div className="space-y-3">
-        {children}
-      </div>
-      {error && (
-        <p className="mt-2 text-xs text-rose-600 flex items-center gap-1">
-          <svg className="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-          </svg>
-          {error}
-        </p>
-      )}
-    </div>
+      <div className="space-y-3">{children}</div>
+      <FieldMessage error={error} id={`${id}-message`} />
+    </fieldset>
   );
 }
+
+/** Agrupa checkboxes relacionados bajo una etiqueta común. */
+export const CheckboxGroup = ChoiceGroup;
