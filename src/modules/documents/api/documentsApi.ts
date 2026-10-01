@@ -104,7 +104,6 @@ export type CreateDocumentPayload = {
   templateId?: string;
   name: string;
   documentType: DocumentType;
-  createdByUserId: string;
   leadId?: string;
   propertyId?: string;
   variables?: Record<string, string>;
@@ -136,8 +135,11 @@ export function createDocumentTemplate(payload: CreateTemplatePayload): Promise<
   });
 }
 
-export function updateDocumentTemplate(templateId: string, content: string): Promise<DocumentTemplate> {
-  return patchJson<DocumentTemplate>(`/document-templates/${templateId}?companyId=${getCompanyId()}`, { content });
+export function updateDocumentTemplate(
+  templateId: string,
+  changes: { content: string; name?: string; description?: string }
+): Promise<DocumentTemplate> {
+  return patchJson<DocumentTemplate>(`/document-templates/${templateId}?companyId=${getCompanyId()}`, changes);
 }
 
 export function deleteDocumentTemplate(templateId: string): Promise<void> {
@@ -151,42 +153,42 @@ export function toggleTemplateActive(templateId: string): Promise<DocumentTempla
   );
 }
 
-// Documents API
+// Contratos generados desde plantillas (los archivos subidos usan storedDocumentsApi).
 export function listDocuments(status?: DocumentStatus): Promise<Document[]> {
   const params = new URLSearchParams({ companyId: getCompanyId() });
   if (status) params.append('status', status);
-  return getJson<Document[]>(`/documents?${params}`);
+  return getJson<Document[]>(`/contracts?${params}`);
 }
 
 export function listDocumentsByLead(leadId: string): Promise<Document[]> {
-  return getJson<Document[]>(`/documents/lead/${leadId}?companyId=${getCompanyId()}`);
+  return getJson<Document[]>(`/contracts/lead/${leadId}?companyId=${getCompanyId()}`);
 }
 
 export function listDocumentsByProperty(propertyId: string): Promise<Document[]> {
-  return getJson<Document[]>(`/documents/property/${propertyId}?companyId=${getCompanyId()}`);
+  return getJson<Document[]>(`/contracts/property/${propertyId}?companyId=${getCompanyId()}`);
 }
 
 export function getDocument(documentId: string): Promise<Document> {
-  return getJson<Document>(`/documents/${documentId}?companyId=${getCompanyId()}`);
+  return getJson<Document>(`/contracts/${documentId}?companyId=${getCompanyId()}`);
 }
 
 export function createDocument(payload: CreateDocumentPayload): Promise<Document> {
-  return postJson<Document>('/documents', {
+  return postJson<Document>('/contracts', {
     companyId: getCompanyId(),
     ...payload
   });
 }
 
 export function updateDocumentStatus(documentId: string, status: DocumentStatus): Promise<Document> {
-  return patchJson<Document>(`/documents/${documentId}/status?companyId=${getCompanyId()}`, { status });
+  return patchJson<Document>(`/contracts/${documentId}/status?companyId=${getCompanyId()}`, { status });
 }
 
 export function sendDocumentForSignature(documentId: string): Promise<Document> {
-  return postJson<Document>(`/documents/${documentId}/send-for-signature?companyId=${getCompanyId()}`, {});
+  return postJson<Document>(`/contracts/${documentId}/send-for-signature?companyId=${getCompanyId()}`, {});
 }
 
 export function deleteDocument(documentId: string): Promise<void> {
-  return deleteVoid(`/documents/${documentId}?companyId=${getCompanyId()}`);
+  return deleteVoid(`/contracts/${documentId}?companyId=${getCompanyId()}`);
 }
 
 // Document Signatures API

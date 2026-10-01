@@ -24,6 +24,9 @@ const PublicCompanyPage = page(() => import('../../modules/companies/pages/Publi
 const PublicPropertyDetailPage = page(() => import('../../modules/properties/pages/PublicPropertyDetailPage'), 'PublicPropertyDetailPage');
 const PrivacyNoticePage = page(() => import('../../modules/properties/pages/LegalPages'), 'PrivacyNoticePage');
 const TermsPage = page(() => import('../../modules/properties/pages/LegalPages'), 'TermsPage');
+const ContractEditorPage = page(() => import('../../modules/documents/pages/ContractEditorPage'), 'ContractEditorPage');
+const ContractDetailPage = page(() => import('../../modules/documents/pages/ContractDetailPage'), 'ContractDetailPage');
+const DocumentTemplateEditorPage = page(() => import('../../modules/documents/pages/DocumentTemplateEditorPage'), 'DocumentTemplateEditorPage');
 const LeadDetailPage = page(() => import('../../modules/leads/pages/LeadDetailPage'), 'LeadDetailPage');
 const LeadsPipelinePage = page(() => import('../../modules/leads/pages/LeadsPipelinePage'));
 const FollowUpTasksPage = page(() => import('../../modules/leads/pages/FollowUpTasksPage'));
@@ -80,6 +83,10 @@ export function AppRouter() {
           <Route path="documentos" element={<DocumentsPage />} />
           <Route path="contratos" element={<ContractsPage />} />
           <Route path="contratos/plantillas" element={<TemplatesPage />} />
+          <Route path="contratos/plantillas/nueva" element={<DocumentTemplateEditorPage />} />
+          <Route path="contratos/plantillas/:templateId" element={<DocumentTemplateEditorPage />} />
+          <Route path="contratos/nuevo" element={<ContractEditorPage />} />
+          <Route path="contratos/:contractId" element={<ContractDetailPage />} />
           <Route path="notificaciones" element={<NotificationsPage />} />
           <Route path="notificaciones/plantillas" element={<MessageTemplatesPage />} />
           <Route path="notificaciones/plantillas/nueva" element={<TemplateEditorPage />} />
