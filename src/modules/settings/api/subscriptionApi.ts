@@ -31,6 +31,13 @@ export type Subscription = {
   cancelAtPeriodEnd?: boolean;
 };
 
+/** Se emite con la suscripción nueva cuando cambia sin recargar la página (p. ej. cambio de plan en prueba). */
+export const SUBSCRIPTION_CHANGED_EVENT = 'homeforge:subscription-changed';
+
+export function notifySubscriptionChanged(subscription: Subscription) {
+  window.dispatchEvent(new CustomEvent<Subscription>(SUBSCRIPTION_CHANGED_EVENT, { detail: subscription }));
+}
+
 export function getSubscription(): Promise<Subscription> {
   return getJson<Subscription>(`/companies/${getCompanyId()}/subscription`).catch(error => {
     console.warn('⚠️ Endpoint de suscripción no disponible:', error);

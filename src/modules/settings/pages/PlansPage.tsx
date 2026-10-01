@@ -3,7 +3,7 @@ import { useSearchParams } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { PlanCards } from '../components/PlanCards';
 import { updateSessionSubscription } from '../../auth';
-import { getSubscription, getPlans, Plan, PlanCode, Subscription } from '../api/subscriptionApi';
+import { getSubscription, getPlans, notifySubscriptionChanged, Plan, PlanCode, Subscription } from '../api/subscriptionApi';
 import { openBillingPortal, startCheckout } from '../api/billingApi';
 import { SubscriptionDetails } from '../../../shared/SubscriptionDetails';
 import { Alert, Badge, BadgeVariant, Button, Card, LoadingState, PageHeader } from '../../../shared/ui';
@@ -74,7 +74,18 @@ export function PlansPage() {
   async function selectPlan(planCode: PlanCode) {
     setChanging(planCode);
     try {
-      window.location.assign(await startCheckout(planCode));
+      const result = await startCheckout(planCode);
+      if (result.url) {
+        window.location.assign(result.url);
+        return;
+      }
+      if (result.planChanged) {
+        const updated = await getSubscription();
+        applySubscription(updated);
+        notifySubscriptionChanged(updated);
+        toast.success(`Cambiaste al plan ${updated.planCode}. No se cobra nada hasta que termine tu prueba.`);
+      }
+      setChanging(undefined);
     } catch (error) {
       toast.error(error instanceof Error ? error.message : 'No fue posible iniciar el pago.');
       setChanging(undefined);
@@ -96,8 +107,10 @@ export function PlansPage() {
 
   const subscribed = subscription.paymentConfigured && ['ACTIVE', 'PENDING'].includes(subscription.status);
   const isTrial = subscription.status === 'TRIAL';
+  // Ya contrató con tarjeta, pero la prueba sigue: el primer cobro llega al terminar.
+  const inPaidTrial = subscribed && !!subscription.trialEndsAt && new Date(subscription.trialEndsAt) > new Date();
   const statusBadge: { label: string; variant: BadgeVariant } =
-    isTrial ? { label: 'Periodo de prueba', variant: 'info' } :
+    isTrial || (inPaidTrial && !subscription.cancelAtPeriodEnd) ? { label: 'Periodo de prueba', variant: 'info' } :
     subscription.status === 'ACTIVE' && subscription.cancelAtPeriodEnd ? { label: 'Se cancelará', variant: 'warning' } :
     subscription.status === 'ACTIVE' ? { label: 'Activo', variant: 'success' } :
     subscription.status === 'PENDING' ? { label: 'Pago pendiente', variant: 'warning' } :
@@ -108,6 +121,9 @@ export function PlansPage() {
   if (isTrial) {
     headline = `${subscription.trialDaysRemaining} días de prueba restantes`;
     detail = `Tu prueba gratuita termina el ${formatDate(subscription.trialEndsAt)}. Contrata un plan para no perder el acceso.`;
+  } else if (inPaidTrial && !subscription.cancelAtPeriodEnd) {
+    headline = `Plan ${subscription.planCode}`;
+    detail = `Sigues en tu prueba gratuita. El primer cobro será el ${formatDate(subscription.nextBillingAt)}; mientras tanto puedes cambiar de plan sin costo.`;
   } else if (subscription.status === 'ACTIVE') {
     headline = `Plan ${subscription.planCode}`;
     detail = subscription.cancelAtPeriodEnd
@@ -143,7 +159,7 @@ export function PlansPage() {
             <p className="mt-1 text-xs text-fg-subtle">{detail}</p>
           </div>
           <div className="rounded-xl bg-surface-muted px-6 py-4 text-center">
-            <span className="text-xs text-fg-subtle">{isTrial ? 'Periodo de prueba gratuito' : 'Cobro mensual recurrente'}</span>
+            <span className="text-xs text-fg-subtle">{isTrial ? 'Periodo de prueba gratuito' : inPaidTrial ? 'Después de la prueba' : 'Cobro mensual recurrente'}</span>
             <strong className="mt-1 block text-2xl font-bold tracking-tight text-fg">{isTrial ? 'Gratis' : PRICES[subscription.planCode]}</strong>
           </div>
         </div>
@@ -169,7 +185,7 @@ export function PlansPage() {
       </p>
 
       <section className="mt-6">
-        <SubscriptionDetails />
+        <SubscriptionDetails key={`${subscription.planCode}-${subscription.status}`} />
       </section>
     </>
   );
