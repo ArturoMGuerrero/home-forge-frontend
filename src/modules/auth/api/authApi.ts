@@ -53,6 +53,13 @@ export function logout() {
   clearSession();
 }
 
+/** Actualiza datos de la sesión guardada (p. ej. el nombre tras editar el perfil o el token tras cambiar la contraseña). */
+export function updateSessionAccount(changes: Partial<Pick<Session, 'name' | 'token'>>) {
+  const session = getSession();
+  if (!session) return;
+  saveSession({ ...session, ...changes });
+}
+
 export function updateSessionSubscription(planCode: Session['planCode'], userLimit: number, subscriptionStatus?: string, trialEndsAt?: string) {
   const session = getSession();
   if (!session) return;
