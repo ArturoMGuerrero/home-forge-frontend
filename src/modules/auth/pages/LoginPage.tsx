@@ -1,12 +1,13 @@
 import { FormEvent, useState } from 'react';
-import { Link, Navigate, useNavigate } from 'react-router-dom';
+import { Link, Navigate, useNavigate, useSearchParams } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { isAuthenticated, login } from '../api/authApi';
-import { Button, Input } from '../../../shared/ui';
+import { Alert, Button, Input } from '../../../shared/ui';
 import { AuthHeading, AuthLayout } from '../components/AuthLayout';
 
 export function LoginPage() {
   const navigate = useNavigate();
+  const sessionExpired = useSearchParams()[0].get('expired') === '1';
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [saving, setSaving] = useState(false);
@@ -35,6 +36,10 @@ export function LoginPage() {
       headline="Convierte cada oportunidad en una venta mejor gestionada."
     >
       <AuthHeading description="Ingresa con la cuenta registrada para tu empresa." eyebrow="Acceso privado" title="Bienvenido de nuevo" />
+
+      {sessionExpired && (
+        <Alert className="mt-6" variant="warning">Tu sesión expiró. Inicia sesión de nuevo para continuar.</Alert>
+      )}
 
       <form className="mt-8 space-y-5" onSubmit={submit}>
         <Input
