@@ -1,5 +1,5 @@
 import { getCompanyId } from '../../leads';
-import { apiUrl, deleteVoid, getJson, postForm } from '../../../shared/services/api';
+import { deleteVoid, getBlob, getJson, postForm } from '../../../shared/services/api';
 
 export type StoredDocument = {
   id: string;
@@ -34,5 +34,16 @@ export function deleteStoredDocument(id: string) {
   return deleteVoid(`/documents/${id}?companyId=${getCompanyId()}`);
 }
 
-export const storedDocumentDownloadUrl = (id: string) => apiUrl(`/documents/${id}/download?companyId=${getCompanyId()}`);
-export const storedDocumentViewUrl = (id: string) => apiUrl(`/documents/${id}/view?companyId=${getCompanyId()}`);
+/** Contenido del documento (requiere sesión, por eso se descarga con fetch y no con un enlace directo). */
+export function fetchStoredDocument(id: string, mode: 'view' | 'download' = 'view') {
+  return getBlob(`/documents/${id}/${mode}?companyId=${getCompanyId()}`);
+}
+
+export async function downloadStoredDocument(doc: Pick<StoredDocument, 'id' | 'fileName'>) {
+  const url = URL.createObjectURL(await fetchStoredDocument(doc.id, 'download'));
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = doc.fileName;
+  link.click();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}

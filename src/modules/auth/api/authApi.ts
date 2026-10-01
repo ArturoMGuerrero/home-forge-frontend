@@ -1,6 +1,6 @@
 import { postJson } from '../../../shared/services/api';
+import { clearSession, SESSION_KEY } from '../../../shared/services/sessionStorage';
 
-const SESSION_KEY = 'homeforge_session';
 const LEGACY_SESSION_KEY = 'casaflow_session';
 
 // Conserva la sesión iniciada antes del cambio de nombre CasaFlow -> HomeForge.
@@ -22,6 +22,8 @@ export type Session = {
   userLimit: number;
   subscriptionStatus?: string;
   trialEndsAt?: string;
+  /** JWT que autoriza las peticiones a la API. */
+  token: string;
 };
 
 type RegisterPayload = {
@@ -48,7 +50,7 @@ export async function register(payload: RegisterPayload): Promise<Session> {
 }
 
 export function logout() {
-  localStorage.removeItem(SESSION_KEY);
+  clearSession();
 }
 
 export function updateSessionSubscription(planCode: Session['planCode'], userLimit: number, subscriptionStatus?: string, trialEndsAt?: string) {
@@ -64,7 +66,8 @@ export function getSession(): Session | null {
 
   try {
     const session = JSON.parse(value) as Partial<Session>;
-    if (!session.userId || !session.companyId || !session.name || !session.email) {
+    // Las sesiones anteriores a la autenticación con token se descartan: hay que volver a iniciar sesión.
+    if (!session.userId || !session.companyId || !session.name || !session.email || !session.token) {
       localStorage.removeItem(SESSION_KEY);
       return null;
     }

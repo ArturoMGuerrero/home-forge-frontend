@@ -3,7 +3,7 @@ import { useOutletContext } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { LeadItem } from '../../leads';
 import { ApiProperty } from '../../properties';
-import { deleteStoredDocument as deleteDocument, storedDocumentDownloadUrl as documentDownloadUrl, listStoredDocuments as listDocuments, StoredDocument } from '../api/storedDocumentsApi';
+import { deleteStoredDocument as deleteDocument, downloadStoredDocument, listStoredDocuments as listDocuments, StoredDocument } from '../api/storedDocumentsApi';
 import { loadOperationsContext } from '../../../shared/operationsContext';
 import { DocumentPreviewModal } from '../components/DocumentPreviewModal';
 import { UploadDocumentModal } from '../components/UploadDocumentModal';
@@ -12,7 +12,7 @@ import { exportToExcel, formatDate } from '../../../shared/excelExport';
 import { SubscriptionRestrictions } from '../../../shared/subscriptionRestrictions';
 import { ConfirmModal } from '../../../shared/ConfirmModal';
 import { Icon } from '../../../shared/Icon';
-import { Badge, BadgeVariant, Button, buttonClasses, Card, EmptyState, PageHeader, SearchInput, Select } from '../../../shared/ui';
+import { Badge, BadgeVariant, Button, Card, EmptyState, PageHeader, SearchInput, Select } from '../../../shared/ui';
 
 const documentTypeOptions = [
   { value: 'IDENTIFICATION', label: 'Identificación' },
@@ -246,7 +246,7 @@ export function DocumentsPage() {
 
               <div className="mt-auto flex gap-2 border-t border-border p-3">
                 <Button className="flex-1" onClick={() => setPreviewDocument(item)} size="sm" variant="secondary">Vista previa</Button>
-                <a className={buttonClasses({ variant: 'tertiary', size: 'sm', className: 'flex-1' })} href={documentDownloadUrl(item.id)}>Descargar</a>
+                <Button className="flex-1" onClick={() => downloadStoredDocument(item).catch(() => toast.error('No se pudo descargar el documento'))} size="sm" variant="tertiary">Descargar</Button>
                 <Button aria-label={`Eliminar ${item.fileName}`} onClick={() => setDocumentToDelete(item)} size="sm" variant="danger-ghost">
                   <svg aria-hidden="true" className="size-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
