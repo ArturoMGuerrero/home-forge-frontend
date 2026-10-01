@@ -1,9 +1,12 @@
 import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { countryName } from '../../settings';
-import { ApiProperty, formatApiPrice, getPublishedProperty, listingLabel, propertyImages, propertyStatusClass, propertyStatusLabel, PublicPropertyListing } from '../api/propertyApi';
+import { formatApiPrice, getPublishedProperty, listingLabel, propertyImages, propertyStatusClass, propertyStatusLabel, propertyTypeLabel, PublicPropertyListing } from '../api/propertyApi';
 import { Alert, Badge, buttonClasses, Card, Spinner } from '../../../shared/ui';
 import { PublicHeader } from '../components/PublicHeader';
+import { PublicFooter } from '../components/PublicFooter';
+import { LikeButton } from '../components/LikeButton';
+import { useLikedProperties } from '../likedProperties';
 
 const fallbackImage = 'https://images.unsplash.com/photo-1564013799919-ab600027ffc6?auto=format&fit=crop&w=1600&q=80';
 
@@ -12,10 +15,14 @@ export function PublicPropertyDetailPage() {
   const [listing, setListing] = useState<PublicPropertyListing | null>(null);
   const [activeImage, setActiveImage] = useState(0);
   const [error, setError] = useState('');
+  const { isLiked, toggleLike } = useLikedProperties();
 
   useEffect(() => {
     getPublishedProperty(propertyId)
-      .then(setListing)
+      .then(result => {
+        setListing(result);
+        document.title = `${result.property.title} | HomeForge`;
+      })
       .catch(requestError => setError(requestError instanceof Error ? requestError.message : 'No fue posible cargar la propiedad.'));
   }, [propertyId]);
 
@@ -47,7 +54,10 @@ export function PublicPropertyDetailPage() {
             <Badge>{countryName(property.countryCode)}</Badge>
             <span className="text-sm text-fg-subtle">{property.code}</span>
           </div>
-          <h1 className="mt-4 max-w-4xl text-3xl font-bold tracking-tight sm:text-4xl">{property.title}</h1>
+          <div className="mt-4 flex items-start justify-between gap-4">
+            <h1 className="max-w-4xl text-3xl font-bold tracking-tight sm:text-4xl">{property.title}</h1>
+            <LikeButton className="shrink-0 border border-border" liked={isLiked(property.id)} onToggle={() => toggleLike(property.id)} propertyTitle={property.title} />
+          </div>
           <p className="mt-2 text-base text-fg-subtle">{[property.address, property.city, property.stateCode, countryName(property.countryCode)].filter(Boolean).join(', ')}</p>
         </div>
 
@@ -85,7 +95,7 @@ export function PublicPropertyDetailPage() {
                   <span className="text-sm text-fg-subtle">Precio</span>
                   <strong className="mt-1 block text-3xl font-bold tracking-tight text-fg">{formatApiPrice(property)}</strong>
                 </div>
-                <Badge size="md">{property.propertyType}</Badge>
+                <Badge size="md">{propertyTypeLabel(property.propertyType)}</Badge>
               </div>
               <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-5">
                 <Feature value={property.bedrooms} label="Recámaras" />
@@ -129,6 +139,8 @@ export function PublicPropertyDetailPage() {
           </aside>
         </div>
       </main>
+
+      <PublicFooter />
     </div>
   );
 }

@@ -117,6 +117,19 @@ export function formatApiPrice(property: Pick<ApiProperty, 'price' | 'currencyCo
   return property.listingType === 'RENT' ? `${amount}/mes` : amount;
 }
 
+const propertyTypeLabels: Record<string, string> = {
+  HOUSE: 'Casa',
+  APARTMENT: 'Departamento',
+  LAND: 'Terreno',
+  COMMERCIAL: 'Local comercial',
+  OFFICE: 'Oficina',
+  WAREHOUSE: 'Bodega'
+};
+
+export function propertyTypeLabel(propertyType: string) {
+  return propertyTypeLabels[propertyType] ?? propertyType;
+}
+
 export function listingLabel(listingType: ListingType) {
   return listingType === 'RENT' ? 'Renta' : 'Venta';
 }

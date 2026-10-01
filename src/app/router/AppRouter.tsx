@@ -22,6 +22,8 @@ const CatalogPage = page(() => import('../../modules/settings/pages/CatalogPage'
 const CompanyProfileSettingsPage = page(() => import('../../modules/settings/pages/CompanyProfileSettingsPage'), 'CompanyProfileSettingsPage');
 const PublicCompanyPage = page(() => import('../../modules/companies/pages/PublicCompanyPage'), 'PublicCompanyPage');
 const PublicPropertyDetailPage = page(() => import('../../modules/properties/pages/PublicPropertyDetailPage'), 'PublicPropertyDetailPage');
+const PrivacyNoticePage = page(() => import('../../modules/properties/pages/LegalPages'), 'PrivacyNoticePage');
+const TermsPage = page(() => import('../../modules/properties/pages/LegalPages'), 'TermsPage');
 const LeadDetailPage = page(() => import('../../modules/leads/pages/LeadDetailPage'), 'LeadDetailPage');
 const LeadsPipelinePage = page(() => import('../../modules/leads/pages/LeadsPipelinePage'));
 const FollowUpTasksPage = page(() => import('../../modules/leads/pages/FollowUpTasksPage'));
@@ -57,6 +59,8 @@ export function AppRouter() {
         <Route path="/propiedades" element={<PublicPropertiesPage />} />
         <Route path="/propiedades/:propertyId" element={<PublicPropertyDetailPage />} />
         <Route path="/empresas/:companyId" element={<PublicCompanyPage />} />
+        <Route path="/aviso-de-privacidad" element={<PrivacyNoticePage />} />
+        <Route path="/terminos" element={<TermsPage />} />
         <Route path="/payment/success" element={<PaymentSuccessPage />} />
         <Route path="/payment/failure" element={<PaymentFailurePage />} />
         <Route path="/payment/pending" element={<PaymentPendingPage />} />
