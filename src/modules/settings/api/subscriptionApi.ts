@@ -1,5 +1,5 @@
 import { getCompanyId } from '../../leads';
-import { getJson, putJson } from '../../../shared/services/api';
+import { getJson } from '../../../shared/services/api';
 
 export type PlanCode = 'STARTER' | 'PRO' | 'BUSINESS';
 
@@ -25,6 +25,10 @@ export type Subscription = {
   trialDaysRemaining: number;
   nextBillingAt?: string;
   paymentConfigured: boolean;
+  /** Proveedor que cobra la suscripción (p. ej. "stripe"). */
+  paymentProvider?: string;
+  /** La suscripción se cancelará al terminar el periodo pagado. */
+  cancelAtPeriodEnd?: boolean;
 };
 
 export function getSubscription(): Promise<Subscription> {
@@ -34,12 +38,8 @@ export function getSubscription(): Promise<Subscription> {
   });
 }
 
-export function changeSubscriptionPlan(planCode: PlanCode): Promise<Subscription> {
-  return putJson<Subscription>(`/companies/${getCompanyId()}/subscription`, { planCode });
-}
-
 // Planes de pago disponibles después del periodo de prueba gratuito (14 días)
-// Todos los planes requieren pago mensual vía Mercado Pago
+// Todos los planes se cobran mensualmente con tarjeta (Stripe)
 const PLANS: Plan[] = [
   {
     code: 'STARTER',

@@ -7,16 +7,19 @@ type PlanCardsProps = {
   changing?: PlanCode;
   onSelect: (plan: PlanCode) => void;
   subscriptionStatus?: SubscriptionStatus;
+  /** Ya existe una suscripción pagada: los demás planes se cambian en el portal de pagos. */
+  subscribed?: boolean;
 };
 
-export function PlanCards({ plans, currentPlan, changing, onSelect, subscriptionStatus }: PlanCardsProps) {
+export function PlanCards({ plans, currentPlan, changing, onSelect, subscriptionStatus, subscribed = false }: PlanCardsProps) {
   const isExpiredOrSuspended = subscriptionStatus === 'EXPIRED' || subscriptionStatus === 'SUSPENDED' || subscriptionStatus === 'CANCELLED';
 
   return (
     <div className="grid gap-4 lg:grid-cols-3">
       {plans.map(plan => {
-        const current = currentPlan === plan.code;
-        const canRenew = current && isExpiredOrSuspended;
+        // Sin suscripción pagada (prueba o vencida) cualquier plan, incluido el actual, se puede contratar.
+        const current = subscribed && currentPlan === plan.code;
+        const canRenew = currentPlan === plan.code && isExpiredOrSuspended;
 
         return (
           <article
@@ -55,7 +58,8 @@ export function PlanCards({ plans, currentPlan, changing, onSelect, subscription
               {current && !canRenew ? 'Plan seleccionado' :
                canRenew ? 'Renovar plan' :
                changing === plan.code ? 'Procesando...' :
-               `Cambiar a ${plan.name}`}
+               subscribed ? `Cambiar a ${plan.name}` :
+               `Contratar ${plan.name}`}
             </Button>
           </article>
         );
