@@ -28,6 +28,17 @@ server {
     proxy_set_header X-Forwarded-Proto $scheme;
   }
 
+  # Vista previa al compartir una propiedad: los robots de WhatsApp, Facebook, Telegram, etc. no ejecutan
+  # JavaScript, así que reciben del backend un HTML con título, precio y foto (Open Graph).
+  # Las personas reciben la app normal. No incluye buscadores: Google sí ejecuta la app.
+  location ~ "^/propiedades/(?<property_id>[0-9a-fA-F-]{36})/?$" {
+    if ($http_user_agent ~* "(?:WhatsApp|facebookexternalhit|Facebot|meta-externalagent|Twitterbot|TelegramBot|Slackbot|LinkedInBot|Discordbot|Pinterest|SkypeUriPreview|Iframely|Embedly)") {
+      rewrite ^ /api/share/propiedades/$property_id last;
+    }
+    expires -1;
+    try_files /index.html =404;
+  }
+
   # Archivos con hash en el nombre: se pueden guardar en caché un año.
   location /assets/ {
     expires 1y;

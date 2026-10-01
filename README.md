@@ -94,6 +94,9 @@ El `Dockerfile` compila la app y la sirve con nginx (`nginx/default.conf.templat
 - Cualquier ruta de la app (`/propiedades/...`, `/app/...`) devuelve `index.html`, sin caché. `/assets/` lleva caché de un año
   porque los nombres incluyen un hash.
 - Añade cabeceras de seguridad básicas.
+- **Vista previa al compartir:** cuando WhatsApp, Facebook, Telegram, etc. piden `/propiedades/{id}`, nginx les responde
+  con el HTML Open Graph del backend (`/api/share/propiedades/{id}`: título, precio y foto). Las personas reciben la app normal.
+  Si el frontend se publica sin este nginx (p. ej. en un hosting estático), hay que replicar esa regla ahí.
 
 ```bash
 docker build -t homeforge-frontend .

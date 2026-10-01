@@ -6,6 +6,7 @@ import { Alert, Badge, buttonClasses, Card, Spinner } from '../../../shared/ui';
 import { PublicHeader } from '../components/PublicHeader';
 import { PublicFooter } from '../components/PublicFooter';
 import { LikeButton } from '../components/LikeButton';
+import { ShareButton } from '../components/ShareButton';
 import { useLikedProperties } from '../likedProperties';
 
 const fallbackImage = 'https://images.unsplash.com/photo-1564013799919-ab600027ffc6?auto=format&fit=crop&w=1600&q=80';
@@ -56,7 +57,10 @@ export function PublicPropertyDetailPage() {
           </div>
           <div className="mt-4 flex items-start justify-between gap-4">
             <h1 className="max-w-4xl text-3xl font-bold tracking-tight sm:text-4xl">{property.title}</h1>
-            <LikeButton className="shrink-0 border border-border" liked={isLiked(property.id)} onToggle={() => toggleLike(property.id)} propertyTitle={property.title} />
+            <div className="flex shrink-0 gap-2">
+              <ShareButton className="border border-border" propertyId={property.id} propertyTitle={property.title} />
+              <LikeButton className="border border-border" liked={isLiked(property.id)} onToggle={() => toggleLike(property.id)} propertyTitle={property.title} />
+            </div>
           </div>
           <p className="mt-2 text-base text-fg-subtle">{[property.address, property.city, property.stateCode, countryName(property.countryCode)].filter(Boolean).join(', ')}</p>
         </div>
