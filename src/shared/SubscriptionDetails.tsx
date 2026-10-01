@@ -15,6 +15,11 @@ const statusVariants: Record<string, BadgeVariant> = {
 const shortDate = (value: string) => new Date(value).toLocaleDateString('es-MX', { year: 'numeric', month: 'short', day: 'numeric' });
 
 /** Tarjeta con el estado de pago de la suscripción de la empresa. */
+const PAYMENT_METHODS: Record<string, string> = {
+  stripe: 'Tarjeta (Stripe)',
+  mercadopago: 'Mercado Pago'
+};
+
 export function SubscriptionDetails() {
   const [status, setStatus] = useState<PaymentStatusResponse | null>(null);
   const [loading, setLoading] = useState(true);
@@ -50,7 +55,7 @@ export function SubscriptionDetails() {
     { label: 'Plan', value: status.planCode },
     status.nextBillingAt && { label: 'Próximo pago', value: shortDate(status.nextBillingAt) },
     status.lastPaymentAt && { label: 'Último pago', value: shortDate(status.lastPaymentAt) },
-    status.paymentMethod && { label: 'Método de pago', value: status.paymentMethod }
+    status.paymentMethod && { label: 'Método de pago', value: PAYMENT_METHODS[status.paymentMethod] ?? status.paymentMethod }
   ].filter(Boolean) as Array<{ label: string; value: string }>;
 
   return (
