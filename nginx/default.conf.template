@@ -1,0 +1,42 @@
+# Plantilla de nginx: al arrancar, la imagen oficial sustituye ${BACKEND_URL} con la variable de entorno.
+server {
+  listen 80;
+  server_name _;
+  root /usr/share/nginx/html;
+  index index.html;
+
+  # Fotos de propiedades y documentos (el backend valida cada archivo).
+  client_max_body_size 100m;
+
+  add_header X-Content-Type-Options "nosniff" always;
+  add_header Referrer-Policy "strict-origin-when-cross-origin" always;
+  add_header X-Frame-Options "SAMEORIGIN" always;
+
+  # API y archivos subidos: mismo dominio que la app, así no hace falta CORS.
+  location /api/ {
+    proxy_pass ${BACKEND_URL};
+    proxy_set_header Host $host;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header X-Forwarded-Proto $scheme;
+    proxy_read_timeout 60s;
+  }
+
+  location /uploads/ {
+    proxy_pass ${BACKEND_URL};
+    proxy_set_header Host $host;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header X-Forwarded-Proto $scheme;
+  }
+
+  # Archivos con hash en el nombre: se pueden guardar en caché un año.
+  location /assets/ {
+    expires 1y;
+    try_files $uri =404;
+  }
+
+  # Rutas de la app (React Router): siempre index.html, sin caché para recibir cada versión nueva.
+  location / {
+    expires -1;
+    try_files $uri $uri/ /index.html;
+  }
+}
