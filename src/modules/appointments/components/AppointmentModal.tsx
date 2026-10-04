@@ -1,4 +1,4 @@
-import { FormEvent, useRef, useState } from 'react';
+import { FormEvent, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import toast from 'react-hot-toast';
 import { LeadItem } from '../../leads';
@@ -7,7 +7,8 @@ import { AgendaAppointment as Appointment, createAgendaAppointment as createAppo
 import { SubscriptionRestrictions } from '../../../shared/subscriptionRestrictions';
 import { UpgradeModal } from '../../../shared/UpgradeModal';
 import { Button, Input, Modal, SearchInput, Select, Textarea } from '../../../shared/ui';
-import { timeSlotOptions } from '../timeSlots';
+import { defaultAppointmentTimes, timeSlotOptions } from '../timeSlots';
+import { useBusinessHours } from '../../settings/api/businessHours';
 
 interface Props {
   isOpen: boolean;
@@ -53,6 +54,15 @@ export function AppointmentModal({ isOpen, onClose, onAppointmentCreated, leads,
   const [searchLead, setSearchLead] = useState('');
   const [searchProperty, setSearchProperty] = useState('');
   const formRef = useRef<HTMLFormElement>(null);
+  const businessHours = useBusinessHours();
+
+  // Al abrir, sugerir la hora de apertura de la empresa (mientras no se haya tocado la hora).
+  useEffect(() => {
+    if (!isOpen) return;
+    setForm(current => current.startTime === initialForm.startTime && current.endTime === initialForm.endTime
+      ? { ...current, ...defaultAppointmentTimes(businessHours) }
+      : current);
+  }, [isOpen, businessHours]);
 
   if (!isOpen) return null;
 
@@ -145,8 +155,8 @@ export function AppointmentModal({ isOpen, onClose, onAppointmentCreated, leads,
 
           <div className="grid gap-4 sm:grid-cols-3">
             <Input label="Fecha" onChange={e => setForm({ ...form, date: e.target.value })} required type="date" value={form.date} />
-            <Select label="Inicio" onChange={e => setForm({ ...form, startTime: e.target.value })} options={timeSlotOptions} required value={form.startTime} />
-            <Select label="Fin" onChange={e => setForm({ ...form, endTime: e.target.value })} options={timeSlotOptions} required value={form.endTime} />
+            <Select label="Inicio" onChange={e => setForm({ ...form, startTime: e.target.value })} options={timeSlotOptions(businessHours, form.startTime)} required value={form.startTime} />
+            <Select label="Fin" onChange={e => setForm({ ...form, endTime: e.target.value })} options={timeSlotOptions(businessHours, form.endTime)} required value={form.endTime} />
           </div>
 
           <div className="grid gap-2">

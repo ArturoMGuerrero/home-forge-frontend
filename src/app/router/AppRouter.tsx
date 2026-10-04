@@ -20,6 +20,7 @@ const RegisterPage = page(() => import('../../modules/auth/pages/RegisterPage'),
 const SettingsPage = page(() => import('../../modules/settings/pages/SettingsPage'), 'SettingsPage');
 const CatalogPage = page(() => import('../../modules/settings/pages/CatalogPage'), 'CatalogPage');
 const CompanyProfileSettingsPage = page(() => import('../../modules/settings/pages/CompanyProfileSettingsPage'), 'CompanyProfileSettingsPage');
+const BusinessHoursSettingsPage = page(() => import('../../modules/settings/pages/BusinessHoursSettingsPage'), 'BusinessHoursSettingsPage');
 const PublicCompanyPage = page(() => import('../../modules/companies/pages/PublicCompanyPage'), 'PublicCompanyPage');
 const PublicPropertyDetailPage = page(() => import('../../modules/properties/pages/PublicPropertyDetailPage'), 'PublicPropertyDetailPage');
 const PrivacyNoticePage = page(() => import('../../modules/properties/pages/LegalPages'), 'PrivacyNoticePage');
@@ -97,6 +98,7 @@ export function AppRouter() {
           <Route path="cuenta" element={<AccountSettingsPage />} />
           <Route path="configuracion" element={<SettingsPage />} />
           <Route path="configuracion/empresa" element={<CompanyProfileSettingsPage />} />
+          <Route path="configuracion/horario" element={<BusinessHoursSettingsPage />} />
           <Route path="configuracion/asignacion" element={<AssignmentRulesPage />} />
           <Route path="configuracion/catalogos/:catalogName" element={<CatalogPage />} />
           {/* Rutas internas desconocidas regresan al panel en vez de salir al sitio público. */}
