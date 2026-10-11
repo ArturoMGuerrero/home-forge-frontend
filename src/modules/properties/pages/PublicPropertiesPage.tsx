@@ -1,8 +1,9 @@
 import { FormEvent, useEffect, useMemo, useState } from 'react';
-import { listPublishedProperties, propertyImages, propertyTypeLabel, PublicPropertyListing } from '../api/propertyApi';
+import { listPublishedProperties, propertyTypeLabel, PublicPropertyListing } from '../api/propertyApi';
 import { Alert, Button, Card, cn, EmptyState, Select, Skeleton } from '../../../shared/ui';
 import { Icon } from '../../../shared/Icon';
 import { PublicHeader } from '../components/PublicHeader';
+import { PublicHeroBackdrop } from '../components/PublicHeroBackdrop';
 import { PublicFooter } from '../components/PublicFooter';
 import { PublicPropertyCard } from '../components/PublicPropertyCard';
 import { useLikedProperties } from '../likedProperties';
@@ -82,7 +83,6 @@ export function PublicPropertiesPage() {
   }, [listings, onlyLiked, likedIds, operation, propertyType, maxPrice, minBedrooms, location, sort]);
 
   const hasFilters = operation !== 'ALL' || location !== '' || propertyType !== 'ALL' || maxPrice !== 'ALL' || minBedrooms !== 'ALL';
-  const heroImage = listings.length > 0 ? propertyImages(listings[0].property)[0] : undefined;
 
   function changeOperation(next: Operation) {
     setOperation(next);
@@ -116,14 +116,7 @@ export function PublicPropertiesPage() {
       <PublicHeader />
 
       <section className="relative overflow-hidden bg-slate-950 px-5 pb-32 pt-14 sm:pb-36 sm:pt-20">
-        {heroImage ? (
-          <>
-            <img alt="" aria-hidden="true" className="absolute inset-0 size-full object-cover" src={heroImage} />
-            <div aria-hidden="true" className="absolute inset-0 bg-gradient-to-r from-slate-950/95 via-slate-950/75 to-slate-950/35" />
-          </>
-        ) : (
-          <div aria-hidden="true" className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_left,rgb(79_70_229/0.45),transparent_55%),radial-gradient(ellipse_at_bottom_right,rgb(16_185_129/0.18),transparent_50%)]" />
-        )}
+        <PublicHeroBackdrop />
         <div className="relative mx-auto max-w-7xl">
           {listings.length > 0 && (
             <span className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3 py-1 text-xs font-semibold text-white backdrop-blur">
