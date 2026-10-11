@@ -7,7 +7,7 @@ describe('horas de las citas según el horario de atención', () => {
   it('ofrece de apertura a cierre en el intervalo configurado', () => {
     const values = timeSlotOptions(office).map(option => option.value);
     expect(values[0]).toBe('09:00');
-    expect(values.at(-1)).toBe('18:00');
+    expect(values[values.length - 1]).toBe('18:00');
     expect(values).toHaveLength(19);
     expect(timeSlotOptions({ ...office, slotMinutes: 60 }).map(option => option.value)).toEqual(
       ['09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00', '18:00']
