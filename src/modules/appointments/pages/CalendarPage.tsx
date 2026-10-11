@@ -1,10 +1,11 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import type { MouseEvent } from 'react';
 import { Link } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { listAppointments, Appointment, AppointmentStatus, appointmentTypeLabels, appointmentStatusLabels } from '../api/appointmentsApi';
 import NewAppointmentModal from '../components/NewAppointmentModal';
 import { getSession } from '../../auth';
+import { toMinutes, useBusinessHours } from '../../settings/api/businessHours';
 import { Icon } from '../../../shared/Icon';
 import { Badge, BadgeVariant, Button, buttonClasses, Card, cn, PageHeader, SegmentedControl } from '../../../shared/ui';
 
@@ -12,7 +13,7 @@ type ViewMode = 'month' | 'week' | 'day';
 
 const DAYS = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
 const MONTHS = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
-const WORK_HOURS = Array.from({ length: 14 }, (_, i) => i + 7);
+const hourRange = (from: number, to: number) => Array.from({ length: Math.max(to - from, 0) }, (_, i) => i + from);
 
 const statusStyles: Record<AppointmentStatus, { chip: string; badge: BadgeVariant }> = {
   [AppointmentStatus.SCHEDULED]: { chip: 'border-info bg-info-soft text-info-fg', badge: 'info' },
@@ -40,6 +41,13 @@ export default function CalendarPage() {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [showNewModal, setShowNewModal] = useState(false);
+  const businessHours = useBusinessHours();
+  // Horas del horario de atención, más las de cualquier cita fuera de él para que no quede oculta.
+  const workHours = useMemo(() => {
+    const hours = new Set(hourRange(Math.floor(toMinutes(businessHours.start) / 60), Math.ceil(toMinutes(businessHours.end) / 60)));
+    appointments.forEach(apt => hours.add(new Date(apt.startsAt).getHours()));
+    return [...hours].sort((a, b) => a - b);
+  }, [businessHours, appointments]);
   const [editingAppointment, setEditingAppointment] = useState<Appointment | null>(null);
   const [viewMode, setViewMode] = useState<ViewMode>('month');
   const companyId = getSession()?.companyId || '';
@@ -217,7 +225,7 @@ export default function CalendarPage() {
                     );
                   })}
                 </div>
-                {WORK_HOURS.map(hour => (
+                {workHours.map(hour => (
                   <div className="grid grid-cols-[64px_repeat(7,1fr)] border-b border-border last:border-b-0" key={hour}>
                     <div className="bg-surface-muted px-2 py-2 text-right text-xs tabular-nums text-fg-subtle">{String(hour).padStart(2, '0')}:00</div>
                     {weekDays.map(date => (
@@ -251,7 +259,7 @@ export default function CalendarPage() {
 
           {viewMode === 'day' && (
             <div className="mx-auto max-w-4xl overflow-hidden rounded-xl border border-border">
-              {WORK_HOURS.map(hour => {
+              {workHours.map(hour => {
                 const hourAppointments = appointmentsStartingAt(currentDate, hour);
                 return (
                   <div className="flex border-b border-border last:border-b-0" key={hour}>

@@ -85,6 +85,29 @@ Los archivos compilados estarán en: `dist/`
 bun run preview
 ```
 
+### Producción con Docker
+
+El `Dockerfile` compila la app y la sirve con nginx (`nginx/default.conf.template`):
+
+- La app llama a la API en el **mismo dominio** (`/api`), así que no hace falta CORS. nginx reenvía `/api/` y `/uploads/`
+  al backend indicado en `BACKEND_URL` (por defecto `http://backend:8080`).
+- Cualquier ruta de la app (`/propiedades/...`, `/app/...`) devuelve `index.html`, sin caché. `/assets/` lleva caché de un año
+  porque los nombres incluyen un hash.
+- Añade cabeceras de seguridad básicas.
+- **Vista previa al compartir:** cuando WhatsApp, Facebook, Telegram, etc. piden `/propiedades/{id}`, nginx les responde
+  con el HTML Open Graph del backend (`/api/share/propiedades/{id}`: título, precio y foto). Las personas reciben la app normal.
+  Si el frontend se publica sin este nginx (p. ej. en un hosting estático), hay que replicar esa regla ahí.
+
+```bash
+docker build -t homeforge-frontend .
+docker run -p 8081:80 -e BACKEND_URL=http://<host-del-backend>:8080 homeforge-frontend
+```
+
+Para servir la API en otro dominio, compila con `--build-arg VITE_API_BASE=https://api.tudominio.com/api`.
+La pila completa (Postgres, backend y frontend) se levanta con `compose.yml` del repositorio del backend.
+
+En GitHub, cada PR y cada push a `main` corren las pruebas, el build y la imagen Docker (`.github/workflows/ci.yml`).
+
 ## 📡 Conexión con el Backend
 
 El frontend se conecta al backend mediante la Fetch API.
