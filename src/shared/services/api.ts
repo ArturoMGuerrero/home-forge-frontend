@@ -48,9 +48,8 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
     const body = await res.json().catch(() => null) as { error?: string } | null;
     throw new Error(body?.error ?? `API error ${res.status}`);
   }
-  // 204, o 201/202 sin cuerpo: no hay JSON que leer.
-  const text = await res.text();
-  return (text ? JSON.parse(text) : undefined) as T;
+  if (res.status === 204) return undefined as T;
+  return res.json();
 }
 
 export async function getJson<T>(path: string): Promise<T> {
