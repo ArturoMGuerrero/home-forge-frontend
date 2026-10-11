@@ -51,7 +51,8 @@ export function SettingsPage() {
           <SettingsLink description="Avatar, seguridad y apariencia personal." icon="user" label="Mi cuenta" to="/app/cuenta" />
           <SettingsLink description="Suscripción, límites y estado de pago." icon="plans" label="Plan y facturación" to="/app/planes" />
         </div>
-        <div className="mt-4 grid gap-4 lg:grid-cols-2">
+        <div className="mt-4 grid gap-4 lg:grid-cols-3">
+          <AutomationLink description="Horas en que se agendan citas y visitas, y que muestra el calendario." title="Horario de atención" to="/app/configuracion/horario" />
           <AutomationLink description="Distribuye prospectos por turnos, carga, ciudad, operación y presupuesto." title="Asignación automática" to="/app/configuracion/asignacion" />
           <AutomationLink
             badge={<Badge dot variant="success">Activos</Badge>}

@@ -3,7 +3,8 @@ import toast from 'react-hot-toast';
 import { createAppointment, updateAppointment, Appointment, AppointmentType, LocationType, appointmentTypeLabels, locationTypeLabels } from '../api/appointmentsApi';
 import { getSession } from '../../auth';
 import { Button, Input, Modal, Select, Textarea } from '../../../shared/ui';
-import { timeSlotOptions } from '../timeSlots';
+import { defaultAppointmentTimes, timeSlotOptions } from '../timeSlots';
+import { useBusinessHours } from '../../settings/api/businessHours';
 
 const FORM_ID = 'calendar-appointment-form';
 const reminderOptions = [
@@ -23,6 +24,7 @@ interface NewAppointmentModalProps {
 
 export default function NewAppointmentModal({ defaultDate, appointment, onClose, onSuccess }: NewAppointmentModalProps) {
   const session = getSession();
+  const businessHours = useBusinessHours();
 
   const [saving, setSaving] = useState(false);
   const [formData, setFormData] = useState({
@@ -62,24 +64,17 @@ export default function NewAppointmentModal({ defaultDate, appointment, onClose,
       const year = defaultDate.getFullYear();
       const month = String(defaultDate.getMonth() + 1).padStart(2, '0');
       const day = String(defaultDate.getDate()).padStart(2, '0');
-      const dateStr = `${year}-${month}-${day}`;
-
-      const hour = defaultDate.getHours();
-      const minutes = defaultDate.getMinutes();
-      // Round to nearest 30 minutes
-      const roundedMinutes = minutes < 30 ? '00' : '30';
-      const startTime = `${String(hour).padStart(2, '0')}:${roundedMinutes}`;
-      const endHour = minutes < 30 ? hour : hour + 1;
-      const endTime = `${String(endHour).padStart(2, '0')}:${minutes < 30 ? '30' : '00'}`;
 
       setFormData(prev => ({
         ...prev,
-        date: dateStr,
-        startTime,
-        endTime
+        date: `${year}-${month}-${day}`,
+        ...defaultAppointmentTimes(businessHours, defaultDate)
       }));
     }
-  }, [appointment, defaultDate]);
+  }, [appointment, defaultDate, businessHours]);
+
+  const startOptions = timeSlotOptions(businessHours, formData.startTime);
+  const endOptions = timeSlotOptions(businessHours, formData.endTime);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -171,8 +166,8 @@ export default function NewAppointmentModal({ defaultDate, appointment, onClose,
 
         <div className="grid gap-4 sm:grid-cols-3">
           <Input label="Fecha" onChange={e => setFormData({ ...formData, date: e.target.value })} required type="date" value={formData.date} />
-          <Select label="Inicio" onChange={e => setFormData({ ...formData, startTime: e.target.value })} options={timeSlotOptions} required value={formData.startTime} />
-          <Select label="Fin" onChange={e => setFormData({ ...formData, endTime: e.target.value })} options={timeSlotOptions} required value={formData.endTime} />
+          <Select label="Inicio" onChange={e => setFormData({ ...formData, startTime: e.target.value })} options={startOptions} required value={formData.startTime} />
+          <Select label="Fin" onChange={e => setFormData({ ...formData, endTime: e.target.value })} options={endOptions} required value={formData.endTime} />
         </div>
 
         {formData.locationType === LocationType.IN_PERSON && (

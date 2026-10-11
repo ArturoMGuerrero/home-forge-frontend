@@ -1,6 +1,7 @@
 import { FormEvent, useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 import { getSession } from '../../auth';
+import { useBusinessHours } from '../../settings/api/businessHours';
 import { listAvailability, createAvailability, deleteAvailability, AgentAvailability, dayLabels } from '../api/availabilityApi';
 import { ConfirmModal } from '../../../shared/ConfirmModal';
 import { Icon } from '../../../shared/Icon';
@@ -19,7 +20,13 @@ export default function AgentAvailabilityPage() {
   const [saving, setSaving] = useState(false);
   const [toDelete, setToDelete] = useState<string | null>(null);
   const [deleting, setDeleting] = useState(false);
+  const businessHours = useBusinessHours();
   const [formData, setFormData] = useState({ dayOfWeek: 1, startTime: '09:00', endTime: '17:00' });
+  // Un horario nuevo empieza con el horario de atención de la empresa.
+  const openAddForm = () => {
+    setFormData({ dayOfWeek: 1, startTime: businessHours.start, endTime: businessHours.end });
+    setShowAddForm(true);
+  };
 
   const loadAvailabilities = async () => {
     if (!userId) return;
@@ -77,7 +84,7 @@ export default function AgentAvailabilityPage() {
   return (
     <>
       <PageHeader
-        actions={<Button icon={<Icon className="size-4" name="plus" />} onClick={() => setShowAddForm(true)}>Agregar horario</Button>}
+        actions={<Button icon={<Icon className="size-4" name="plus" />} onClick={openAddForm}>Agregar horario</Button>}
         backLink={{ to: '/app/calendario', label: 'Calendario' }}
         subtitle="Configura los horarios en los que puedes recibir citas."
         title="Mi disponibilidad"
