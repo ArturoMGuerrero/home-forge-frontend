@@ -6,7 +6,6 @@ import { Alert, Badge, buttonClasses, Card, Spinner } from '../../../shared/ui';
 import { PublicHeader } from '../components/PublicHeader';
 import { PublicFooter } from '../components/PublicFooter';
 import { LikeButton } from '../components/LikeButton';
-import { PropertyInquiryForm } from '../components/PropertyInquiryForm';
 import { ShareButton } from '../components/ShareButton';
 import { useLikedProperties } from '../likedProperties';
 
@@ -128,11 +127,6 @@ export function PublicPropertyDetailPage() {
           </div>
 
           <aside className="space-y-4 lg:sticky lg:top-20 lg:self-start">
-            <Card id="me-interesa">
-              <h2 className="text-lg font-semibold">¿Te interesa esta propiedad?</h2>
-              <p className="mb-4 mt-1 text-sm text-fg-subtle">Déjanos tus datos y un asesor te contacta para resolver dudas o agendar una visita.</p>
-              <PropertyInquiryForm companyName={seller.companyName} propertyId={property.id} propertyTitle={property.title} />
-            </Card>
             <Card>
               <span className="text-sm text-fg-subtle">Inmobiliaria responsable</span>
               <h2 className="mt-1 text-lg font-semibold">{seller.companyName}</h2>
