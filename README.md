@@ -1,91 +1,64 @@
 # HomeForge - Frontend
 
-Aplicación web para HomeForge, una plataforma CRM completa para inmobiliarias, constructoras, desarrolladores y equipos comerciales de vivienda.
+Aplicación web de HomeForge, el CRM para inmobiliarias: panel privado para el equipo (prospectos, propiedades, citas,
+contratos, reportes, configuración) y sitio público con el catálogo de propiedades.
 
-## 🎯 Características Principales
+**Tecnologías:** React 19, TypeScript, Vite, React Router 7, Tailwind CSS 4, Vitest y Bun. Mapas con Leaflet y gráficas con
+Recharts. Las llamadas a la API usan `fetch` (sin axios). La interfaz está en español.
 
-- **CRM Visual**: Pipeline Kanban drag & drop, scoring de leads, timeline de actividades
-- **Gestión de Propiedades**: Catálogo completo con imágenes, mapas, filtros avanzados
-- **Automatización**: Tareas automáticas, asignación inteligente, seguimiento
-- **Documentos**: Generación de contratos, plantillas personalizables, firma electrónica
-- **Notificaciones**: Sistema completo multicanal con plantillas y programación
-- **Calendario**: Vista mensual, gestión de citas, disponibilidad de agentes
-- **Dashboard**: Métricas en tiempo real, gráficos interactivos
-- **Multi-idioma**: Soporte para Español e Inglés
-- **Responsive**: Optimizado para desktop y móvil
+## Desarrollo local
 
-## 🚀 Tecnologías
-
-- **Framework**: React
-- **Lenguaje**: TypeScript
-- **Build**: Vite
-- **Routing**: React Router
-- **HTTP Client**: Fetch API
-- **Internacionalización**: i18next
-- **Testing**: Vitest
-- **Styling**: Tailwind CSS 4
-- **Package manager**: Bun
-
-## 📋 Requisitos
-
-- Bun 1.3.13 o superior ([Instalar Bun](https://bun.sh/docs/installation))
-- Backend de HomeForge corriendo en http://localhost:8080
-
-## 🔧 Configuración Inicial
-
-### 1. Clonar el repositorio
-
-```bash
-git clone <tu-repositorio-frontend>
-cd HomeForge-frontend
-```
-
-### 2. Instalar dependencias
+Requisitos: [Bun](https://bun.sh/docs/installation) 1.3.13+ y el backend corriendo en http://localhost:8080
+(ver el README de `home-forge-backend`).
 
 ```bash
 bun install --frozen-lockfile
+bun run dev            # http://localhost:5174
 ```
 
-### 3. Configurar variables de entorno
-
-Copia el archivo de ejemplo:
+No hace falta `.env`: si `VITE_API_BASE` no está definida, la app usa el mismo host en el puerto 8080
+(así también funciona al abrirla desde otra computadora de la red). Para otro backend, copia `.env.example` a `.env`
+y define `VITE_API_BASE`.
 
 ```bash
-cp .env.example .env
+bun run test --run     # pruebas (Vitest)
+bun run build          # tipos (tsc) + build de producción en dist/
+bun run preview        # sirve el build localmente
 ```
 
-Edita `.env` según tus necesidades:
+## Estructura
 
-```bash
-# URL del backend API
-VITE_API_BASE=http://localhost:8080/api
+```
+src/
+├── app/            # Providers, rutas (router/AppRouter.tsx) y protección de rutas
+├── layout/         # Layout privado (menú lateral, encabezado)
+├── modules/        # Un módulo por área de negocio
+│   ├── auth/           # Registro, login, recuperar contraseña, sesión
+│   ├── properties/     # Propiedades (panel) y sitio público: catálogo, detalle, "Me interesa", compartir, me gusta
+│   ├── leads/          # Prospectos, pipeline, seguimientos, coincidencias, asignación automática
+│   ├── appointments/   # Calendario, citas y disponibilidad de asesores
+│   ├── documents/      # Documentos, plantillas de contrato y contratos con firmas
+│   ├── notifications/  # Mensajes y plantillas para prospectos
+│   ├── companies/      # Perfil público de la inmobiliaria
+│   ├── users/          # Usuarios y equipos
+│   ├── reports/, dashboard/, payments/
+│   └── settings/       # Empresa, horario de atención, Mi cuenta, planes (Stripe), catálogos
+├── shared/         # Componentes de UI, cliente de la API, validaciones y utilidades comunes
+└── test/           # Pruebas de Vitest
 ```
 
-## 🚀 Iniciar el Proyecto
+Cada módulo se organiza en `pages/`, `components/` y `api/` (funciones que llaman al backend), según lo que necesite,
+y exporta lo que usan otros módulos desde su `index.ts`.
 
-### Modo Desarrollo
+## Conexión con el backend
 
-```bash
-bun run dev
-```
+- Todas las llamadas pasan por `src/shared/services/api.ts` (`getJson`, `postJson`, etc.), que agrega el token de la
+  sesión (`Authorization: Bearer`). Si el backend responde 401 con un token, cierra la sesión y lleva a `/login?expired=1`.
+- La sesión (usuario, empresa, plan y token JWT de 8 horas) se guarda en `localStorage` (`homeforge_session`).
+- Los errores del backend llegan como `{"error": "..."}` y las funciones de `api.ts` los lanzan como `Error` con ese mensaje.
+- **Lista completa de endpoints:** con el backend en local, abre http://localhost:8080/swagger-ui.html.
 
-La aplicación estará disponible en: **http://localhost:5174**
-
-### Build para Producción
-
-```bash
-bun run build
-```
-
-Los archivos compilados estarán en: `dist/`
-
-### Preview del Build
-
-```bash
-bun run preview
-```
-
-### Producción con Docker
+## Producción con Docker
 
 El `Dockerfile` compila la app y la sirve con nginx (`nginx/default.conf.template`):
 
@@ -96,7 +69,7 @@ El `Dockerfile` compila la app y la sirve con nginx (`nginx/default.conf.templat
 - Añade cabeceras de seguridad básicas.
 - **Vista previa al compartir:** cuando WhatsApp, Facebook, Telegram, etc. piden `/propiedades/{id}`, nginx les responde
   con el HTML Open Graph del backend (`/api/share/propiedades/{id}`: título, precio y foto). Las personas reciben la app normal.
-  Si el frontend se publica sin este nginx (p. ej. en un hosting estático), hay que replicar esa regla ahí.
+  Por eso conviene publicar el frontend con esta imagen: en un hosting estático (Vercel, Netlify) habría que replicar esa regla.
 
 ```bash
 docker build -t homeforge-frontend .
@@ -107,99 +80,6 @@ Para servir la API en otro dominio, compila con `--build-arg VITE_API_BASE=https
 La pila completa (Postgres, backend y frontend) se levanta con `compose.yml` del repositorio del backend.
 
 En GitHub, cada PR y cada push a `main` corren las pruebas, el build y la imagen Docker (`.github/workflows/ci.yml`).
-
-## 📡 Conexión con el Backend
-
-El frontend se conecta al backend mediante la Fetch API.
-
-**URL configurada**: se lee de `VITE_API_BASE`; si no se define, se detecta el host actual y se usa el puerto 8080.
-
-### Endpoints utilizados:
-
-- `GET /api/properties` - Listar propiedades
-- `POST /api/properties` - Crear propiedad
-- `GET /api/leads` - Listar prospectos
-- `POST /api/leads` - Crear prospecto
-- `GET /api/users` - Usuarios
-- Ver más en el código fuente
-
-## 🧪 Tests
-
-```bash
-# Ejecutar tests
-bun run test --run
-```
-
-## 📁 Estructura del Proyecto
-
-```
-HomeForge-frontend/
-├── public/              # Archivos estáticos
-├── src/
-│   ├── components/      # Componentes reutilizables
-│   │   ├── Charts.tsx              # Gráficos y visualizaciones
-│   │   ├── ImageLightbox.tsx       # Visor de imágenes
-│   │   ├── LocationPicker.tsx      # Selector de ubicación
-│   │   ├── PropertyComparator.tsx  # Comparador de propiedades
-│   │   ├── PropertyFilters.tsx     # Filtros de propiedades
-│   │   └── PropertyMap.tsx         # Mapa de propiedades
-│   ├── layout/          # Layouts (PrivateLayout, etc.)
-│   ├── modules/         # Módulos de negocio
-│   │   ├── leads/       # Gestión de prospectos
-│   │   ├── properties/  # Gestión de propiedades
-│   │   └── settings/    # Configuración
-│   ├── pages/           # Páginas/Vistas
-│   │   ├── AgendaPage.tsx
-│   │   ├── CatalogPage.tsx
-│   │   ├── DashboardPage.tsx
-│   │   ├── DocumentsPage.tsx
-│   │   ├── LeadDetailPage.tsx
-│   │   ├── LoginPage.tsx
-│   │   ├── MatchesPage.tsx
-│   │   ├── NewPropertyPage.tsx
-│   │   ├── PaymentFailurePage.tsx
-│   │   ├── PaymentPendingPage.tsx
-│   │   ├── PaymentSuccessPage.tsx
-│   │   ├── PlansPage.tsx
-│   │   ├── PropertiesPage.tsx
-│   │   ├── RegisterPage.tsx
-│   │   ├── ReportsPage.tsx
-│   │   ├── SettingsPage.tsx
-│   │   └── UsersPage.tsx
-│   ├── app/             # Providers, protección y rutas
-│   ├── layout/          # Layout privado
-│   ├── modules/         # Dominios funcionales
-│   │   ├── auth/
-│   │   ├── properties/
-│   │   ├── leads/
-│   │   ├── appointments/
-│   │   ├── documents/
-│   │   ├── notifications/
-│   │   ├── users/
-│   │   ├── reports/
-│   │   └── settings/
-│   ├── shared/          # UI, servicios y utilidades transversales
-│   └── main.tsx         # Punto de entrada
-├── .env.example         # Variables de entorno de ejemplo
-├── index.html
-├── package.json
-├── tsconfig.json
-├── vite.config.ts
-└── README.md
-```
-
-## 🌍 Internacionalización
-
-El proyecto soporta múltiples idiomas:
-
-- **Español** (es)
-- **Inglés** (en)
-
-La configuración de traducciones está en `src/shared/i18n/`.
-
-### Cambiar idioma
-
-El idioma se puede cambiar desde la interfaz de usuario o configurando el locale en el navegador.
 
 ## 🎨 Estilos
 
@@ -222,273 +102,14 @@ El proyecto usa **Tailwind CSS 4** y tokens CSS semánticos para los temas light
 - Excepción intencional: el sidebar y los paneles de marca (login, hero público) son siempre
   oscuros y usan colores fijos de Tailwind.
 
-## 🛠️ Comandos Útiles
 
-```bash
-# Instalar dependencias
-bun install --frozen-lockfile
+## Solución de problemas
 
-# Modo desarrollo
-bun run dev
+- **La app no carga datos:** revisa que el backend responda en http://localhost:8080/actuator/health.
+- **"Tu sesión expiró":** el token dura 8 horas, o cambiaste la contraseña en otro dispositivo; vuelve a iniciar sesión.
+- **Puerto 5174 ocupado:** ya hay otro `bun run dev` corriendo (úsalo), o arranca con `bun run dev -- --port 5175`.
+- **`bun install` falla:** `bun pm cache rm`, borra `node_modules` y vuelve a instalar.
 
-# Build
-bun run build
+## Licencia
 
-# Preview
-bun run preview
-
-# Tests
-bun run test --run
-
-# Limpiar node_modules y reinstalar
-rm -rf node_modules
-bun install --frozen-lockfile
-```
-
-## 🔧 Configuración Avanzada
-
-### Cambiar puerto
-
-Edita `vite.config.ts`:
-
-```typescript
-export default defineConfig({
-  server: {
-    port: 5175  // Cambiar aquí
-  }
-})
-```
-
-### Cambiar URL del backend
-
-Edita `.env`:
-
-```bash
-VITE_API_BASE=http://api.midominio.com/api
-```
-
-### Proxy API (desarrollo)
-
-Si tienes problemas con CORS, puedes configurar un proxy en `vite.config.ts`:
-
-```typescript
-export default defineConfig({
-  server: {
-    proxy: {
-      '/api': {
-        target: 'http://localhost:8080',
-        changeOrigin: true,
-      }
-    }
-  }
-})
-```
-
-## 🔐 Autenticación
-
-El frontend incluye:
-
-- Formulario de registro
-- Formulario de login
-- Gestión de sesión (localStorage)
-- Rutas protegidas
-- Redirección automática
-
-## 📦 Dependencias Principales
-
-```json
-{
-  "react": "^18.x",
-  "react-router-dom": "^6.x",
-  "axios": "^1.x",
-  "i18next": "^23.x",
-  "react-i18next": "^13.x",
-  "recharts": "^2.x",
-  "leaflet": "^1.x",
-  "react-leaflet": "^4.x"
-}
-```
-
-## 🚀 Despliegue
-
-### Vercel / Netlify
-
-1. Conecta tu repositorio
-2. Configura la variable de entorno: `VITE_API_BASE`
-3. Build command: `bun run build`
-4. Output directory: `dist`
-
-### Manual
-
-```bash
-# Build
-bun run build
-
-# Subir carpeta dist/ a tu servidor
-scp -r dist/* usuario@servidor:/ruta/
-```
-
-### Nginx
-
-Configuración ejemplo:
-
-```nginx
-server {
-    listen 80;
-    server_name midominio.com;
-    root /ruta/a/dist;
-
-    location / {
-        try_files $uri $uri/ /index.html;
-    }
-}
-```
-
-## 📱 Funcionalidades
-
-- ✅ Autenticación (registro/login/recuperar contraseña)
-- ✅ Dashboard principal con métricas y gráficos
-- ✅ Gestión de propiedades
-  - Crear, editar, eliminar
-  - Carga de imágenes con lightbox
-  - Filtros avanzados y búsqueda
-  - Mapa de ubicación interactivo
-  - Comparador de propiedades
-  - Selector de ubicación con geocodificación
-- ✅ CRM de prospectos completo
-  - Lista de leads con scoring
-  - Pipeline de ventas Kanban (drag & drop)
-  - Detalle de prospecto
-  - Actividades extendidas en timeline
-  - Crear y eliminar actividades
-  - Scoring automático de leads (0-100 puntos)
-  - Asignación automática con reglas personalizables
-- ✅ Automatización de seguimiento
-  - Tareas automáticas por cambio de estado
-  - Recordatorios y vencimientos
-  - Priorización de tareas
-- ✅ Documentos y contratos
-  - Plantillas reutilizables con variables
-  - Generación de contratos personalizados
-  - Firma electrónica
-  - Gestión de estados (Borrador → Firma → Completado)
-  - Versionado de plantillas y documentos
-- ✅ Notificaciones y comunicación
-  - Notificaciones por Email, WhatsApp, Push, SMS
-  - Plantillas de mensajes reutilizables
-  - Variables dinámicas en mensajes
-  - Filtros por estado y tipo
-  - Programación de envíos
-  - Seguimiento de entregas (Pendiente → Enviado → Entregado → Leído)
-- ✅ Sistema de suscripciones
-  - Planes Free, Plus y Professional
-  - Integración con pasarela de pagos
-  - Gestión de cobros recurrentes
-  - Restricciones por plan
-  - Páginas de confirmación de pago
-- ✅ Calendario y citas
-  - Vista mensual interactiva
-  - Creación de citas con modal
-  - Tipos de cita (tour, reunión, llamada, videollamada, firma)
-  - Ubicaciones (presencial, virtual, teléfono, en propiedad)
-  - Recordatorios configurables
-  - Gestión de disponibilidad de agentes
-  - Horarios por día de la semana
-  - Filtros por rango de fechas, usuario, lead, estado
-- ✅ Gestión de archivos adjuntos
-- ✅ Catálogo de propiedades
-- ✅ Matching de propiedades con prospectos
-- ✅ Reportes y análisis
-- ✅ Perfil de empresa
-- ✅ Gestión de usuarios
-- ✅ Configuración de usuario
-- ✅ Multi-idioma (ES/EN)
-
-## 🤝 Backend
-
-Este frontend está diseñado para trabajar con el backend de HomeForge:
-
-- Repositorio Backend: `HomeForge-backend`
-- URL esperada: http://localhost:8080
-- Debe estar configurado con CORS para permitir: http://localhost:5174
-
-## 🔄 Variables de Entorno
-
-```bash
-# .env
-VITE_API_BASE=http://localhost:8080/api
-
-# .env.production (para producción)
-VITE_API_BASE=https://api.midominio.com/api
-```
-
-Las variables **DEBEN** empezar con `VITE_` para ser expuestas al frontend.
-
-## 📊 Performance
-
-- **Vite** proporciona Hot Module Replacement (HMR) ultra-rápido
-- **Code splitting** automático por rutas
-- **Lazy loading** de componentes pesados
-- **Optimización** de assets en build
-
-## 🐛 Debugging
-
-### React DevTools
-
-Instala la extensión de navegador: [React Developer Tools](https://react.dev/learn/react-developer-tools)
-
-### Network Inspector
-
-Revisa las llamadas HTTP en las DevTools del navegador (tab Network).
-
-### Logs
-
-El proyecto usa `console.log` para debugging. En producción, estos se eliminan automáticamente.
-
-## 🆘 Solución de Problemas
-
-### "Cannot connect to backend"
-
-1. Verifica que el backend esté corriendo: http://localhost:8080/actuator/health
-2. Revisa la variable `VITE_API_BASE` en `.env`
-3. Verifica CORS en el backend
-
-### `bun install` falla
-
-```bash
-# Limpiar caché y reinstalar
-bun pm cache rm
-rm -rf node_modules
-bun install --frozen-lockfile
-```
-
-### Puerto ya en uso
-
-Cambia el puerto en `vite.config.ts` o usa:
-
-```bash
-bun run dev -- --port 5175
-```
-
-### TypeScript errors
-
-```bash
-# Verificar tipos
-bunx tsc --noEmit
-```
-
-## 📝 Licencia
-
-Proyecto privado - Todos los derechos reservados
-
-## 🆘 Soporte
-
-Para problemas o preguntas:
-
-1. Revisa la documentación
-2. Verifica la consola del navegador
-3. Revisa las DevTools (Network tab)
-
----
-
-**Desarrollado con ⚛️ y React**
+Proyecto privado. Todos los derechos reservados.
